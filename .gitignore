@@ -1,1 +1,27 @@
-/node_modules
+# Gitignore from Quickstart
+# qkst.io/dotfiles/gitignore
+
+# JavaScript
+node_modules/
+bower_components/
+npm-debug.log
+
+# Logs
+*.log
+logs
+
+# Linux
+*~
+.Trash-*
+
+# OS X
+._*
+.fuse_*
+.Spotlight-*
+.DS_Store
+
+# Windows
+*.tmp
+*.bak
+*.lnk
+Thumbs.db
