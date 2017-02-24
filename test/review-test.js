@@ -2,11 +2,13 @@ var Helper = require('hubot-test-helper');
 var chai = require('chai');
 chai.should();
 
-var helper = new Helper('../index.js');
 var url = require('../src/url');
 var slack = require('../src/slack');
 var github = require('../src/github');
 var Request = require('../src/request');
+var Response = require('../src/response');
+
+var helper = new Helper('../index.js');
 
 describe('Unit', function () {
   describe('url', function () {
@@ -65,25 +67,11 @@ describe('Unit', function () {
         var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
         return github.getGithubResources(r.githubURLs)
           .then(function (resources) {
-            resources = resources.map(function (resource) {
-              resource.data = {
-                'title': resource.type + ' ' + resource.number,
-                'html_url': 'gh.com/' + resource.type + '/' + resource.number,
-                'body': 'hello world',
-                'user': {
-                  'login': resource.owner,
-                  'html_url': 'xyz'
-                }
-              };
-
-              return resource;
-            });
-
             var attachments = resources.map(slack.generateSlackAttachmentFromGithubResource);
             
-            attachments[0].fallback.should.equal('pull 1 by abc: gh.com/pull/1');
+            attachments[0].fallback.should.equal('pull 1 by abc: gh.com/abc/def/pull/1');
             attachments[0].title.should.equal('abc/def: pull 1');
-            attachments[1].fallback.should.equal('pull 2 by abc: gh.com/pull/2');
+            attachments[1].fallback.should.equal('pull 2 by abc: gh.com/abc/def/pull/2');
             attachments[1].title.should.equal('abc/def: pull 2');
           });
       });
@@ -108,6 +96,30 @@ describe('Unit', function () {
           });
       });
     });
+  });
+
+  describe('response', function () {
+    describe('Slack', function () {
+      describe('non-review', function () {
+        it('generates attachments if GitHub URLs are present', function () {
+          var req = Request({'text': 'https://github.com/abc/def/pull/1'});
+          Response({'isSlack': true, 'request': req})
+            .then(function (res) {
+              res.should.have.ownProperty('attachments');
+              res.attachments.should.have.lengthOf(1);
+              res.attachments[0].fallback.should.equal('pull 1 by abc: gh.com/abc/def/pull/1');
+            });
+        });
+
+        it('does not generate attachments if no GitHub URLs are present', function () {
+          var req = Request({'text': 'https://example.com'});
+          Response({'isSlack': true, 'request': req})
+            .then(function (res) {
+              (res === null).should.be.true;
+            });
+        });
+      });
+    })
   });
 });
 

@@ -32,7 +32,17 @@ function getGithubResource(type, req) {
   var nothing = Promise.resolve({});
 
   if (TEST) {
-    return nothing;
+    return Promise.resolve({
+      'data': {
+        'user': {
+          'login': req.owner,
+          'html_url': 'gh.com/' + req.owner
+        },
+        'title': type + ' ' + req.number,
+        'html_url': 'gh.com/' + req.owner + '/' + req.repo + '/' + type + '/' + req.number,
+        'body': 'hello world'
+      }
+    });
   }
 
   if (type === 'pull') {
