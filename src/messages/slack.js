@@ -1,5 +1,7 @@
-var config = require('./config');
-var url = require('./url');
+var config = require('../config');
+var url = require('../url');
+
+var Message = require('./message');
 
 var extractURLs = url.extractURLs;
 
@@ -47,6 +49,29 @@ function generateSlackAttachmentFromGithubResource (resource) {
   return attachment;
 }
 
-module.exports = {
-  'generateSlackAttachmentFromGithubResource': generateSlackAttachmentFromGithubResource
-};
+function templateFn (resources, reviewers) {
+  var attachments = resources.map(generateSlackAttachmentFromGithubResource);
+
+  if (!reviewers || !reviewers.length) {
+    return {
+      'attachments': attachments
+    };
+  }
+
+  return {
+    'text': reviewers.join(', ') + ': please review this pull request',
+    'attachments': attachments
+  };
+}
+
+function SlackMessage (options) {
+  return Message({
+    'templateFn': templateFn,
+    'error': options.error,
+    'reviewers': options.reviewers,
+    'resources': options.resources,
+    'reviewerMap': options.reviewerMap
+  });
+}
+
+module.exports = SlackMessage;

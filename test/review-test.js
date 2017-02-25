@@ -3,10 +3,12 @@ var chai = require('chai');
 chai.should();
 
 var url = require('../src/url');
-var slack = require('../src/slack');
 var github = require('../src/github');
 var Request = require('../src/request');
 var Response = require('../src/response');
+var messages = require('../src/messages');
+var GenericMessage = messages.GenericMessage;
+var SlackMessage = messages.SlackMessage;
 
 var helper = new Helper('../index.js');
 
@@ -29,7 +31,7 @@ describe('(unit)', function () {
     });
   });
 
-  describe('request', function () {
+  describe('Request', function () {
     it('identifies reviews correctly', function () {
       var r = Request({'text': 'review https://github.com/abc/pull/1'});
       r.should.have.ownProperty('isReview');
@@ -61,44 +63,85 @@ describe('(unit)', function () {
     });
   });
 
-  describe('slack', function () {
-    describe('#generateSlackAttachmentFromGithubResource', function () {
-      it('generates attachments correctly', function () {
-        var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
-        return github.getGithubResources(r.githubURLs)
-          .then(function (resources) {
-            var attachments = resources.map(slack.generateSlackAttachmentFromGithubResource);
-            
-            attachments[0].fallback.should.equal('pull 1 by abc: gh.com/abc/def/pull/1');
-            attachments[0].title.should.equal('abc/def: pull 1');
-            attachments[1].fallback.should.equal('pull 2 by abc: gh.com/abc/def/pull/2');
-            attachments[1].title.should.equal('abc/def: pull 2');
+  describe('generic message', function () {
+    it('outputs an error when provided', function () {
+      var message = GenericMessage({'error': 'test'});
+      message.should.equal('test');
+    });
+
+    it('outputs a review message', function () {
+       var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
+
+       return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
+          var message = GenericMessage({
+            'reviewers': reviewers,
+            'resources': resources
           });
-      });
 
-      it('generates an image-only attachment if an image is present in body', function () {
-        var r = Request({'text': 'https://github.com/abc/def/pull/1'});
-        return github.getGithubResources(r.githubURLs)
-          .then(function (resources) {
-            resources = resources.map(function (resource) {
-              resource.data = {
-                'user': {},
-                'body': 'http://example.com/example.png'
-              };
-
-              return resource;
-            });
-
-            var attachments = resources.map(slack.generateSlackAttachmentFromGithubResource);
-
-            attachments[0].text.should.equal('');
-            attachments[0].image_url.should.equal('http://example.com/example.png');
-          });
-      });
+          message.should.equal('Assigning @foo, @bar to abc/def#1');
+        });
     });
   });
 
-  describe('response', function () {
+  describe('Slack message', function () {
+    var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2'});
+
+    it('outputs a non-review message', function () {
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          var message = SlackMessage({
+            'resources': resources
+          });
+
+          var attachments = message.attachments;
+          attachments[0].fallback.should.equal('pull 1 by abc: gh.com/abc/def/pull/1');
+          attachments[0].title.should.equal('abc/def: pull 1');
+          attachments[1].fallback.should.equal('pull 2 by abc: gh.com/abc/def/pull/2');
+          attachments[1].title.should.equal('abc/def: pull 2');
+        });
+    });
+
+    it('outputs an image if one is available in PR body', function () {
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          resources = resources.map(function (resource) {
+            resource.data = {
+              'user': {},
+              'body': 'http://example.com/example.png'
+            };
+
+            return resource;
+          });
+
+          var message = SlackMessage({
+            'resources': resources
+          });
+
+          var attachments = message.attachments;
+          attachments[0].text.should.equal('');
+          attachments[0].image_url.should.equal('http://example.com/example.png');
+        });
+    })
+
+    it('outputs a review message', function () {
+      var r = Request({'text': 'review https://github.com/abc/def/pull/1'});
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
+          var message = SlackMessage({
+            'resources': resources,
+            'reviewers': reviewers
+          });
+
+          message.text.should.equal('@foo, @bar: please review this pull request');
+          message.should.have.ownProperty('attachments');
+        });
+    });
+  });
+
+  describe('Response', function () {
     describe('using Slack', function () {
       describe('for non-review messages', function () {
         it('generates attachments if GitHub URLs are present', function () {
