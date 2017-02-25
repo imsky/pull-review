@@ -122,7 +122,13 @@ function getBlameForCommitFile (resource) {
       'sha': resource.sha,
       'path': resource.path
     }
-  });
+  })
+    .then(function (res) {
+      return res.data.repository.object.blame;
+    })
+    .catch(function (err) {
+      return null;
+    });
 }
 
 module.exports = {

@@ -45,12 +45,25 @@ function Request (options) {
         }
 
         var response = chunks.join('');
+        var json;
 
         try  {
-          resolve(JSON.parse(response));
+          json = JSON.parse(response);
         } catch (e) {
           reject('GitHub GraphQL API response is not able to be parsed as JSON');
         }
+
+        if (!json.data) {
+          if (json.errors) {
+            reject(json.errors);
+            return;
+          } else {
+            reject(Error('Unknown GraphQL error'));
+            return;
+          }
+        }
+
+        resolve(json);
       });
     });
 
