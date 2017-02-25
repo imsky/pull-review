@@ -49,10 +49,6 @@ describe('(unit)', function () {
   });
 
   describe('github', function () {
-    describe('#parseGithubPath', function () {
-      it('parses GitHub URLs correctly');
-    });
-
     describe('#getGithubResources', function () {
       it('fetches resources correctly', function () {
         var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
