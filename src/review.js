@@ -1,7 +1,7 @@
 require('native-promise-only');
 
 var github = require('./github');
-var BlameRangeList = require('./blame-range-list');
+var BlameRangeList = github.BlameRangeList;
 
 function Review (options) {
   var request = options.request;
@@ -75,6 +75,7 @@ function Review (options) {
       }));
     })
     .then(function (blames) {
+      //todo: factor this block out into separate file
       var authorsLinesChanged = {};
 
       for (var i = 0; i < blames.length; i++) {
@@ -92,7 +93,7 @@ function Review (options) {
           return range.login !== pullRequestAuthorLogin;
         })
 
-        var recentBlames = nonAuthorBlames.slice(0, Math.floor(nonAuthorBlames.length * 0.75));
+        var recentBlames = nonAuthorBlames.slice(0, Math.ceil(nonAuthorBlames.length * 0.75));
 
         for(var j = 0; j < recentBlames.length; j++) {
           var range = recentBlames[j];

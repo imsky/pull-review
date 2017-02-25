@@ -12,6 +12,11 @@
 // Author:
 //   Ivan Malopinsky
 
+//todo: AUTHORS/OWNERS integration
+//todo: review stategy: blame/random
+//todo: PR size tags
+//todo: consider scraper fallback for blame
+
 var Request = require('./src/request');
 var Review = require('./src/review');
 var Response = require('./src/response');
@@ -32,7 +37,6 @@ module.exports = function (robot) {
 
     var response = Response({
       'adapter': adapter,
-      'logger': robot.logger,
       'request': request,
       'review': review
     });

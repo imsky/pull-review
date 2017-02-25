@@ -8,6 +8,7 @@ var Github = require('github');
 var config = require('../config');
 
 var GraphQLRequest = require('./graphql');
+var BlameRangeList = require('./blame-range-list');
 
 var TEST = config.TEST;
 var GITHUB_TOKEN = config.GITHUB_TOKEN;
@@ -134,8 +135,17 @@ function getBlameForCommitFile (resource) {
     });
 }
 
+function assignUsersToResource (resource, users) {
+
+}
+
+function postComment (resource, comment) {
+
+}
+
 module.exports = {
   'getGithubResources': getGithubResources,
   'getPullRequestFiles': getPullRequestFiles,
-  'getBlameForCommitFile': getBlameForCommitFile
+  'getBlameForCommitFile': getBlameForCommitFile,
+  'BlameRangeList': BlameRangeList
 };
