@@ -3,30 +3,46 @@ require('native-promise-only');
 var slack = require('./slack');
 var github = require('./github');
 
+function SlackResponse(options) {
+  var review = options.review;
+  var resources = options.resources;
+
+  var attachments = resources.map(slack.generateSlackAttachmentFromGithubResource);
+
+  return {
+    'attachments': attachments
+  };
+}
+
+function GenericResponse(options) {
+  var review = options.review;
+  var resources = options.resources;
+
+  return 'hello world';
+}
+
 function Response (options) {
   var request = options.request;
+  var review = options.review;
   var isSlack = options.adapter === 'slack';
 
-  var isReview = request.isReview;
   var githubURLs = request.githubURLs;
 
-  if (isReview) {
-    throw Error('Review response not supported yet');
-  }
-
-  if (!isSlack) {
-    throw Error('Non-Slack response not supported yet');
-  }
-
   if (githubURLs.length) {
-    return github.getGithubResources(githubURLs)
-      .then(function (resources) {
-        return resources.map(slack.generateSlackAttachmentFromGithubResource)
-      })
-      .then(function (attachments) {
-        return {
-          'attachments': attachments
+    var resources = github.getGithubResources(githubURLs);
+    return Promise.all([review, resources])
+      .then(function (res) {
+        var resources = res[0];
+        var inputs = {
+          'review': review,
+          'resources': resources
         };
+
+        if (isSlack) {
+          return SlackResponse(inputs);
+        }
+
+        return GenericResponse(inputs);
       });
   }
 

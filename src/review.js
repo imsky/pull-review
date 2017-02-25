@@ -24,7 +24,7 @@ function Review (options) {
 
   //todo: get config file from pull request repo
 
-  return return github.getGithubResources(githubURLs)
+  return github.getGithubResources(githubURLs)
     .then(function (resources) {
       if (!resources.length) {
         throw Error('Could not find GitHub resources');
@@ -56,7 +56,7 @@ function Review (options) {
 
       var topChangedFiles = files.slice(0, maxFilesToReview);
 
-      return Promise.all(topChanged.files.map(function (file) {
+      return Promise.all(topChangedFiles.map(function (file) {
         return github.getBlameForCommitFile({
           'owner': pullRequest.owner,
           'repo': pullRequest.repo,
@@ -67,6 +67,7 @@ function Review (options) {
     })
     .then(function (blames) {
       var authorsLinesChanged = {};
+      //todo: error out if login is not available
       var pullRequestAuthorLogin = pullRequest.data.user.login;
 
       for (var i = 0; i < blames.length; i++) {
@@ -78,7 +79,9 @@ function Review (options) {
         });
 
         var nonAuthorBlames = ranges.filter(function (range) {
-          return range.commit.author.user.login !== pullRequestAuthorLogin;
+          if (range.commit.author.user) {
+            return range.commit.author.user.login !== pullRequestAuthorLogin;
+          }
         })
 
         var recentBlames = nonAuthorBlames.slice(0, Math.floor(nonAuthorBlames.length * 0.75));
@@ -112,7 +115,10 @@ function Review (options) {
       });
 
       return authorBlames.slice(0, maxReviewers);
-    });
+    })
+      .then(function (reviewers) {
+        console.log(reviewers)
+      });
 
     //todo: filter out blacklisted authors, filter out authors that can't be notified
     //todo: assign up to max number of reviewers, post comment on github tagging reviewers

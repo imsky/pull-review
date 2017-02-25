@@ -7,7 +7,7 @@ var Github = require('github');
 
 var config = require('../config');
 
-var graphql = require('./graphql');
+var GraphQLRequest = require('./graphql');
 
 var TEST = config.TEST;
 var GITHUB_TOKEN = config.GITHUB_TOKEN;
@@ -107,13 +107,16 @@ function getPullRequestFiles (resource) {
     'repo': resource.repo,
     'number': resource.number,
     'per_page': 100
-  });
+  })
+    .then(function (res) {
+      return res.data;
+    });
 }
 
 function getBlameForCommitFile (resource) {
   var query = queries['git-blame'];
 
-  return graphql({
+  return GraphQLRequest({
     'token': GITHUB_TOKEN,
     'query': query,
     'variables': {
