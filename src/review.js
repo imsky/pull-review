@@ -1,6 +1,7 @@
 require('native-promise-only');
 
 var github = require('./github');
+var BlameRangeList = require('./blame-range-list');
 
 function Review (options) {
   var request = options.request;
@@ -12,19 +13,22 @@ function Review (options) {
     return Promise.resolve(null);
   }
 
-  if (!githubURLs.length) {
-    throw Error('No GitHub URLs');
-  } else if (githubURLs.length > 1) {
-    throw Error('Only one GitHub URL can be reviewed at a time');
-  }
-
-  var pullRequest;
+  var pullRequest, pullRequestAuthorLogin;
   var maxFilesToReview = 10;
   var maxReviewers = 5;
 
   //todo: get config file from pull request repo
 
-  return github.getGithubResources(githubURLs)
+  return Promise.resolve(true)
+    .then(function () {
+      if (!githubURLs.length) {
+        throw Error('No GitHub URLs');
+      } else if (githubURLs.length > 1) {
+        throw Error('Only one GitHub URL can be reviewed at a time');
+      }
+
+      return github.getGithubResources(githubURLs)
+    })
     .then(function (resources) {
       if (!resources.length) {
         throw Error('Could not find GitHub resources');
@@ -36,11 +40,16 @@ function Review (options) {
         throw Error('Reviews for resources other than pull requests are not supported');
       }
 
-      if (resource.data.state !== 'open') {
-        throw Error('GitHub resource state is not open');
+      pullRequest = resource;
+
+      if (pullRequest.data.state !== 'open') {
+        throw Error('Pull request is not open');
+      } else if (!pullRequest.data.user) {
+        throw Error('No user data available for pull request');
       }
 
-      pullRequest = resource;
+      pullRequestAuthorLogin = pullRequest.data.user.login;
+
       return github.getPullRequestFiles(pullRequest);
     })
     .then(function (files) {
@@ -67,29 +76,28 @@ function Review (options) {
     })
     .then(function (blames) {
       var authorsLinesChanged = {};
-      //todo: error out if login is not available
-      var pullRequestAuthorLogin = pullRequest.data.user.login;
 
       for (var i = 0; i < blames.length; i++) {
         var blame = blames[i] || {};
-        var ranges = blame.ranges || [];
+
+        var ranges = BlameRangeList({
+          'blame': blame
+        });
 
         ranges.sort(function (a, b) {
           return a.age - b.age;
         });
 
         var nonAuthorBlames = ranges.filter(function (range) {
-          if (range.commit.author.user) {
-            return range.commit.author.user.login !== pullRequestAuthorLogin;
-          }
+          return range.login !== pullRequestAuthorLogin;
         })
 
         var recentBlames = nonAuthorBlames.slice(0, Math.floor(nonAuthorBlames.length * 0.75));
 
         for(var j = 0; j < recentBlames.length; j++) {
           var range = recentBlames[j];
-          var linesChanged = range.endingLine - range.startingLine + 1;
-          var author = range.commit.author.user.login;
+          var linesChanged = range.count;
+          var author = range.login;
 
           if (!authorsLinesChanged[author]) {
             authorsLinesChanged[author] = 0;
@@ -117,11 +125,17 @@ function Review (options) {
       return authorBlames.slice(0, maxReviewers);
     })
       .then(function (reviewers) {
-        console.log(reviewers)
+        if (!reviewers.length) {
+          throw Error('No reviewers found');
+        }
+
+        return {
+          'reviewers': reviewers,
+          'config': null
+        };
       });
 
     //todo: filter out blacklisted authors, filter out authors that can't be notified
-    //todo: assign up to max number of reviewers, post comment on github tagging reviewers
 }
 
 module.exports = Review;
