@@ -1,4 +1,4 @@
-query GitBlame($owner: String!, $repo: String!, $sha: String!, $path: String!) {
+query ($owner: String!, $repo: String!, $sha: String!, $path: String!) {
   repository(owner: $owner, name: $repo) {
     object(expression: $sha) {
       ...blame

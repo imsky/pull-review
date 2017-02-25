@@ -1,8 +1,23 @@
+var fs = require('fs');
+var path = require('path');
+
+require('native-promise-only');
+
 var Github = require('github');
 
-var config =  require('./config');
+var config = require('../config');
+
+var graphql = require('./graphql');
 
 var TEST = config.TEST;
+var GITHUB_TOKEN = config.GITHUB_TOKEN;
+
+var queries = ['git-blame'];
+
+queries = queries.reduce(function (map, name) {
+  map[name] = fs.readFileSync(path.join(__dirname, name + '.graphql'), 'utf8');
+  return map;
+}, {});
 
 var github = new Github({
   'protocol': 'https'
@@ -11,7 +26,7 @@ var github = new Github({
 if (!TEST) {
   github.authenticate({
     'type': 'token',
-    'token': config.GITHUB_TOKEN
+    'token': GITHUB_TOKEN
   }); 
 }
 
@@ -34,6 +49,7 @@ function getGithubResource(type, req) {
   if (TEST) {
     return Promise.resolve({
       'data': {
+        'state': 'open',
         'user': {
           'login': req.owner,
           'html_url': 'gh.com/' + req.owner
@@ -85,6 +101,32 @@ function getGithubResources (githubURLs) {
   return Promise.all(githubResources.map(fetchGithubResourceData));
 }
 
+function getPullRequestFiles (resource) {
+  return github.pullRequests.getFiles({
+    'owner': resource.owner,
+    'repo': resource.repo,
+    'number': resource.number,
+    'per_page': 100
+  });
+}
+
+function getBlameForCommitFile (resource) {
+  var query = queries['git-blame'];
+
+  return graphql({
+    'token': GITHUB_TOKEN,
+    'query': query,
+    'variables': {
+      'owner': resource.owner,
+      'repo': resource.repo,
+      'sha': resource.sha,
+      'path': resource.path
+    }
+  });
+}
+
 module.exports = {
-  'getGithubResources': getGithubResources
+  'getGithubResources': getGithubResources,
+  'getPullRequestFiles': getPullRequestFiles,
+  'getBlameForCommitFile': getBlameForCommitFile
 };
