@@ -1,8 +1,8 @@
 {
   "name": "hubot-review",
-  "description": "TODO",
+  "description": "Assigns and notifies reviewers for GitHub pull requests",
   "version": "0.0.0",
-  "author": "Ivan Malopinsky>",
+  "author": "Ivan Malopinsky",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts",
   "repository": {

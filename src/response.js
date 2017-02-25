@@ -1,9 +1,11 @@
+require('native-promise-only');
+
 var slack = require('./slack');
 var github = require('./github');
 
 function Response (options) {
   var request = options.request;
-  var isSlack = options.isSlack;
+  var isSlack = options.adapter === 'slack';
 
   var isReview = request.isReview;
   var githubURLs = request.githubURLs;

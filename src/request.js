@@ -28,7 +28,7 @@ function Request (options) {
   return {
     'isReview': isReview,
     'githubURLs': githubURLs
-  }
+  };
 }
 
 module.exports = Request;

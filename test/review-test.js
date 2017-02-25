@@ -10,7 +10,7 @@ var Response = require('../src/response');
 
 var helper = new Helper('../index.js');
 
-describe('Unit', function () {
+describe('(unit)', function () {
   describe('url', function () {
     describe('#parseURL', function () {
       it('parses URLs correctly', function () {
@@ -49,6 +49,10 @@ describe('Unit', function () {
   });
 
   describe('github', function () {
+    describe('#parseGithubPath', function () {
+      it('parses GitHub URLs correctly');
+    });
+
     describe('#getGithubResources', function () {
       it('fetches resources correctly', function () {
         var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
@@ -58,7 +62,7 @@ describe('Unit', function () {
             resources[1].number.should.equal('2');
           });
       });
-    })
+    });
   });
 
   describe('slack', function () {
@@ -99,11 +103,11 @@ describe('Unit', function () {
   });
 
   describe('response', function () {
-    describe('Slack', function () {
-      describe('non-review', function () {
+    describe('using Slack', function () {
+      describe('for non-review messages', function () {
         it('generates attachments if GitHub URLs are present', function () {
           var req = Request({'text': 'https://github.com/abc/def/pull/1'});
-          Response({'isSlack': true, 'request': req})
+          Response({'adapter': 'slack', 'request': req})
             .then(function (res) {
               res.should.have.ownProperty('attachments');
               res.attachments.should.have.lengthOf(1);
@@ -113,7 +117,7 @@ describe('Unit', function () {
 
         it('does not generate attachments if no GitHub URLs are present', function () {
           var req = Request({'text': 'https://example.com'});
-          Response({'isSlack': true, 'request': req})
+          Response({'adapter': 'slack', 'request': req})
             .then(function (res) {
               (res === null).should.be.true;
             });
@@ -123,7 +127,7 @@ describe('Unit', function () {
   });
 });
 
-describe('Integration', function () {
+describe('(integration)', function () {
   var room;
 
   beforeEach(function () {
