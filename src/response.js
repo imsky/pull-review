@@ -1,39 +1,11 @@
 require('native-promise-only');
 
-var slack = require('./slack');
 var github = require('./github');
+var messages = require('./messages');
 
-function SlackResponse(options) {
-  var review = options.review;
-  var resources = options.resources;
-  var error = options.error;
-
-  var attachments = resources.map(slack.generateSlackAttachmentFromGithubResource);
-
-  return {
-    'attachments': attachments
-  };
-}
-
-function GenericResponse(options) {
-  var review = options.review;
-  var resources = options.resources;
-  var error = options.error;
-
-  if (review) {
-    //todo: factor out the "assigning" message into a common function
-    var reviewers = review.reviewers.map(function (reviewer) {
-      return '@' + reviewer.login;
-    });
-
-    var pullRequest = resources[0];
-    var shorthand = pullRequest.owner + '/' + pullRequest.repo + '#' + pullRequest.number;
-
-    if (reviewers.length) {
-      return 'Assigning ' + reviewers.join(', ') + ' to ' + shorthand;
-    }
-  }
-}
+var GenericMessage = messages.GenericMessage;
+var SlackMessage = messages.SlackMessage;
+var GitHubMessage = messages.GitHubMessage;
 
 function Response (options) {
   var request = options.request;
@@ -44,34 +16,72 @@ function Response (options) {
 
   var githubURLs = request.githubURLs;
 
-  function sendResponse(inputs) {
+  function sendHubotMessage(inputs) {
     if (isSlack) {
-      return SlackResponse(inputs);
+      return SlackMessage(inputs);
     }
 
-    return GenericResponse(inputs);
+    return GenericMessage(inputs);
+  }
+
+  function sendGitHubMessage(inputs) {
+    var message = GitHubMessage(inputs);
+    var resources = inputs.resources;
+
+    if (!message) {
+      return;
+    }
+
+    return github.postPullRequestComment(resources[0], message);
+  }
+
+  function successfulReviewFlow (review, resources) {
+    var inputs;
+
+    return Promise.all([review, resources])
+      .then(function (res) {
+        var review = res[0];
+        var resources = res[1];
+
+        inputs = {
+          'review': review,
+          'resources': resources
+        };
+
+        return github.assignUsersToResource(resources[0], review.reviewers);
+      })
+      .then(function () {
+        return sendGitHubMessage(inputs);
+      })
+      .then(function () {
+        return sendHubotMessage(inputs);
+      });
   }
 
   if (githubURLs.length) {
     var resources = github.getGithubResources(githubURLs);
-    var inputs;
 
     if (isReview) {
-      //todo: process review first, shortcut processing if there's a review error
-      return Promise.all([review, resources])
-        .then(function (res) {
-          var review = res[0];
-          var resources = res[1];
+      var reviewError = false;
 
-          inputs = {
-            'review': review,
-            'resources': resources
-          };
+      return review.catch(function (err) {
+        reviewError = true;
 
-          //todo: assign up to max number of reviewers, post comment on github tagging reviewers
-          //todo: notify reviewers
+        return sendHubotMessage({
+          'error': err
+        });
+      })
+        .then(function (review) {
+          if (reviewError) {
+            return review;
+          }
 
-          return sendResponse(inputs);
+          return successfulReviewFlow(review, resources);
+        })
+        .catch(function (err) {
+          return sendHubotMessage({
+            'error': err
+          });
         });
     }
 
@@ -81,7 +91,7 @@ function Response (options) {
           'resources': resources
         }
 
-        return sendResponse(inputs);
+        return sendHubotMessage(inputs);
       });
   }
 

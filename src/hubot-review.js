@@ -1,6 +1,6 @@
-var Request = require('./src/request');
-var Review = require('./src/review');
-var Response = require('./src/response');
+var Request = require('./request');
+var Review = require('./review');
+var Response = require('./response');
 
 function HubotReview (options) {
   var text = options.text;

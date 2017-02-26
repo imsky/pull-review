@@ -135,17 +135,35 @@ function getBlameForCommitFile (resource) {
     });
 }
 
-function assignUsersToResource (resource, users) {
+function assignUsersToResource (resource, assignees) {
+  console.log('assigning', assignees)
+  return true;
 
+  return github.issues.addAssigneesToIssue({
+    'owner': resource.owner,
+    'repo': resource.repo,
+    'number': resource.number,
+    'assignees': assignees
+  });
 }
 
-function postComment (resource, comment) {
+function postPullRequestComment (resource, body) {
+  console.log('posting', body)
+  return true;
 
+  return github.pullRequests.createComment({
+    'owner': resource.owner,
+    'repo': resource.repo,
+    'number': resource.number,
+    'body': body
+  });
 }
 
 module.exports = {
   'getGithubResources': getGithubResources,
   'getPullRequestFiles': getPullRequestFiles,
   'getBlameForCommitFile': getBlameForCommitFile,
+  'assignUsersToResource': assignUsersToResource,
+  'postPullRequestComment': postPullRequestComment,
   'BlameRangeList': BlameRangeList
 };

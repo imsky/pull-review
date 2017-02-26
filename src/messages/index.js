@@ -1,7 +1,9 @@
 var SlackMessage = require('./slack');
 var GenericMessage = require('./message');
+var GitHubMessage = require('./github');
 
 module.exports = {
   'SlackMessage': SlackMessage,
-  'GenericMessage': GenericMessage
+  'GenericMessage': GenericMessage,
+  'GitHubMessage': GitHubMessage
 };

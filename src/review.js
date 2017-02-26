@@ -50,6 +50,24 @@ function Review (options) {
 
       pullRequestAuthorLogin = pullRequest.data.user.login;
 
+      var assignees = [];
+
+      if (pullRequest.data.assignees) {
+        assignees = pullRequest.data.assignees;
+      } else if (pullRequest.data.assignee) {
+        assignees.push(pullRequest.data.assignee);
+      }
+
+      assignees = assignees.filter(function (assignee) {
+        return assignee.login !== pullRequestAuthorLogin;
+      });
+
+      if (assignees.length >= maxReviewers) {
+        throw Error('Pull request already has reviewers assigned');
+      }
+
+      maxReviewers = maxReviewers - assignees.length;
+
       return github.getPullRequestFiles(pullRequest);
     })
     .then(function (files) {

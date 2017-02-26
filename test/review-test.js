@@ -6,9 +6,11 @@ var url = require('../src/url');
 var github = require('../src/github');
 var Request = require('../src/request');
 var Response = require('../src/response');
+var HubotReview = require('../src/hubot-review');
 var messages = require('../src/messages');
 var GenericMessage = messages.GenericMessage;
 var SlackMessage = messages.SlackMessage;
+var GitHubMessage = messages.GitHubMessage;
 
 var helper = new Helper('../index.js');
 
@@ -51,30 +53,33 @@ describe('(unit)', function () {
   });
 
   describe('github', function () {
-    describe('#getGithubResources', function () {
-      it('fetches resources correctly', function () {
-        var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
-        return github.getGithubResources(r.githubURLs)
-          .then(function (resources) {
-            resources.should.have.lengthOf(2);
-            resources[1].number.should.equal('2');
-          });
-      });
+    it('#getGithubResources', function () {
+      var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          resources.should.have.lengthOf(2);
+          resources[1].number.should.equal('2');
+        });
     });
+
+    it('#getPullRequestFiles');
+    it('#getBlameForCommitFile');
+    it('#assignUsersToResource');
+    it('#postPullRequestComment');
   });
 
   describe('generic message', function () {
+    var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
+    var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
+
     it('outputs an error when provided', function () {
       var message = GenericMessage({'error': 'test'});
       message.should.equal('test');
     });
 
     it('outputs a review message', function () {
-       var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
-
-       return github.getGithubResources(r.githubURLs)
+      return github.getGithubResources(r.githubURLs)
         .then(function (resources) {
-          var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
           var message = GenericMessage({
             'reviewers': reviewers,
             'resources': resources
@@ -83,6 +88,22 @@ describe('(unit)', function () {
           message.should.equal('Assigning @foo, @bar to abc/def#1');
         });
     });
+
+    it('outputs a review message using a reviewer map', function () {
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          var message = GenericMessage({
+            'reviewers': reviewers,
+            'resources': resources,
+            'reviewerMap': {
+              'foo': 'uvw',
+              'bar': 'xyz'
+            }
+          });
+
+          message.should.equal('Assigning @uvw, @xyz to abc/def#1');
+        });
+    })
   });
 
   describe('Slack message', function () {
@@ -123,7 +144,7 @@ describe('(unit)', function () {
           attachments[0].text.should.equal('');
           attachments[0].image_url.should.equal('http://example.com/example.png');
         });
-    })
+    });
 
     it('outputs a review message', function () {
       var r = Request({'text': 'review https://github.com/abc/def/pull/1'});
@@ -141,39 +162,58 @@ describe('(unit)', function () {
     });
   });
 
-  describe('Response', function () {
-    describe('using Slack', function () {
-      describe('for non-review messages', function () {
-        it('generates attachments if GitHub URLs are present', function () {
-          var req = Request({'text': 'https://github.com/abc/def/pull/1'});
-          Response({'adapter': 'slack', 'request': req})
-            .then(function (res) {
-              res.should.have.ownProperty('attachments');
-              res.attachments.should.have.lengthOf(1);
-              res.attachments[0].fallback.should.equal('pull 1 by abc: gh.com/abc/def/pull/1');
-            });
-        });
+  describe('GitHub message', function () {
+    it('does not output a non-review message', function () {
+      var r = Request({'text': 'https://github.com/abc/def/pull/1'});
 
-        it('does not generate attachments if no GitHub URLs are present', function () {
-          var req = Request({'text': 'https://example.com'});
-          Response({'adapter': 'slack', 'request': req})
-            .then(function (res) {
-              (res === null).should.be.true;
-            });
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          var message = GitHubMessage({
+            'resources': resources
+          });
+
+          (message === undefined).should.be.true;
         });
-      });
-    })
+    });
+
+    it('outputs a review message', function () {
+      var r = Request({'text': 'review https://github.com/abc/def/pull/1'});
+      var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
+
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          var message = GitHubMessage({
+            'resources': resources,
+            'reviewers': reviewers
+          });
+
+          message.should.equal('@foo, @bar: please review this pull request');
+        });
+    });
   });
 });
 
 describe('(integration)', function () {
-  var room;
-
-  beforeEach(function () {
-    room = helper.createRoom();
+  describe('HubotReview', function () {
+    describe('using default adapter', function () {
+      it('works correctly', function () {
+        return HubotReview({'text': 'review https://github.com/abc/def/pull/1'})
+          .then(function (res) {
+            res.should.contain('Assigning');
+          })
+      });
+    });
   });
 
-  afterEach(function () {
-    return room.destroy();
+  describe('Hubot', function () {
+    var room;
+
+    beforeEach(function () {
+      room = helper.createRoom();
+    });
+
+    afterEach(function () {
+      return room.destroy();
+    });
   });
 });
