@@ -11,7 +11,6 @@ function Message (options) {
 
     var pullRequest = resources[0];
     var shorthand = pullRequest.owner + '/' + pullRequest.repo + '#' + pullRequest.number;
-
     if (reviewers.length) {
       return 'Assigning ' + reviewers.join(', ') + ' to ' + shorthand;
     }

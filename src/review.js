@@ -109,7 +109,7 @@ function Review (options) {
 
         var nonAuthorBlames = ranges.filter(function (range) {
           return range.login !== pullRequestAuthorLogin;
-        })
+        });
 
         var recentBlames = nonAuthorBlames.slice(0, Math.ceil(nonAuthorBlames.length * 0.75));
 

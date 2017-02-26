@@ -128,7 +128,7 @@ function assignUsersToResource (resource, assignees) {
 }
 
 function postPullRequestComment (resource, body) {
-  return github.pullRequests.createComment({
+  return github.issues.createComment({
     'owner': resource.owner,
     'repo': resource.repo,
     'number': resource.number,

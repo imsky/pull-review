@@ -43,6 +43,132 @@ function mockGitHubPullRequest(api, url, options) {
   });
 };
 
+function mockGitHubPullRequestFiles(api, url, options) {
+  var split = url.split('/');
+  var owner = split[2];
+  var repo = split[3];
+  var number = split[5];
+  options = options || {};
+
+  return api.get(url).reply(200, [
+    {
+      'filename': 'added_file.txt',
+      'status': 'added',
+      'changes': 999
+    },
+    {
+      'filename': 'modified_file_1.txt',
+      'status': 'modified',
+      'changes': 1
+    },
+    {
+      'filename': 'modified_file_2.txt',
+      'status': 'modified',
+      'changes': 2
+    },
+
+    {
+      'filename': 'modified_file_3.txt',
+      'status': 'modified',
+      'changes': 3
+    },
+    {
+      'filename': 'deleted_file.txt',
+      'status': 'deleted',
+      'changes': 999
+    }
+  ]);
+}
+
+function mockGraphQLBlame(api, url, options) {
+  options = options || {};
+
+  return api.post(url).reply(200, {
+    'data': {
+      'repository': {
+        'object': {
+          'blame': {
+            'ranges': [
+              {
+                'startingLine': 1,
+                'endingLine': 10,
+                'age': 1,
+                'commit': {
+                  'author': {
+                    'user': {
+                      'login': 'mockuser'
+                    }
+                  }
+                }
+              },
+              {
+                'startingLine': 11,
+                'endingLine': 12,
+                'age': 10,
+                'commit': {
+                  'author': {
+                    'user': {
+                      'login': 'mockuser2'
+                    }
+                  }
+                }
+              },
+              {
+                'startingLine': 13,
+                'endingLine': 15,
+                'age': 2,
+                'commit': {
+                  'author': {
+                    'user': {
+                      'login': 'mockuser'
+                    }
+                  }
+                }
+              },
+              {
+                'startingLine': 16,
+                'endingLine': 16,
+                'age': 1,
+                'commit': {
+                  'author': {
+                    'user': {
+                      'login': 'mockuser2'
+                    }
+                  }
+                }
+              },
+              {
+                'startingLine': 17,
+                'endingLine': 25,
+                'age': 3,
+                'commit': {
+                  'author': {
+                    'user': {
+                      'login': 'mockuser'
+                    }
+                  }
+                }
+              },
+              {
+                'startingLine': 25,
+                'endingLine': 26,
+                'age': 9,
+                'commit': {
+                  'author': {
+                    'user': {
+                      'login': 'mockuser3'
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  })
+}
+
 describe('(unit)', function () {
   describe('url', function () {
     describe('#parseURL', function () {
@@ -96,7 +222,20 @@ describe('(unit)', function () {
         });
     });
 
-    it('#getPullRequestFiles');
+    it('#getPullRequestFiles', function () {
+      mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
+
+      return github.getPullRequestFiles({
+        'owner': 'OWNER',
+        'repo': 'REPO',
+        'number': 1
+      })
+        .then(function (files) {
+          files.should.not.be.empty;
+          files.should.have.lengthOf(5);
+        });
+    });
+
     it('#getBlameForCommitFile');
     it('#assignUsersToResource');
     it('#postPullRequestComment');
@@ -246,13 +385,19 @@ describe('(integration)', function () {
     describe('using default adapter', function () {
       beforeEach(function () {
         mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+        mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
+        mockGraphQLBlame(ghapi, '/graphql');
+        mockGraphQLBlame(ghapi, '/graphql');
+        mockGraphQLBlame(ghapi, '/graphql');
+        ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+        ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
       });
 
       it('works correctly', function () {
         return HubotReview({'text': 'review https://github.com/OWNER/REPO/pull/1'})
           .then(function (res) {
-            console.log(res);
-            res.should.contain('Assigning');
+            res.should.contain('Assigning @mockuser2, @mockuser3 to OWNER/REPO#1');
           })
       });
     });

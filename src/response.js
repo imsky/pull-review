@@ -40,11 +40,11 @@ function Response (options) {
 
     return Promise.all([review, resources])
       .then(function (res) {
-        var review = res[0];
+        var review = res[0] || {};
         var resources = res[1];
 
         inputs = {
-          'review': review,
+          'reviewers': review.reviewers,
           'resources': resources
         };
 
