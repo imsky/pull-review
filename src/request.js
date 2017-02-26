@@ -5,11 +5,7 @@ var extractURLs = url.extractURLs;
 function Request (options) {
   var text = options.text;
 
-  var URLs = extractURLs(text);
-
-  if (!URLs.length) {
-    return;
-  }
+  var URLs = extractURLs(text) || [];
 
   var githubURLs = URLs.map(function (u) {
     var uo = parseURL(u);

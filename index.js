@@ -14,7 +14,6 @@
 // Author:
 //   Ivan Malopinsky
 
-//todo: mock github api
 //todo: AUTHORS/OWNERS integration
 //todo: review stategy: blame/random
 //todo: PR size tags

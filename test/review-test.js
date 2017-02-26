@@ -1,12 +1,14 @@
 var Helper = require('hubot-test-helper');
 var nock = require('nock');
 var chai = require('chai');
+chai.use(require('chai-as-promised'));
 chai.should();
 
 var url = require('../src/url');
 var github = require('../src/github');
 var Request = require('../src/request');
 var Response = require('../src/response');
+var Review = require('../src/review');
 var HubotReview = require('../src/hubot-review');
 var messages = require('../src/messages');
 var GenericMessage = messages.GenericMessage;
@@ -25,11 +27,12 @@ function mockGitHubPullRequest(api, url, options) {
   options = options || {};
 
   var login = options.login || 'mockuser';
+  var state = options.state || 'open';
 
   return api.get(url).reply(200, {
     'html_url': ['https://mockhub.com', owner, repo, 'pull', number].join('/'),
     'number': number,
-    'state': options.state || 'open',
+    'state': state,
     'title': 'Lorem ipsum',
     'body': options.body || 'Hello world',
     'assignees': options.assignees || undefined,
@@ -208,12 +211,10 @@ describe('(unit)', function () {
   });
 
   describe('github', function () {
-    beforeEach(function () {
+    it('#getGithubResources', function () {
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
-    });
 
-    it('#getGithubResources', function () {
       var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1 and https://github.com/OWNER/REPO/pull/2 '});
       return github.getGithubResources(r.githubURLs)
         .then(function (resources) {
@@ -239,6 +240,42 @@ describe('(unit)', function () {
     it('#getBlameForCommitFile');
     it('#assignUsersToResource');
     it('#postPullRequestComment');
+  });
+
+  describe('Review', function () {
+    it('bails when input request is not a review', function () {
+      var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1'});
+      var review = Review({'request': r});
+      review.then(function (res) {
+        (res === null).should.be.true;
+      });
+    });
+
+    it('fails without exactly one open GitHub pull request with user data', function () {
+      var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1  https://github.com/OWNER/REPO/pull/2'});
+
+      var tooManyPRs = Review({'request': r});
+
+      r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
+      r.githubURLs = [];
+
+      var notEnoughPRs = Review({'request': r});
+
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1', {
+        'state': 'closed'
+      });
+
+      r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
+      var closedPR = Review({'request': r});
+
+      return Promise.all([
+        tooManyPRs.should.eventually.be.rejectedWith(Error, 'Only one GitHub URL can be reviewed at a time'),
+        notEnoughPRs.should.eventually.be.rejectedWith(Error, 'No GitHub URLs'),
+        closedPR.should.eventually.be.rejectedWith(Error, 'Pull request is not open')
+      ]);
+    });
+
+    it('fails with enough assigned reviewers');
   });
 
   describe('generic message', function () {
@@ -281,7 +318,12 @@ describe('(unit)', function () {
 
           message.should.equal('Assigning @uvw, @xyz to OWNER/REPO#1');
         });
-    })
+    });
+
+    it('outputs nothing without reviewers', function () {
+      var message = GenericMessage({'reviewers': null});
+      (message === undefined).should.be.true;
+    });
   });
 
   describe('Slack message', function () {
@@ -400,7 +442,41 @@ describe('(integration)', function () {
             res.should.contain('Assigning @mockuser2, @mockuser3 to OWNER/REPO#1');
           })
       });
+
+      it('fails for issues', function () {
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/issues/1');
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/issues/1');
+
+        return HubotReview({'text': 'review https://github.com/OWNER/REPO/issues/1'})
+          .then(function (res) {
+            (res instanceof Error).should.be.true;
+            res.message.should.equal('Reviews for resources other than pull requests are not supported');
+          });
+      })
     });
+
+    describe('using Slack adapter', function () {
+      beforeEach(function () {
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+        mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
+        mockGraphQLBlame(ghapi, '/graphql');
+        mockGraphQLBlame(ghapi, '/graphql');
+        mockGraphQLBlame(ghapi, '/graphql');
+        ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+        ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
+      });
+
+      it('works correctly', function () {
+        return HubotReview({'adapter': 'slack', 'text': 'review https://github.com/OWNER/REPO/pull/1'})
+          .then(function (res) {
+            res.should.have.ownProperty('text');
+            res.text.should.equal('@mockuser2, @mockuser3: please review this pull request');
+            res.should.have.ownProperty('attachments');
+            res.attachments.should.have.lengthOf(1);
+          })
+      });
+    })
   });
 
   describe('Hubot', function () {

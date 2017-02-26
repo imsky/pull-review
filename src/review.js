@@ -44,8 +44,6 @@ function Review (options) {
 
       if (pullRequest.data.state !== 'open') {
         throw Error('Pull request is not open');
-      } else if (!pullRequest.data.user) {
-        throw Error('No user data available for pull request');
       }
 
       pullRequestAuthorLogin = pullRequest.data.user.login;
