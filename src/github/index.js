@@ -11,7 +11,7 @@ var GraphQLRequest = require('./graphql');
 var BlameRangeList = require('./blame-range-list');
 
 var TEST = config.TEST;
-var GITHUB_TOKEN = config.GITHUB_TOKEN;
+var GITHUB_TOKEN = TEST ? 'test' : config.GITHUB_TOKEN;
 
 var queries = ['git-blame'];
 
@@ -24,12 +24,10 @@ var github = new Github({
   'protocol': 'https'
 });
 
-if (!TEST) {
-  github.authenticate({
-    'type': 'token',
-    'token': GITHUB_TOKEN
-  }); 
-}
+github.authenticate({
+  'type': 'token',
+  'token': GITHUB_TOKEN
+});
 
 function parseGithubPath (path) {
   var parts = path.split('/').filter(function (p) {
@@ -46,21 +44,6 @@ function parseGithubPath (path) {
 
 function getGithubResource(type, req) {
   var nothing = Promise.resolve({});
-
-  if (TEST) {
-    return Promise.resolve({
-      'data': {
-        'state': 'open',
-        'user': {
-          'login': req.owner,
-          'html_url': 'gh.com/' + req.owner
-        },
-        'title': type + ' ' + req.number,
-        'html_url': 'gh.com/' + req.owner + '/' + req.repo + '/' + type + '/' + req.number,
-        'body': 'hello world'
-      }
-    });
-  }
 
   if (type === 'pull') {
     return github.pullRequests.get(req);
@@ -136,9 +119,6 @@ function getBlameForCommitFile (resource) {
 }
 
 function assignUsersToResource (resource, assignees) {
-  console.log('assigning', assignees)
-  return true;
-
   return github.issues.addAssigneesToIssue({
     'owner': resource.owner,
     'repo': resource.repo,
@@ -148,9 +128,6 @@ function assignUsersToResource (resource, assignees) {
 }
 
 function postPullRequestComment (resource, body) {
-  console.log('posting', body)
-  return true;
-
   return github.pullRequests.createComment({
     'owner': resource.owner,
     'repo': resource.repo,

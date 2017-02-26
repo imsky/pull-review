@@ -1,4 +1,5 @@
 var Helper = require('hubot-test-helper');
+var nock = require('nock');
 var chai = require('chai');
 chai.should();
 
@@ -13,6 +14,34 @@ var SlackMessage = messages.SlackMessage;
 var GitHubMessage = messages.GitHubMessage;
 
 var helper = new Helper('../index.js');
+
+var ghapi = nock('https://api.github.com');
+
+function mockGitHubPullRequest(api, url, options) {
+  var split = url.split('/');
+  var owner = split[2];
+  var repo = split[3];
+  var number = split[5];
+  options = options || {};
+
+  var login = options.login || 'mockuser';
+
+  return api.get(url).reply(200, {
+    'html_url': ['https://mockhub.com', owner, repo, 'pull', number].join('/'),
+    'number': number,
+    'state': options.state || 'open',
+    'title': 'Lorem ipsum',
+    'body': options.body || 'Hello world',
+    'assignees': options.assignees || undefined,
+    'user': {
+      'login': login,
+      'html_url': ['https://mockhub.com', login].join('/')
+    },
+    'head': {
+      'sha': 'deadbeef'
+    }
+  });
+};
 
 describe('(unit)', function () {
   describe('url', function () {
@@ -53,8 +82,13 @@ describe('(unit)', function () {
   });
 
   describe('github', function () {
+    beforeEach(function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
+    });
+
     it('#getGithubResources', function () {
-      var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
+      var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1 and https://github.com/OWNER/REPO/pull/2 '});
       return github.getGithubResources(r.githubURLs)
         .then(function (resources) {
           resources.should.have.lengthOf(2);
@@ -69,8 +103,13 @@ describe('(unit)', function () {
   });
 
   describe('generic message', function () {
-    var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2 '});
+    var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1 and https://github.com/OWNER/REPO/pull/2 '});
     var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
+
+    beforeEach(function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
+    });
 
     it('outputs an error when provided', function () {
       var message = GenericMessage({'error': 'test'});
@@ -85,7 +124,7 @@ describe('(unit)', function () {
             'resources': resources
           });
 
-          message.should.equal('Assigning @foo, @bar to abc/def#1');
+          message.should.equal('Assigning @foo, @bar to OWNER/REPO#1');
         });
     });
 
@@ -101,13 +140,18 @@ describe('(unit)', function () {
             }
           });
 
-          message.should.equal('Assigning @uvw, @xyz to abc/def#1');
+          message.should.equal('Assigning @uvw, @xyz to OWNER/REPO#1');
         });
     })
   });
 
   describe('Slack message', function () {
-    var r = Request({'text': 'https://github.com/abc/def/pull/1 and https://github.com/abc/def/pull/2'});
+    var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1 and https://github.com/OWNER/REPO/pull/2'});
+
+    beforeEach(function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
+    });
 
     it('outputs a non-review message', function () {
       return github.getGithubResources(r.githubURLs)
@@ -117,10 +161,10 @@ describe('(unit)', function () {
           });
 
           var attachments = message.attachments;
-          attachments[0].fallback.should.equal('pull 1 by abc: gh.com/abc/def/pull/1');
-          attachments[0].title.should.equal('abc/def: pull 1');
-          attachments[1].fallback.should.equal('pull 2 by abc: gh.com/abc/def/pull/2');
-          attachments[1].title.should.equal('abc/def: pull 2');
+          attachments[0].fallback.should.equal('Lorem ipsum by mockuser: https://mockhub.com/OWNER/REPO/pull/1');
+          attachments[0].title.should.equal('OWNER/REPO: Lorem ipsum');
+          attachments[1].fallback.should.equal('Lorem ipsum by mockuser: https://mockhub.com/OWNER/REPO/pull/2');
+          attachments[1].title.should.equal('OWNER/REPO: Lorem ipsum');
         });
     });
 
@@ -147,7 +191,7 @@ describe('(unit)', function () {
     });
 
     it('outputs a review message', function () {
-      var r = Request({'text': 'review https://github.com/abc/def/pull/1'});
+      var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
       return github.getGithubResources(r.githubURLs)
         .then(function (resources) {
           var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
@@ -163,8 +207,12 @@ describe('(unit)', function () {
   });
 
   describe('GitHub message', function () {
+    beforeEach(function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+    });
+
     it('does not output a non-review message', function () {
-      var r = Request({'text': 'https://github.com/abc/def/pull/1'});
+      var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1'});
 
       return github.getGithubResources(r.githubURLs)
         .then(function (resources) {
@@ -177,7 +225,7 @@ describe('(unit)', function () {
     });
 
     it('outputs a review message', function () {
-      var r = Request({'text': 'review https://github.com/abc/def/pull/1'});
+      var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
       var reviewers = [{'login': 'foo'}, {'login': 'bar'}];
 
       return github.getGithubResources(r.githubURLs)
@@ -196,9 +244,14 @@ describe('(unit)', function () {
 describe('(integration)', function () {
   describe('HubotReview', function () {
     describe('using default adapter', function () {
+      beforeEach(function () {
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      });
+
       it('works correctly', function () {
-        return HubotReview({'text': 'review https://github.com/abc/def/pull/1'})
+        return HubotReview({'text': 'review https://github.com/OWNER/REPO/pull/1'})
           .then(function (res) {
+            console.log(res);
             res.should.contain('Assigning');
           })
       });
