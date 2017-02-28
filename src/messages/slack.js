@@ -1,11 +1,10 @@
-var config = require('../config');
 var url = require('../url');
 
 var Message = require('./message');
 
 var extractURLs = url.extractURLs;
 
-var GITHUB_ICON_URL = config.GITHUB_ICON_URL;
+var GITHUB_ICON_URL = process.env.GITHUB_ICON_URL || 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/240px-Octicons-mark-github.svg.png';
 
 function generateSlackAttachmentFromGithubResource (resource) {
   var data = resource.data;

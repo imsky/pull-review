@@ -5,13 +5,11 @@ require('native-promise-only');
 
 var Github = require('github');
 
-var config = require('../config');
-
 var GraphQLRequest = require('./graphql');
 var BlameRangeList = require('./blame-range-list');
 
-var TEST = config.TEST;
-var GITHUB_TOKEN = TEST ? 'test' : config.GITHUB_TOKEN;
+var TEST = process.env.NODE_ENV === 'test';
+var GITHUB_TOKEN = TEST ? 'test' : process.env.GITHUB_TOKEN;
 
 var queries = ['git-blame'];
 
@@ -34,10 +32,16 @@ function parseGithubPath (path) {
     return p.length > 0;
   });
 
+  var type = parts[2];
+
+  if (type === 'issues') {
+    type = 'issue';
+  }
+
   return {
     'owner': parts[0],
     'repo': parts[1],
-    'type': parts[2],
+    'type': type,
     'number': parts[3]
   };
 }
@@ -47,7 +51,7 @@ function getGithubResource(type, req) {
 
   if (type === 'pull') {
     return github.pullRequests.get(req);
-  } else if (type === 'issues') {
+  } else if (type === 'issue') {
     return github.issues.get(req);
   }
 

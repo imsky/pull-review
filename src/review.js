@@ -30,10 +30,6 @@ function Review (options) {
       return github.getGithubResources(githubURLs)
     })
     .then(function (resources) {
-      if (!resources.length) {
-        throw Error('Could not find GitHub resources');
-      }
-
       var resource = resources[0];
 
       if (resource.type !== 'pull') {
