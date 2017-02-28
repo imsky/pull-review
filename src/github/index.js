@@ -6,7 +6,6 @@ require('native-promise-only');
 var Github = require('github');
 
 var GraphQLRequest = require('./graphql');
-var BlameRangeList = require('./blame-range-list');
 
 var TEST = process.env.NODE_ENV === 'test';
 var GITHUB_TOKEN = TEST ? 'test' : process.env.GITHUB_TOKEN;
@@ -26,6 +25,23 @@ github.authenticate({
   'type': 'token',
   'token': GITHUB_TOKEN
 });
+
+function BlameRangeList (options) {
+  var blame = options.blame || {};
+  var ranges = blame.ranges || [];
+
+  return ranges.map(function (range) {
+    if (!range.commit.author.user) {
+      return null;
+    }
+
+    return {
+      'age': range.age,
+      'count': range.endingLine - range.startingLine + 1,
+      'login': range.commit.author.user.login
+    };
+  }).filter(Boolean);
+}
 
 function parseGithubPath (path) {
   var parts = path.split('/').filter(function (p) {
@@ -115,7 +131,8 @@ function getBlameForCommitFile (resource) {
     }
   })
     .then(function (res) {
-      return res.data.repository.object.blame;
+      var blame = res.data.repository.object.blame;
+      return BlameRangeList({'blame': blame});
     })
     .catch(function (err) {
       return null;
@@ -162,6 +179,5 @@ module.exports = {
   'getBlameForCommitFile': getBlameForCommitFile,
   'getRepoFile': getRepoFile,
   'assignUsersToResource': assignUsersToResource,
-  'postPullRequestComment': postPullRequestComment,
-  'BlameRangeList': BlameRangeList
+  'postPullRequestComment': postPullRequestComment
 };
