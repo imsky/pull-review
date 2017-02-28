@@ -19,6 +19,12 @@ var helper = new Helper('../index.js');
 
 var ghapi = nock('https://api.github.com');
 
+function mockNotFound(api, url) {
+  return api.get(url).reply(404, {
+    'message': 'Not Found'
+  });
+}
+
 function mockGitHubPullRequest(api, url, options) {
   var split = url.split('/');
   var owner = split[2];
@@ -246,9 +252,16 @@ describe('(unit)', function () {
     it('bails when input request is not a review', function () {
       var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1'});
       var review = Review({'request': r});
-      review.then(function (res) {
+      return review.then(function (res) {
         (res === null).should.be.true;
       });
+    });
+
+    it('fails with PRs that are not found', function () {
+      mockNotFound(ghapi, '/repos/OWNER/REPO/pulls/1');
+      var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
+      var review = Review({'request': r});
+      return review.should.eventually.be.rejectedWith(Error, '{"message":"Not Found"}');
     });
 
     it('fails without exactly one open GitHub pull request with user data', function () {
@@ -425,8 +438,7 @@ describe('(unit)', function () {
 describe('(integration)', function () {
   describe('HubotReview', function () {
     describe('using default adapter', function () {
-      beforeEach(function () {
-        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      it('works correctly', function () {
         mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
         mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
         mockGraphQLBlame(ghapi, '/graphql');
@@ -434,9 +446,7 @@ describe('(integration)', function () {
         mockGraphQLBlame(ghapi, '/graphql');
         ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
         ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
-      });
 
-      it('works correctly', function () {
         return HubotReview({'text': 'review https://github.com/OWNER/REPO/pull/1'})
           .then(function (res) {
             res.should.contain('Assigning @mockuser2, @mockuser3 to OWNER/REPO#1');
@@ -457,7 +467,6 @@ describe('(integration)', function () {
 
     describe('using Slack adapter', function () {
       beforeEach(function () {
-        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
         mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
         mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
         mockGraphQLBlame(ghapi, '/graphql');
@@ -483,11 +492,31 @@ describe('(integration)', function () {
     var room;
 
     beforeEach(function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
+      mockGraphQLBlame(ghapi, '/graphql');
+      mockGraphQLBlame(ghapi, '/graphql');
+      mockGraphQLBlame(ghapi, '/graphql');
+      ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+      ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
+
       room = helper.createRoom();
     });
 
     afterEach(function () {
       return room.destroy();
+    });
+
+    it('works', function (done) {
+      return room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
+        .then(function () {
+          setTimeout(function () {
+            room.messages.should.have.lengthOf(2);
+            room.messages[1][1].should.equal('Assigning @mockuser2, @mockuser3 to OWNER/REPO#1');
+            done();
+          }, 500);
+        });
     });
   });
 });
