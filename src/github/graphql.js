@@ -1,75 +1,16 @@
-var https = require('https');
+var client = require('github-graphql-client');
 
 require('native-promise-only');
 
-function Request (options) {
-  var token = options.token;
-  var query = options.query;
-  var variables = options.variables || {};
-
-  if (!token) {
-    throw Error('Missing GitHub token');
-  } else if (!query) {
-    throw Error('Missing query');
-  }
-
-  var payload = {
-    'query': query,
-    'variables': variables
-  };
-
+function Request(options) {
   return new Promise(function (resolve, reject) {
-    var payloadString = JSON.stringify(payload);
-
-    var req = https.request({
-      'hostname': 'api.github.com',
-      'path': '/graphql',
-      'method': 'POST',
-      'headers': {
-        'Content-Type': 'application/json',
-        'Content-Length': payloadString.length,
-        'Authorization': 'bearer ' + token,
-        'User-Agent': 'GitHub GraphQL Client'
+    client(options, function (err, res) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
       }
-    }, function (res) {
-      var chunks = [];
-
-      res.on('data', function (chunk) {
-        chunks.push(chunk.toString('utf8'));
-      });
-
-      res.on('end', function () {
-        if (res.statusCode !== 200) {
-          reject(res.statusMessage);
-          return;
-        }
-
-        var response = chunks.join('');
-        var json;
-
-        try  {
-          json = JSON.parse(response);
-        } catch (e) {
-          reject('GitHub GraphQL API response is not able to be parsed as JSON');
-        }
-
-        if (!json.data) {
-          if (json.errors) {
-            reject(json.errors);
-            return;
-          } else {
-            reject(Error('Unknown GraphQL error'));
-            return;
-          }
-        }
-
-        resolve(json);
-      });
     });
-
-    req.on('error', reject);
-    req.write(payloadString);
-    req.end();
   });
 }
 
