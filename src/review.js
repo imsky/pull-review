@@ -17,8 +17,6 @@ function Review (options) {
   var maxFilesToReview = 10;
   var maxReviewers = 5;
 
-  //todo: get config file from pull request repo
-
   return Promise.resolve(true)
     .then(function () {
       if (!githubURLs.length) {
@@ -62,9 +60,14 @@ function Review (options) {
 
       maxReviewers = maxReviewers - assignees.length;
 
-      return github.getPullRequestFiles(pullRequest);
+      var getConfig = github.getRepoFile(resource, '.pull-review', 'utf8').catch(function () { return null; })
+
+      return Promise.all([getConfig, github.getPullRequestFiles(pullRequest)]);
     })
-    .then(function (files) {
+    .then(function (res) {
+      var config = res[0];
+      var files = res[1];
+
       files = files || [];
 
       files = files.filter(function (file) {

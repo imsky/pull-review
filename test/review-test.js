@@ -25,6 +25,15 @@ function mockNotFound(api, url) {
   });
 }
 
+function mockFile(api, url, options) {
+  return api.get(url).reply(200, {
+    'name': options.name,
+    'path': options.path,
+    'encoding': 'base64',
+    'content': (new Buffer(options.content || '', 'utf8')).toString('base64')
+  });
+}
+
 function mockGitHubPullRequest(api, url, options) {
   var split = url.split('/');
   var owner = split[2];
@@ -246,6 +255,20 @@ describe('(unit)', function () {
     it('#getBlameForCommitFile');
     it('#assignUsersToResource');
     it('#postPullRequestComment');
+
+    it('#getRepoFile', function () {
+      mockFile(ghapi, '/repos/OWNER/REPO/contents/file.txt', {
+        'content': 'Hello world'
+      });
+
+      return github.getRepoFile({
+        'owner': 'OWNER',
+        'repo': 'REPO'
+      }, 'file.txt', 'utf8')
+        .then(function (res) {
+          res.should.equal('Hello world');
+        })
+    });
   });
 
   describe('Review', function () {

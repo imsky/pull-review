@@ -21,6 +21,7 @@
 //todo: travis CI tests
 //todo: eslint
 //todo: consider pull request review integration
+//todo: env var config override
 
 var HubotReview = require('./src/hubot-review');
 
