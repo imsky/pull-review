@@ -62,18 +62,16 @@ function Response (options) {
     var resources = github.getGithubResources(githubURLs);
 
     if (isReview) {
-      var reviewError = false;
+      var reviewError;
 
       return review.catch(function (err) {
-        reviewError = true;
-
-        return sendHubotMessage({
-          'error': err
-        });
+        reviewError = err;
       })
         .then(function (review) {
           if (reviewError) {
-            return review;
+            return sendHubotMessage({
+              'error': reviewError
+            });
           }
 
           return successfulReviewFlow(review, resources);

@@ -462,7 +462,18 @@ describe('(integration)', function () {
             (res instanceof Error).should.be.true;
             res.message.should.equal('Reviews for resources other than pull requests are not supported');
           });
-      })
+      });
+
+      it('fails for inaccessible PRs', function () {
+        mockNotFound(ghapi, '/repos/OWNER/REPO/pulls/404');
+        mockNotFound(ghapi, '/repos/OWNER/REPO/pulls/404');
+
+        return HubotReview({'text': 'review https://github.com/OWNER/REPO/pull/404'})
+          .then(function (res) {
+            (res instanceof Error).should.be.true;
+            res.message.should.equal('{"message":"Not Found"}');
+          });
+      });
     });
 
     describe('using Slack adapter', function () {
