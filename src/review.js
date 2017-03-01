@@ -1,5 +1,11 @@
 require('native-promise-only');
 
+var PULL_REVIEW_CONFIG = process.env.PULL_REVIEW_CONFIG;
+
+if (PULL_REVIEW_CONFIG) {
+  console.info('Using review config override', PULL_REVIEW_CONFIG);
+}
+
 var github = require('./github');
 var pullReview = require('./pull-review');
 
@@ -54,7 +60,7 @@ function Review (options) {
       return Promise.all([getConfig, github.getPullRequestFiles(pullRequest)]);
     })
     .then(function (res) {
-      var config = res[0];
+      var config = PULL_REVIEW_CONFIG || res[0];
       var files = res[1] || [];
 
       return PullReviewAssignment({

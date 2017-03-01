@@ -4,6 +4,7 @@
 // Configuration:
 //   GITHUB_TOKEN - required API access token with GraphQL API enabled
 //   PULL_REVIEW_CONFIG - optional pull review config override encoded as JSON
+//   DRY_RUN - optional flag to log, but not execute review actions
 //   GITHUB_ICON_URL - optional fallback icon URL for unfurled GitHub URLs
 //
 // Commands:
@@ -22,7 +23,6 @@
 //todo: travis CI tests
 //todo: eslint
 //todo: consider pull request review integration
-//todo: env var config override
 
 var HubotReview = require('./src/hubot-review');
 

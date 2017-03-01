@@ -1,5 +1,11 @@
 require('native-promise-only');
 
+var DRY_RUN = process.env.DRY_RUN;
+
+if (DRY_RUN) {
+  console.info('Hubot Review in dry run mode');
+}
+
 var github = require('./github');
 var messages = require('./messages');
 
@@ -62,13 +68,24 @@ function Response (options) {
           'resources': resources
         };
 
-        return github.assignUsersToResource(resources[0], review.reviewers);
-      })
-      .then(function () {
-        return sendGitHubMessage(inputs);
-      })
-      .then(function () {
-        return sendHubotMessage(inputs);
+        function liveRun () {
+          return github.assignUsersToResource(resources[0], review.reviewers)
+            .then(function () {
+              return sendGitHubMessage(inputs);
+            })
+            .then(function () {
+              return sendHubotMessage(inputs);
+            });
+        }
+
+        function dryRun () {
+          return Promise.resolve()
+            .then(function () {
+              console.info('Assigning ', review.reviewers, 'to', resources[0]);
+            })
+        }
+
+        return DRY_RUN ? dryRun() : liveRun();
       });
   }
 

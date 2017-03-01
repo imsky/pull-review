@@ -52,12 +52,14 @@ function PullReviewConfig (input) {
   var maxFiles = 5;
   var reviewers = {};
   var reviewBlacklist = [];
+  var requireNotification = true;
 
   minReviewers = config.min_reviewers !== undefined ? config.min_reviewers : minReviewers;
   maxReviewers = config.max_reviewers !== undefined ? config.max_reviewers : maxReviewers;
   maxFiles = config.max_files !== undefined ? config.max_files : maxFiles;
   reviewers = config.reviewers || reviewers;
   reviewBlacklist = config.review_blacklist || reviewBlacklist;
+  requireNotification = config.require_notification !== undefined ? config.require_notification : requireNotification;
 
   if (minReviewers < 0) {
     throw Error('Invalid number of minimum reviewers');
@@ -74,7 +76,8 @@ function PullReviewConfig (input) {
     'maxReviewers': maxReviewers,
     'maxFiles': maxFiles,
     'reviewers': reviewers,
-    'reviewBlacklist': reviewBlacklist
+    'reviewBlacklist': reviewBlacklist,
+    'requireNotification': requireNotification
   };
 
   return config;
@@ -143,7 +146,7 @@ function PullReviewAssignment (options) {
             blameAuthorIsUnreachable = !config.reviewers[range.login];
           }
 
-          var blameIsUnusable = blameAuthorIsPullRequestAuthor || blameAuthorIsBlacklisted || blameAuthorIsUnreachable;
+          var blameIsUnusable = blameAuthorIsPullRequestAuthor || blameAuthorIsBlacklisted || (config.requireNotification && blameAuthorIsUnreachable);
 
           return !blameIsUnusable;
         });
