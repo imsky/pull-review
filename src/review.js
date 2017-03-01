@@ -7,7 +7,7 @@ if (PULL_REVIEW_CONFIG) {
 }
 
 var github = require('./github');
-var pullReview = require('./pull-review');
+var pullReview = require('pull-review');
 
 var PullReviewAssignment = pullReview.PullReviewAssignment;
 
