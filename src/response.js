@@ -18,6 +18,20 @@ function Response (options) {
 
   function sendHubotMessage(inputs) {
     if (isSlack) {
+      //todo: consider moving this to review flow
+      var reviewerMap = (inputs.reviewers || []).reduce(function (map, reviewer) {
+        var username = reviewer.login;
+
+        if (reviewer.notify && reviewer.notify.slack) {
+          username = reviewer.notify.slack;
+        }
+
+        map[reviewer.login] = username;
+        return map;
+      }, {});
+
+      inputs.reviewerMap = reviewerMap;
+
       return SlackMessage(inputs);
     }
 

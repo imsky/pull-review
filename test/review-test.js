@@ -334,6 +334,7 @@ describe('(unit)', function () {
       });
       mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
       mockGraphQLBlame(ghapi, '/graphql');
+      mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
       var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
       Review({'request': r})
@@ -545,7 +546,7 @@ describe('(integration)', function () {
         return HubotReview({'adapter': 'slack', 'text': 'review https://github.com/OWNER/REPO/pull/1'})
           .then(function (res) {
             res.should.have.ownProperty('text');
-            res.text.should.equal('@mockuser2, @mockuser3: please review this pull request');
+            res.text.should.equal('@foo, @bar: please review this pull request');
             res.should.have.ownProperty('attachments');
             res.attachments.should.have.lengthOf(1);
           })

@@ -179,9 +179,13 @@ function PullReviewAssignment (options) {
       });
 
       return authorBlames.slice(0, maxReviewers);
-    });
-
-    //todo: map reviewers to their notification counterparts in config
+    })
+      .then(function(reviewers) {
+        return reviewers.map(function (reviewer) {
+          reviewer.notify = config.reviewers[reviewer.login];
+          return reviewer;
+        });
+      });
 }
 
 module.exports = {
