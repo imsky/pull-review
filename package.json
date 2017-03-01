@@ -17,8 +17,8 @@
     "github-graphql-client": "^1.0.0",
     "native-promise-only": "^0.8.1",
     "normalize-url": "~1.9.0",
-    "pull-review": "^1.0.0",
-    "url-regex": "~4.0.0"
+    "pull-review": "~1.0.0",
+    "url-regex": "~3.2.0"
   },
   "devDependencies": {
     "chai": "^2.1.1",
