@@ -13,11 +13,14 @@ max_reviewers: 2
 
 # list of GitHub users and their app-specific usernames
 reviewers:
-  - mockuser2:
-      slack: foo
-      campfire: bar
-      irc: baz
+  mockuser2:
+    slack: foo
+    campfire: bar
+    irc: baz
+  mockuser3:
+    slack: bar
+    irc: xyz
 
 # list of GitHub users who will never be notified
 review_blacklist:
-  - mockuser3
+  - mockuser4

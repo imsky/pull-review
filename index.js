@@ -2,8 +2,9 @@
 //   Assigns and notifies reviewers for GitHub pull requests
 //
 // Configuration:
-//   GITHUB_TOKEN
-//   GITHUB_ICON_URL - optional fallback icon URL
+//   GITHUB_TOKEN - required API access token with GraphQL API enabled
+//   PULL_REVIEW_CONFIG - optional pull review config override encoded as JSON
+//   GITHUB_ICON_URL - optional fallback icon URL for unfurled GitHub URLs
 //
 // Commands:
 //   <GitHub URL> - unfurl GitHub URLs on platforms like Slack

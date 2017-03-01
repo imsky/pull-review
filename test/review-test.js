@@ -1,8 +1,13 @@
+var fs = require('fs');
+var path = require('path');
+
 var Helper = require('hubot-test-helper');
 var nock = require('nock');
 var chai = require('chai');
 chai.use(require('chai-as-promised'));
 chai.should();
+
+var config = fs.readFileSync(path.join(__dirname, 'pull-review', 'config.yml'), 'utf8');
 
 var url = require('../src/url');
 var github = require('../src/github');
@@ -31,6 +36,14 @@ function mockFile(api, url, options) {
     'path': options.path,
     'encoding': 'base64',
     'content': (new Buffer(options.content || '', 'utf8')).toString('base64')
+  });
+}
+
+function mockConfig(api, url) {
+  return mockFile(api, url, {
+    'name': 'config',
+    'path': 'config',
+    'content': config
   });
 }
 
@@ -311,7 +324,23 @@ describe('(unit)', function () {
       ]);
     });
 
-    it('fails with enough assigned reviewers');
+    it('adds only up to max reviewers if assignees are present', function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1', {
+        'assignees': [
+          {
+            'login': 'someuser'
+          }
+        ]
+      });
+      mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
+      mockGraphQLBlame(ghapi, '/graphql');
+
+      var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
+      Review({'request': r})
+        .then(function (res) {
+          res.reviewers.should.have.lengthOf(1);
+        });
+    });
   });
 
   describe('generic message', function () {
@@ -469,6 +498,7 @@ describe('(integration)', function () {
         mockGraphQLBlame(ghapi, '/graphql');
         ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
         ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
+        mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
         return HubotReview({'text': 'review https://github.com/OWNER/REPO/pull/1'})
           .then(function (res) {
@@ -508,6 +538,7 @@ describe('(integration)', function () {
         mockGraphQLBlame(ghapi, '/graphql');
         ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
         ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
+        mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
       });
 
       it('works correctly', function () {
@@ -534,6 +565,7 @@ describe('(integration)', function () {
       mockGraphQLBlame(ghapi, '/graphql');
       ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
       ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
+      mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
       room = helper.createRoom();
     });

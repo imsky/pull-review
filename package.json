@@ -35,6 +35,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test istanbul cover node_modules/.bin/_mocha -- -- test/*-test.js"
+    "test": "NODE_ENV=test istanbul cover node_modules/.bin/_mocha -- -- test/*-test.js test/**/*-test.js"
   }
 }

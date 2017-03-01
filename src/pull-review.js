@@ -4,6 +4,9 @@ require('native-promise-only');
 
 var SUPPORTED_CONFIG_VERSIONS = [1];
 
+//todo: jsdoc
+//todo: tests
+
 function BlameRange (input) {
   var login = input.login;
   var count = input.count;
@@ -33,23 +36,11 @@ function PullReviewConfig (input) {
   var yamlParseError, jsonParseError;
 
   if (typeof input === 'string') {
-    try {
-      config = yaml.safeLoad(input);
-    } catch (e) {
-      yamlParseError = e;
-    }
+    config = yaml.safeLoad(input);
+  }
 
-    if (yamlParseError) {
-      try {
-        config = JSON.parse(input);
-      } catch (e) {
-        jsonParseError = e;
-      }
-    }
-
-    if (jsonParseError) {
-      throw Error('Failed to parse config as either YAML or JSON');
-    }
+  if (!config) {
+    throw Error('Invalid config');
   }
 
   if (!config.version || SUPPORTED_CONFIG_VERSIONS.indexOf(config.version) === -1) {
@@ -62,9 +53,9 @@ function PullReviewConfig (input) {
   var reviewers = {};
   var reviewBlacklist = [];
 
-  minReviewers = config.min_reviewers || minReviewers;
-  maxReviewers = config.max_reviewers || maxReviewers;
-  maxFiles = config.max_files || maxFiles;
+  minReviewers = config.min_reviewers !== undefined ? config.min_reviewers : minReviewers;
+  maxReviewers = config.max_reviewers !== undefined ? config.max_reviewers : maxReviewers;
+  maxFiles = config.max_files !== undefined ? config.max_files : maxFiles;
   reviewers = config.reviewers || reviewers;
   reviewBlacklist = config.review_blacklist || reviewBlacklist;
 
@@ -146,7 +137,9 @@ function PullReviewAssignment (options) {
 
           if (config && config.reviewBlacklist) {
             blameAuthorIsBlacklisted = config.reviewBlacklist.indexOf(range.login) !== -1;
-          } else if (config && config.reviewers) {
+          } 
+
+          if (config && config.reviewers) {
             blameAuthorIsUnreachable = !config.reviewers[range.login];
           }
 
@@ -187,6 +180,8 @@ function PullReviewAssignment (options) {
 
       return authorBlames.slice(0, maxReviewers);
     });
+
+    //todo: map reviewers to their notification counterparts in config
 }
 
 module.exports = {
