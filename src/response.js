@@ -65,10 +65,15 @@ function Response (options) {
           'resources': resources
         };
 
-        function liveRun () {
-          return github.assignUsersToResource(resources[0], review.reviewers)
+        var assignees = (review.reviewers || []).map(function (reviewer) {
+          return reviewer.login;
+        });
+
+        function liveRun() {
+          return github.assignUsersToResource(resources[0], assignees)
             .then(function () {
-              return sendGitHubMessage(inputs);
+              return true;
+              //return sendGitHubMessage(inputs);
             })
             .then(function () {
               return sendHubotMessage(inputs);
