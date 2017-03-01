@@ -42,7 +42,18 @@ module.exports = function (robot) {
         return;
       }
 
-      res.send(response);
+      try {
+        res.send(response);
+      } catch (e) {
+        console.error(e);
+
+        try {
+          res.send(String(response));
+        } catch (e) {
+          console.error(e);
+          res.send('Error', e);
+        }
+      }
     })
       .catch(function (err) {
         robot.logger.error(err);

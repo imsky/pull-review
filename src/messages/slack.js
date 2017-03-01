@@ -53,6 +53,7 @@ function templateFn (resources, reviewers) {
 
   if (!reviewers || !reviewers.length) {
     return {
+      'text': '',
       'attachments': attachments
     };
   }
