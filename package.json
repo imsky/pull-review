@@ -1,0 +1,36 @@
+{
+  "name": "pull-review",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "istanbul cover node_modules/.bin/_mocha -- -- test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imsky/pull-review.git"
+  },
+  "keywords": [
+    "git",
+    "pull",
+    "request",
+    "github",
+    "review"
+  ],
+  "author": "Ivan Malopinsky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/imsky/pull-review/issues"
+  },
+  "homepage": "https://github.com/imsky/pull-review#readme",
+  "dependencies": {
+    "js-yaml": "^3.8.1",
+    "native-promise-only": "^0.8.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0"
+  }
+}

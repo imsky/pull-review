@@ -1,0 +1,26 @@
+---
+# pull-review config version (required)
+version: 1
+
+# maximum number of files to evaluate per pull request (set to 0 for no limit)
+max_files: 5
+
+# minimum number of reviewers to assign and notify for a pull request
+min_reviewers: 1
+
+# maximum number of reviewers to assign and notify for a pull request
+max_reviewers: 2
+
+# require a user to be listed in the reviewers section in order to be assigned to a PR
+require_notification: true
+
+# list of users and their app-specific usernames
+reviewers:
+  alice:
+    slack: ajones
+  bob:
+    slack: bsmith
+
+# list of users who will never be notified
+review_blacklist:
+  - charlie
