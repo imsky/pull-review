@@ -2,10 +2,6 @@ require('native-promise-only');
 
 var DRY_RUN = process.env.DRY_RUN;
 
-if (DRY_RUN) {
-  console.info('Hubot Review in dry run mode');
-}
-
 var github = require('./github');
 var messages = require('./messages');
 
@@ -19,6 +15,7 @@ function Response (options) {
 
   var isSlack = options.adapter === 'slack';
   var isReview = request.isReview;
+  var isDryRun = options.dryRun || DRY_RUN;
 
   var githubURLs = request.githubURLs;
 
@@ -85,7 +82,7 @@ function Response (options) {
             })
         }
 
-        return DRY_RUN ? dryRun() : liveRun();
+        return isDryRun ? dryRun() : liveRun();
       });
   }
 

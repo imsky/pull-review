@@ -239,6 +239,10 @@ describe('(unit)', function () {
   });
 
   describe('github', function () {
+    afterEach(function () {
+      return nock.cleanAll();
+    });
+
     it('#getGithubResources', function () {
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
@@ -285,6 +289,10 @@ describe('(unit)', function () {
   });
 
   describe('Review', function () {
+    afterEach(function () {
+      return nock.cleanAll();
+    });
+
     it('bails when input request is not a review', function () {
       var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1'});
       var review = Review({'request': r});
@@ -353,6 +361,10 @@ describe('(unit)', function () {
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
     });
 
+    afterEach(function () {
+      return nock.cleanAll();
+    });
+
     it('outputs an error when provided', function () {
       var message = GenericMessage({'error': 'test'});
       message.should.equal('test');
@@ -398,6 +410,10 @@ describe('(unit)', function () {
     beforeEach(function () {
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/2');
+    });
+
+    afterEach(function () {
+      return nock.cleanAll();
     });
 
     it('outputs a non-review message', function () {
@@ -458,6 +474,10 @@ describe('(unit)', function () {
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
     });
 
+    afterEach(function () {
+      return nock.cleanAll();
+    });
+
     it('does not output a non-review message', function () {
       var r = Request({'text': 'https://github.com/OWNER/REPO/pull/1'});
 
@@ -491,7 +511,12 @@ describe('(unit)', function () {
 describe('(integration)', function () {
   describe('HubotReview', function () {
     describe('using default adapter', function () {
+      afterEach(function () {
+        return nock.cleanAll();
+      });
+
       it('works correctly', function () {
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
         mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
         mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
         mockGraphQLBlame(ghapi, '/graphql');
@@ -533,6 +558,14 @@ describe('(integration)', function () {
     describe('using Slack adapter', function () {
       beforeEach(function () {
         mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
+      });
+
+      afterEach(function () {
+        return nock.cleanAll();
+      });
+
+      it('works correctly with review messages', function () {
+        mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1');
         mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
         mockGraphQLBlame(ghapi, '/graphql');
         mockGraphQLBlame(ghapi, '/graphql');
@@ -540,9 +573,7 @@ describe('(integration)', function () {
         ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
         ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
         mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
-      });
 
-      it('works correctly', function () {
         return HubotReview({'adapter': 'slack', 'text': 'review https://github.com/OWNER/REPO/pull/1'})
           .then(function (res) {
             res.should.have.ownProperty('text');
@@ -551,6 +582,14 @@ describe('(integration)', function () {
             res.attachments.should.have.lengthOf(1);
           })
       });
+
+      it('works correctly with non-review messages', function () {
+        return HubotReview({'adapter': 'slack', 'text': 'https://github.com/OWNER/REPO/pull/1'})
+          .then(function (res) {
+            res.should.have.ownProperty('attachments');
+            res.attachments.should.have.lengthOf(1);
+          });
+        });
     })
   });
 
@@ -575,7 +614,7 @@ describe('(integration)', function () {
       return room.destroy();
     });
 
-    it('works', function (done) {
+    it('works correctly', function (done) {
       return room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
         .then(function () {
           setTimeout(function () {
