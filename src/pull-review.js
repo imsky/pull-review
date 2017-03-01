@@ -108,7 +108,7 @@ function PullReviewAssignment (options) {
     return b.changes - a.changes;
   });
 
-  var topChangedFiles = files.slice(0, config.maxFiles);
+  var topChangedFiles = config.maxFiles > 0 ? files.slice(0, config.maxFiles) : files;
 
   var maxReviewers = config.maxReviewers;
 
