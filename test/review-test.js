@@ -367,7 +367,7 @@ describe('(unit)', function () {
       mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
       var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
-      Review({'request': r})
+      return Review({'request': r})
         .then(function (res) {
           res.reviewers.should.have.lengthOf(1);
         });
@@ -534,6 +534,7 @@ describe('(integration)', function () {
   describe('HubotReview', function () {
     describe('using default adapter', function () {
       afterEach(function () {
+        delete process.env.HUBOT_REVIEW_REQUIRED_ROOMS;
         return nock.cleanAll();
       });
 
@@ -574,6 +575,12 @@ describe('(integration)', function () {
             (res instanceof Error).should.be.true;
             res.message.should.equal('{"message":"Not Found"}');
           });
+      });
+
+      it('fails if review is requested from disabled room', function () {
+        process.env.HUBOT_REVIEW_REQUIRED_ROOMS = 'foobar';
+        return HubotReview({'room': 'test', 'text': 'review https://github.com/OWNER/REPO/pull/404'})
+          .should.eventually.be.rejectedWith(Error, 'Review requests from this room are disabled');
       });
     });
 

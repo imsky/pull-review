@@ -12,12 +12,12 @@ function HubotReview (options) {
   return Promise.resolve()
     .then(function () {
       var request = Request({
-        'text': text
+        'text': text,
+        'room': room
       });
 
       var review = Review({
-        'request': request,
-        'room': room
+        'request': request
       });
 
       var response = Response({

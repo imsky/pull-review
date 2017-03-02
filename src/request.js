@@ -13,7 +13,7 @@ function Request (options) {
 
   if (requiredRooms.length && room !== undefined) {
     if (requiredRooms.indexOf(room) === -1) {
-      throw Error('Reviews are disabled from this room');
+      throw Error('Review requests from this room are disabled');
     }
   }
 

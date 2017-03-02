@@ -18,7 +18,9 @@ function Review (options) {
     return Promise.resolve(null);
   }
 
-  var pullRequest, pullRequestAuthorLogin, assignees = [];
+  var pullRequest;
+  var pullRequestAuthorLogin;
+  var assignees = [];
 
   return Promise.resolve()
     .then(function () {
