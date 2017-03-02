@@ -3,9 +3,19 @@ var parseURL = url.parseURL;
 var extractURLs = url.extractURLs;
 
 function Request (options) {
+  var REQUIRED_ROOMS = process.env.HUBOT_REVIEW_REQUIRED_ROOMS || '';
+
   var text = options.text;
+  var room = options.room;
 
   var URLs = extractURLs(text) || [];
+  var requiredRooms = REQUIRED_ROOMS.split(',').filter(Boolean);
+
+  if (requiredRooms.length && room !== undefined) {
+    if (requiredRooms.indexOf(room) === -1) {
+      throw Error('Reviews are disabled from this room');
+    }
+  }
 
   var githubURLs = URLs.map(function (u) {
     var uo = parseURL(u);

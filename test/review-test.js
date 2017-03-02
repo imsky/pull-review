@@ -607,7 +607,9 @@ describe('(integration)', function () {
       ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
       mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
-      room = helper.createRoom();
+      room = helper.createRoom({
+        'name': 'test'
+      });
     });
 
     afterEach(function () {

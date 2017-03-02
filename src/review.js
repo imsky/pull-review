@@ -7,7 +7,6 @@ var PullReviewAssignment = pullReview.PullReviewAssignment;
 
 function Review (options) {
   var PULL_REVIEW_CONFIG = process.env.HUBOT_REVIEW_PULL_REVIEW_CONFIG;
-  var REQUIRED_ROOMS = process.env.HUBOT_REVIEW_REQUIRED_ROOMS || '';
 
   var request = options.request;
   var room = options.room
@@ -21,16 +20,7 @@ function Review (options) {
 
   var pullRequest, pullRequestAuthorLogin, assignees = [];
 
-  return Promise.resolve(true)
-    .then(function () {
-      var requiredRooms = REQUIRED_ROOMS.split(',');
-
-      if (requiredRooms.length && room !== undefined) {
-        if (requiredRooms.indexOf(room) === -1) {
-          throw Error('Reviews are disabled from this room');
-        }
-      }
-    })
+  return Promise.resolve()
     .then(function () {
       if (!githubURLs.length) {
         throw Error('No GitHub URLs');

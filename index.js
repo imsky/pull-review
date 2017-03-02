@@ -9,10 +9,12 @@
 //   HUBOT_REVIEW_GITHUB_ICON_URL - optional fallback icon URL for unfurled GitHub URLs
 //
 // Commands:
-//   <GitHub URL> - unfurl GitHub URLs on platforms like Slack
-//   review <GitHub PR URL> - assign and notify reviewers for GitHub PR
+//   [hubot] <GitHub URL> - unfurl GitHub URLs on platforms like Slack
+//   [hubot] review <GitHub PR URL> - assign and notify reviewers for GitHub PR
 //
 // Notes:
+//  * Make sure to enable the GitHub GraphQL API for your user/organization
+//  * Make sure to add everyone who can be notified to .pull-review (reviews won't work otherwise)
 //
 // Author:
 //   Ivan Malopinsky
@@ -20,7 +22,6 @@
 //todo: eslint
 //todo: consider pull request review integration
 //todo: consider PR size tags
-//todo: consider scraper fallback for blame
 
 var HubotReview = require('./src/hubot-review');
 
