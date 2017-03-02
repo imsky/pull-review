@@ -1,7 +1,7 @@
 {
   "name": "hubot-review",
   "description": "Assigns and notifies reviewers for GitHub pull requests",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "author": "Ivan Malopinsky",
   "license": "MIT",
   "keywords": [
