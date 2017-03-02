@@ -19,7 +19,6 @@
 // Author:
 //   Ivan Malopinsky
 
-//todo: eslint
 //todo: consider pull request review integration
 //todo: consider PR size tags
 

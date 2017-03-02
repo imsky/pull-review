@@ -37,6 +37,6 @@ function Message (options) {
   } else {
     return templateFn(resources);
   }
-};
+}
 
 module.exports = Message;

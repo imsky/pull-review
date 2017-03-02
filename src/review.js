@@ -1,4 +1,4 @@
-require('native-promise-only');
+var Promise =  require('native-promise-only');
 
 var github = require('./github');
 var pullReview = require('pull-review');
@@ -9,7 +9,6 @@ function Review (options) {
   var PULL_REVIEW_CONFIG = process.env.HUBOT_REVIEW_PULL_REVIEW_CONFIG;
 
   var request = options.request;
-  var room = options.room
 
   var isReview = request.isReview;
   var githubURLs = request.githubURLs || [];
@@ -30,7 +29,7 @@ function Review (options) {
         throw Error('Only one GitHub URL can be reviewed at a time');
       }
 
-      return github.getGithubResources(githubURLs)
+      return github.getGithubResources(githubURLs);
     })
     .then(function (resources) {
       var resource = resources[0];
@@ -54,7 +53,7 @@ function Review (options) {
       }
 
       var getConfig = github.getRepoFile(resource, '.pull-review', 'utf8')
-        .catch(function () { return null; })
+        .catch(function () { return null; });
 
       return Promise.all([getConfig, github.getPullRequestFiles(pullRequest)]);
     })
@@ -67,7 +66,7 @@ function Review (options) {
         'files': files,
         'authorLogin': pullRequestAuthorLogin,
         'assignees': assignees.map(function (assignee) {
-          return assignee.login
+          return assignee.login;
         }),
         'getBlameForFile': function (file) {
           return github.getBlameForCommitFile({

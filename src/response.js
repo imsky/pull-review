@@ -1,4 +1,4 @@
-require('native-promise-only');
+var Promise = require('native-promise-only');
 
 var github = require('./github');
 var messages = require('./messages');
@@ -71,8 +71,7 @@ function Response (options) {
         function liveRun() {
           return github.assignUsersToResource(resources[0], assignees)
             .then(function () {
-              return true;
-              //return sendGitHubMessage(inputs);
+              return sendGitHubMessage(inputs);
             })
             .then(function () {
               return sendHubotMessage(inputs);
@@ -83,7 +82,7 @@ function Response (options) {
           return Promise.resolve()
             .then(function () {
               console.info('Assigning ', review.reviewers, 'to', resources[0]);
-            })
+            });
         }
 
         return DRY_RUN ? dryRun() : liveRun();
@@ -117,11 +116,9 @@ function Response (options) {
 
     return resources
       .then(function (resources) {
-        inputs = {
+        return sendHubotMessage({
           'resources': resources
-        }
-
-        return sendHubotMessage(inputs);
+        });
       });
   }
 

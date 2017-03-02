@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 
-require('native-promise-only');
+var Promise = require('native-promise-only');
 
 var Github = require('github');
 
@@ -134,7 +134,7 @@ function getBlameForCommitFile (resource) {
       var blame = res.data.repository.object.blame;
       return BlameRangeList({'blame': blame});
     })
-    .catch(function (err) {
+    .catch(function () {
       return null;
     });
 }

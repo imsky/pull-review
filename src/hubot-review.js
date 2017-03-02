@@ -1,4 +1,4 @@
-require('native-promise-only');
+var Promise = require('native-promise-only');
 
 var Request = require('./request');
 var Review = require('./review');
