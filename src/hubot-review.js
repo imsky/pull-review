@@ -5,13 +5,15 @@ var Response = require('./response');
 function HubotReview (options) {
   var text = options.text;
   var adapter = options.adapter;
+  var room = options.room;
 
   var request = Request({
     'text': text
   });
 
   var review = Review({
-    'request': request
+    'request': request,
+    'room': room
   });
 
   var response = Response({

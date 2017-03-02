@@ -8,7 +8,7 @@ var Github = require('github');
 var GraphQLRequest = require('./graphql');
 
 var TEST = process.env.NODE_ENV === 'test';
-var GITHUB_TOKEN = TEST ? 'test' : process.env.GITHUB_TOKEN;
+var GITHUB_TOKEN = TEST ? 'test' : process.env.HUBOT_REVIEW_GITHUB_TOKEN;
 
 var queries = ['git-blame'];
 

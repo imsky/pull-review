@@ -2,10 +2,11 @@
 //   Assigns and notifies reviewers for GitHub pull requests
 //
 // Configuration:
-//   GITHUB_TOKEN - required API access token with GraphQL API enabled
-//   PULL_REVIEW_CONFIG - optional pull review config override encoded as JSON
-//   DRY_RUN - optional flag to log, but not execute review actions
-//   GITHUB_ICON_URL - optional fallback icon URL for unfurled GitHub URLs
+//   HUBOT_REVIEW_GITHUB_TOKEN - required API access token with GraphQL API enabled
+//   HUBOT_REVIEW_REQUIRED_ROOMS - optional comma-separated list of chat rooms where review requests are restricted to
+//   HUBOT_REVIEW_PULL_REVIEW_CONFIG - optional pull review config override encoded as JSON
+//   HUBOT_REVIEW_DRY_RUN - optional flag to log, but not execute review actions
+//   HUBOT_REVIEW_GITHUB_ICON_URL - optional fallback icon URL for unfurled GitHub URLs
 //
 // Commands:
 //   <GitHub URL> - unfurl GitHub URLs on platforms like Slack
@@ -16,13 +17,10 @@
 // Author:
 //   Ivan Malopinsky
 
-//todo: AUTHORS/OWNERS integration
-//todo: review stategy: blame/random
-//todo: PR size tags
-//todo: consider scraper fallback for blame
-//todo: travis CI tests
 //todo: eslint
 //todo: consider pull request review integration
+//todo: consider PR size tags
+//todo: consider scraper fallback for blame
 
 var HubotReview = require('./src/hubot-review');
 
@@ -31,10 +29,20 @@ module.exports = function (robot) {
     var adapter = robot.adapterName;
     var message = res.message;
     var text = message.text;
+    var room = message.room;
+
+    if (adapter === 'slack') {
+      var slackChannel = robot.adapter.client.rtm.dataStore.getChannelById(room);
+      var slackGroup = robot.adapter.client.rtm.dataStore.getGroupById(room);
+      var slackRoom = slackChannel || slackGroup || {};
+
+      room = slackRoom.name;
+    }
 
     var hubotReview = HubotReview({
       'text': text,
-      'adapter': adapter
+      'adapter': adapter,
+      'room': room
     });
 
     hubotReview.then(function (response) {
@@ -45,18 +53,21 @@ module.exports = function (robot) {
       try {
         res.send(response);
       } catch (e) {
-        console.error(e);
+        robot.logger.error(e);
 
         try {
           res.send(String(response));
         } catch (e) {
-          console.error(e);
-          res.send('Error', e);
+          robot.logger.error(e);
+
+          res.send('Hubot Review response error:' + e);
         }
       }
     })
-      .catch(function (err) {
-        robot.logger.error(err);
+      .catch(function (e) {
+        robot.logger.error(e);
+
+        res.send('Hubot Review error' + e);
       });
   });
 };

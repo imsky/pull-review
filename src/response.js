@@ -1,7 +1,5 @@
 require('native-promise-only');
 
-var DRY_RUN = process.env.DRY_RUN;
-
 var github = require('./github');
 var messages = require('./messages');
 
@@ -10,12 +8,13 @@ var SlackMessage = messages.SlackMessage;
 var GitHubMessage = messages.GitHubMessage;
 
 function Response (options) {
+  var DRY_RUN = process.env.HUBOT_REVIEW_DRY_RUN;
+
   var request = options.request;
   var review = options.review;
 
   var isSlack = options.adapter === 'slack';
   var isReview = request.isReview;
-  var isDryRun = options.dryRun || DRY_RUN;
 
   var githubURLs = request.githubURLs;
 
@@ -87,7 +86,7 @@ function Response (options) {
             })
         }
 
-        return isDryRun ? dryRun() : liveRun();
+        return DRY_RUN ? dryRun() : liveRun();
       });
   }
 
