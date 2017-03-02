@@ -270,7 +270,29 @@ describe('(unit)', function () {
     });
 
     it('#getBlameForCommitFile');
-    it('#assignUsersToResource');
+
+    describe('#assignUsersToResource', function () {
+      it('works correctly', function () {
+        ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+
+        return github.assignUsersToResource({
+          'owner': 'OWNER',
+          'repo': 'REPO',
+          'number': '1'
+        }, ['test']);
+      });
+
+      it('fails with non-text assignees', function () {
+        (function () {
+          github.assignUsersToResource({
+            'owner': 'OWNER',
+            'repo': 'REPO',
+            'number': '1'
+          }, [{}]);
+        }).should.throw(Error, 'Assignees must be specified as strings');
+      });
+    });
+
     it('#postPullRequestComment');
 
     it('#getRepoFile', function () {

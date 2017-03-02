@@ -140,6 +140,14 @@ function getBlameForCommitFile (resource) {
 }
 
 function assignUsersToResource (resource, assignees) {
+  assignees = assignees || [];
+
+  for(var i = 0; i < assignees.length; i++) {
+    if (typeof assignees[i] !== 'string') {
+      throw Error('Assignees must be specified as strings');
+    }
+  }
+
   return github.issues.addAssigneesToIssue({
     'owner': resource.owner,
     'repo': resource.repo,
