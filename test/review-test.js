@@ -369,7 +369,7 @@ describe('(unit)', function () {
       var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1'});
       return Review({'request': r})
         .then(function (res) {
-          res.reviewers.should.have.lengthOf(1);
+          res.reviewers.should.have.lengthOf(2);
         });
     });
   });

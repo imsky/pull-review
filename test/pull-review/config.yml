@@ -9,7 +9,7 @@ max_files: 10
 min_reviewers: 2
 
 # maximum number of reviewers to assign and notify for a pull request
-max_reviewers: 2
+max_reviewers: 3
 
 # list of GitHub users and their app-specific usernames
 reviewers:
