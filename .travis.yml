@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "0.10"
+  - "4"
+  - "6"
+sudo: false
+cache:
+  directories:
+    - node_modules
+notifications:
+  email: false

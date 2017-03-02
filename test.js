@@ -118,14 +118,16 @@ describe('pull-review', function () {
       return PullReviewAssignment({
         'config': {
           'version': 1,
-          'reviewers': {}
+          'reviewers': {
+            'testuser': {}
+          }
         },
         'authorLogin': 'foo',
         'files': [
           {
             'filename': 'test',
             'status': 'modified',
-            'changes': 1
+            'changes': 2
           }
         ],
         'getBlameForFile': function () {
@@ -134,12 +136,86 @@ describe('pull-review', function () {
               'login': 'mockuser',
               'count': 5,
               'age': 1
+            },
+            {
+              'login': 'testuser',
+              'count': 1,
+              'age': 1
             }
           ]
         }
       })
         .then(function (reviewers) {
-          reviewers.map(function (r) { return r.login }).should.not.include('mockuser');
+          reviewers = reviewers.map(function (r) { return r.login });
+          reviewers.should.not.include('mockuser');
+          reviewers.should.include('testuser');
+        });
+    });
+
+    it('works with blame correctly', function () {
+      return PullReviewAssignment({
+        'config': {
+          'version': 1,
+          'reviewers': {
+            'alice': {},
+            'bob': {},
+            'charlie': {}
+          }
+        },
+        'authorLogin': 'alice',
+        'files': [
+          {
+            'filename': 'foo',
+            'status': 'modified',
+            'changes': 3
+          },
+          {
+            'filename': 'bar',
+            'status': 'modified',
+            'changes': 2
+          }
+        ],
+        'getBlameForFile': function (file) {
+          if (file.filename === 'foo') {
+            return [
+              {
+                'login': 'bob',
+                'count': 5,
+                'age': 1
+              },
+              {
+                'login': 'charlie',
+                'count': 10,
+                'age': 10
+              },
+              {
+                'login': 'bob',
+                'count': 7,
+                'age': 3
+              }
+            ];
+          } else if (file.filename === 'bar') {
+            return [
+              {
+                'login': 'charlie',
+                'count': 1,
+                'age': 1
+              },
+              {
+                'login': 'bob',
+                'count': 1,
+                'age': 10
+              }
+            ];
+          }
+        }
+      })
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(2);
+          reviewers[0].login.should.equal('bob');
+          reviewers[0].count.should.equal(13);
+          reviewers[1].login.should.equal('charlie');
+          reviewers[1].count.should.equal(11);
         });
     });
   });

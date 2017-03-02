@@ -1,10 +1,11 @@
 var yaml = require('js-yaml');
-
-require('native-promise-only');
+var Promise = require('native-promise-only');
 
 var SUPPORTED_CONFIG_VERSIONS = [1];
 
 //todo: jsdoc
+//todo: AUTHORS/OWNERS integration
+//todo: review stategy: blame/random
 
 function BlameRange (input) {
   var login = input.login;
@@ -46,19 +47,17 @@ function PullReviewConfig (input) {
     throw Error('Missing or unsupported config version. Supported versions include: ' + SUPPORTED_CONFIG_VERSIONS.join(', '));
   }
 
-  var minReviewers = 1;
-  var maxReviewers = 2;
-  var maxFiles = 5;
-  var reviewers = {};
-  var reviewBlacklist = [];
-  var requireNotification = true;
+  function get (value, defaultValue) {
+    return value !== undefined ? value : defaultValue;
+  }
 
-  minReviewers = config.min_reviewers !== undefined ? config.min_reviewers : minReviewers;
-  maxReviewers = config.max_reviewers !== undefined ? config.max_reviewers : maxReviewers;
-  maxFiles = config.max_files !== undefined ? config.max_files : maxFiles;
-  reviewers = config.reviewers || reviewers;
-  reviewBlacklist = config.review_blacklist || reviewBlacklist;
-  requireNotification = config.require_notification !== undefined ? config.require_notification : requireNotification;
+  var minReviewers = get(config.min_reviewers, 1);
+  var maxReviewers = get(config.max_reviewers, 2);
+  var assignMinReviewersRandomly = get(config.assign_min_reviewers_randomly, true);
+  var maxFiles = get(config.max_files, 5);
+  var reviewers = get(config.reviewers, {});
+  var reviewBlacklist = get(config.review_blacklist, []);
+  var requireNotification = get(config.require_notification, true);
 
   if (minReviewers < 0) {
     throw Error('Invalid number of minimum reviewers');
@@ -76,7 +75,8 @@ function PullReviewConfig (input) {
     'maxFiles': maxFiles,
     'reviewers': reviewers,
     'reviewBlacklist': reviewBlacklist,
-    'requireNotification': requireNotification
+    'requireNotification': requireNotification,
+    'assignMinReviewersRandomly': assignMinReviewersRandomly
   };
 
   return config;

@@ -27,7 +27,7 @@ Check out `.pull-review` for a documented example of a config file.
 
 ## License
 
-MIT
+[MIT](http://opensource.org/licenses/MIT)
 
 ## Credits
 
