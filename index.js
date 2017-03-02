@@ -56,18 +56,18 @@ module.exports = function (robot) {
         robot.logger.error(e);
 
         try {
-          res.send(String(response));
+          res.send('[hubot-review] ' + String(response));
         } catch (e) {
           robot.logger.error(e);
 
-          res.send('Hubot Review response error:' + e);
+          res.send('[hubot-review] ' + e);
         }
       }
     })
       .catch(function (e) {
         robot.logger.error(e);
 
-        res.send('Hubot Review error' + e);
+        res.send('[hubot-review] ' + e);
       });
   });
 };

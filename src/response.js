@@ -116,8 +116,13 @@ function Response (options) {
 
     return resources
       .then(function (resources) {
+        var filteredResources = resources.filter(function (resource) {
+          resource = resource || {};
+          return resource.type === 'pull' || resource.type === 'issue';
+        });
+
         return sendHubotMessage({
-          'resources': resources
+          'resources': filteredResources
         });
       });
   }
