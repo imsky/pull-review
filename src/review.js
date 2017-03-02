@@ -1,18 +1,16 @@
 require('native-promise-only');
 
-var PULL_REVIEW_CONFIG = process.env.PULL_REVIEW_CONFIG;
-
-if (PULL_REVIEW_CONFIG) {
-  console.info('Using review config override', PULL_REVIEW_CONFIG);
-}
-
 var github = require('./github');
 var pullReview = require('pull-review');
 
 var PullReviewAssignment = pullReview.PullReviewAssignment;
 
 function Review (options) {
+  var PULL_REVIEW_CONFIG = process.env.HUBOT_REVIEW_PULL_REVIEW_CONFIG;
+  var REQUIRED_ROOMS = process.env.HUBOT_REVIEW_REQUIRED_ROOMS || '';
+
   var request = options.request;
+  var room = options.room
 
   var isReview = request.isReview;
   var githubURLs = request.githubURLs || [];
@@ -24,6 +22,15 @@ function Review (options) {
   var pullRequest, pullRequestAuthorLogin, assignees = [];
 
   return Promise.resolve(true)
+    .then(function () {
+      var requiredRooms = REQUIRED_ROOMS.split(',');
+
+      if (requiredRooms.length && room !== undefined) {
+        if (requiredRooms.indexOf(room) === -1) {
+          throw Error('Reviews are disabled from this room');
+        }
+      }
+    })
     .then(function () {
       if (!githubURLs.length) {
         throw Error('No GitHub URLs');
