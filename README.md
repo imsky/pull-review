@@ -1,6 +1,6 @@
 # hubot-review
 
-[![Build Status](https://travis-ci.org/imsky/hubot-review.svg?branch=master)](https://travis-ci.org/imsky/hubot-review)
+[![Build Status](https://travis-ci.org/imsky/hubot-review.svg?branch=master)](https://travis-ci.org/imsky/hubot-review) [![codecov](https://codecov.io/gh/imsky/hubot-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/hubot-review)
 
 Assigns and notifies reviewers for GitHub pull requests.
 
