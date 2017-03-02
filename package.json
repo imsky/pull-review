@@ -28,7 +28,7 @@
     "chai-as-promised": "^6.0.0",
     "codecov": "^1.0.1",
     "coffee-script": "^1.12.4",
-    "eslint": "^3.16.1",
+    "eslint": "~2.13",
     "hubot": "2.x",
     "hubot-test-helper": "^1.3.0",
     "istanbul": "^0.4.5",
