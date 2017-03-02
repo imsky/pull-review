@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "istanbul cover node_modules/.bin/_mocha -- -- test.js"
+    "test": "istanbul cover -x test.js _mocha -- -- test.js"
   },
   "repository": {
     "type": "git",
@@ -25,11 +25,13 @@
   "homepage": "https://github.com/imsky/pull-review#readme",
   "dependencies": {
     "js-yaml": "^3.8.1",
+    "knuth-shuffle": "^1.0.1",
     "native-promise-only": "^0.8.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "codecov": "^1.0.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0"
   }

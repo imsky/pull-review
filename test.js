@@ -218,5 +218,28 @@ describe('pull-review', function () {
           reviewers[1].count.should.equal(11);
         });
     });
+
+    it('assigns minimum reviewers randomly', function () {
+      return PullReviewAssignment({
+        'config': {
+          'version': 1,
+          'reviewers': {
+            'alice': {},
+            'bob': {},
+            'charlie': {}
+          }
+        },
+        'authorLogin': 'alice',
+        'files': [],
+        'getBlameForFile': function () {
+          return []
+        }
+      })
+        .then(function (reviewers) {
+          reviewers = reviewers.map(function (r) { return r.login });
+          reviewers.should.have.lengthOf(1);
+          reviewers.should.not.include('alice');
+        });
+    });
   });
 });

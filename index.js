@@ -1,4 +1,7 @@
+'use strict';
+
 var yaml = require('js-yaml');
+var shuffle = require('knuth-shuffle');
 var Promise = require('native-promise-only');
 
 var SUPPORTED_CONFIG_VERSIONS = [1];
@@ -182,6 +185,26 @@ function PullReviewAssignment (options) {
 
       return authorBlames.slice(0, maxReviewers);
     })
+      .then(function (reviewers) {
+        if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly) {
+          var allReviewers = [];
+          for (var reviewer in config.reviewers) {
+            if (config.reviewers.hasOwnProperty(reviewer)) {
+              if (reviewers.length < config.minReviewers && reviewer !== authorLogin) {
+                allReviewers.push({
+                  'login': reviewer,
+                  'count': 0
+                });
+              }
+            }
+          }
+
+          shuffle.knuthShuffle(allReviewers);
+          reviewers = reviewers.concat(allReviewers.slice(0, config.minReviewers - reviewers.length));
+        }
+
+        return reviewers;
+      })
       .then(function(reviewers) {
         return reviewers.map(function (reviewer) {
           reviewer.notify = config.reviewers[reviewer.login];

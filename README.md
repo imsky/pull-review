@@ -1,5 +1,7 @@
 # pull-review
 
+[![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review)
+
 `pull-review` helps figure out who should be assigned to review a pull request.
 
 While it's built for use with GitHub, it's entirely platform- and client-agnostic. Adapters can be written to use `pull-review` with GitLab, Bitbucket, local Git repositories, and so on.
