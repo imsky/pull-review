@@ -237,7 +237,10 @@ describe('(unit)', function () {
       r.githubURLs.should.be.empty;
     });
 
-    it('de-duplicates resources');
+    it('de-duplicates resources', function () {
+      var r = Request({'text': 'https://github.com/abc/pull/1, https://github.com/abc/pull/1'});
+      r.githubURLs.should.have.lengthOf(1);
+    });
   });
 
   describe('github', function () {

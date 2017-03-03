@@ -17,7 +17,14 @@ function Request (options) {
     }
   }
 
+  var urlMap = {};
+
   var githubURLs = URLs.map(function (u) {
+    if (urlMap[u]) {
+      return false;
+    }
+
+    urlMap[u] = true;
     var uo = parseURL(u);
     return uo.hostname === 'github.com' ? uo : false;
   }).filter(Boolean);
