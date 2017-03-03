@@ -32,10 +32,7 @@ module.exports = function (robot) {
     var room = message.room;
 
     if (adapter === 'slack') {
-      var slackChannel = robot.adapter.client.rtm.dataStore.getChannelById(room);
-      var slackGroup = robot.adapter.client.rtm.dataStore.getGroupById(room);
-      var slackRoom = slackChannel || slackGroup || {};
-
+      var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(room) || {};
       room = slackRoom.name;
     }
 
