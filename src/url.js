@@ -7,7 +7,7 @@ function extractURLs (string) {
 
   if (URLs) {
     return URLs.map(function (url) {
-      return normalizeURL(url.trim()).replace(/(\.|\,)$/, '');
+      return normalizeURL(url.trim()).replace(/(\.|\,|\(|\))$/, '');
     });
   }
 

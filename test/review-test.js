@@ -236,6 +236,8 @@ describe('(unit)', function () {
       r.isReview.should.be.false;
       r.githubURLs.should.be.empty;
     });
+
+    it('de-duplicates resources');
   });
 
   describe('github', function () {
@@ -472,6 +474,31 @@ describe('(unit)', function () {
           var attachments = message.attachments;
           attachments[0].text.should.equal('');
           attachments[0].image_url.should.equal('http://example.com/example.png');
+        });
+    });
+
+    it('outputs an image if one is available in Markdown PR body', function () {
+      return github.getGithubResources(r.githubURLs)
+        .then(function (resources) {
+          resources = resources.map(function (resource) {
+            resource.data = {
+              'user': {},
+              'body': [
+                '![foo](http://example.com/foo.png)',
+                '![bar](http://example.com/bar.png)'
+                ].join('\n')
+            };
+
+            return resource;
+          });
+
+          var message = SlackMessage({
+            'resources': resources
+          });
+
+          var attachments = message.attachments;
+          attachments[0].text.should.equal('');
+          attachments[0].image_url.should.equal('http://example.com/foo.png');
         });
     });
 
