@@ -81,7 +81,17 @@ describe('pull-review', function () {
           'getBlameForFile': function () {},
           'assignees': [1,2,3,4,5,6,7,8,9]
         });
-      }).should.throw(Error, 'Pull request has max reviewers assigned');
+      }).should.throw(Error, 'Pull request has maximum reviewers assigned');
+    });
+
+    it('does not assign reviewers if minimum is met by assignees', function () {
+      (function () {
+        PullReviewAssignment({
+          'authorLogin': 'mockuser',
+          'getBlameForFile': function () {},
+          'assignees': [1]
+        });
+      }).should.throw(Error, 'Pull request has minimum reviewers assigned');
     });
 
     it('fails with bad file data', function () {

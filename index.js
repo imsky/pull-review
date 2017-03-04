@@ -113,13 +113,16 @@ function PullReviewAssignment (options) {
   var topChangedFiles = config.maxFiles > 0 ? files.slice(0, config.maxFiles) : files;
 
   var maxReviewers = config.maxReviewers;
+  var minReviewers = config.minReviewers;
 
   assignees = assignees.filter(function (assignee) {
     return assignee !== authorLogin;
   });
 
   if (assignees.length >= maxReviewers) {
-    throw Error('Pull request has max reviewers assigned');
+    throw Error('Pull request has maximum reviewers assigned');
+  } else if (assignees.length >= minReviewers) {
+    throw Error('Pull request has minimum reviewers assigned');
   }
 
   maxReviewers = maxReviewers - assignees.length;
