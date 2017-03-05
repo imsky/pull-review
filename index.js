@@ -42,29 +42,26 @@ module.exports = function (robot) {
       'room': room
     });
 
+    function sendError (e) {
+      robot.logger.error('[hubot-review]', e);
+      res.send('[hubot-review] ' + e);
+    }
+
     hubotReview.then(function (response) {
       if (!response) {
         return;
       }
 
       try {
-        res.send(response);
-      } catch (e) {
-        robot.logger.error(e);
-
-        try {
-          res.send('[hubot-review] ' + String(response));
-        } catch (e) {
-          robot.logger.error(e);
-
-          res.send('[hubot-review] ' + e);
+        if (response instanceof Error) {
+          sendError(response);
+        } else {
+          res.send(response);
         }
+      } catch (e) {
+        sendError(e);
       }
     })
-      .catch(function (e) {
-        robot.logger.error(e);
-
-        res.send('[hubot-review] ' + e);
-      });
+      .catch(sendError);
   });
 };
