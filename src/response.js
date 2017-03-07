@@ -115,7 +115,14 @@ function Response (options) {
     }
 
     return resources
+      .catch(function () {
+        return;
+      })
       .then(function (resources) {
+        if (!resources) {
+          return;
+        }
+
         var filteredResources = resources.filter(function (resource) {
           resource = resource || {};
           return resource.type === 'pull' || resource.type === 'issue';
