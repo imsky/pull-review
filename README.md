@@ -19,6 +19,14 @@ alice: please review https://github.com/alice/project/pull/123
 hubot: @bob, @charlie: please review https://github.com/alice/project/pull/123
 ```
 
+Example screenshot from Slack:
+
+![slack screenshot](https://raw.githubusercontent.com/imsky/hubot-review/master/docs/slack-screenshot.png)
+
+This will also trigger a comment on the Github PR and assign reviewers:
+
+![github screenshot](https://raw.githubusercontent.com/imsky/hubot-review/master/docs/github-screenshot.png)
+
 ## Installation
 
 In hubot project repo, run:
