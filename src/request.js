@@ -11,12 +11,6 @@ function Request (options) {
   var URLs = extractURLs(text) || [];
   var requiredRooms = REQUIRED_ROOMS.split(',').filter(Boolean);
 
-  if (requiredRooms.length && room !== undefined) {
-    if (requiredRooms.indexOf(room) === -1) {
-      throw Error('Review requests from this room are disabled');
-    }
-  }
-
   var urlMap = {};
 
   var githubURLs = URLs.map(function (u) {
@@ -35,6 +29,12 @@ function Request (options) {
     if (text.indexOf('review ' + githubURLs[i].href) !== -1) {
       isReview = true;
       break;
+    }
+  }
+
+  if (isReview && requiredRooms.length && room !== undefined) {
+    if (requiredRooms.indexOf(room) === -1) {
+      throw Error('Review requests from this room are disabled');
     }
   }
 
