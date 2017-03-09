@@ -7,6 +7,7 @@ var Promise = require('native-promise-only');
 var SUPPORTED_CONFIG_VERSIONS = [1];
 
 //todo: jsdoc
+//todo: underscore.js
 //todo: AUTHORS/OWNERS integration
 //todo: review stategy: blame/random
 
@@ -60,6 +61,7 @@ function PullReviewConfig (input) {
   var maxFiles = get(config.max_files, 5);
   var reviewers = get(config.reviewers, {});
   var reviewBlacklist = get(config.review_blacklist, []);
+  var reviewPathFallbacks = get(config.review_path_fallbacks, null);
   var requireNotification = get(config.require_notification, true);
 
   if (minReviewers < 0) {
@@ -78,6 +80,7 @@ function PullReviewConfig (input) {
     'maxFiles': maxFiles,
     'reviewers': reviewers,
     'reviewBlacklist': reviewBlacklist,
+    'reviewPathFallbacks': reviewPathFallbacks,
     'requireNotification': requireNotification,
     'assignMinReviewersRandomly': assignMinReviewersRandomly
   };
@@ -127,6 +130,22 @@ function PullReviewAssignment (options) {
 
   maxReviewers = maxReviewers - assignees.length;
 
+  function isAuthorBlacklisted (login) {
+    if (config && config.reviewBlacklist) {
+      return config.reviewBlacklist.indexOf(login) !== -1;
+    }
+
+    return false;
+  }
+
+  function isAuthorUnreachable (login) {
+    if (config && config.reviewers) {
+      return !config.reviewers[login];
+    }
+
+    return false;
+  }
+
   return Promise.all(topChangedFiles.map(getBlameForFile))
     .then(function (blames) {
       var authorsLinesChanged = {};
@@ -140,16 +159,8 @@ function PullReviewAssignment (options) {
 
         var usableBlames = ranges.filter(function (range) {
           var blameAuthorIsPullRequestAuthor = range.login === authorLogin;
-          var blameAuthorIsBlacklisted = false;
-          var blameAuthorIsUnreachable = false;
-
-          if (config && config.reviewBlacklist) {
-            blameAuthorIsBlacklisted = config.reviewBlacklist.indexOf(range.login) !== -1;
-          } 
-
-          if (config && config.reviewers) {
-            blameAuthorIsUnreachable = !config.reviewers[range.login];
-          }
+          var blameAuthorIsBlacklisted = isAuthorBlacklisted(range.login);
+          var blameAuthorIsUnreachable = isAuthorUnreachable(range.login);
 
           var blameIsUnusable = blameAuthorIsPullRequestAuthor || blameAuthorIsBlacklisted || (config.requireNotification && blameAuthorIsUnreachable);
 
@@ -177,7 +188,8 @@ function PullReviewAssignment (options) {
         if (authorsLinesChanged.hasOwnProperty(author)) {
           authorBlames.push({
             'login': author,
-            'count': authorsLinesChanged[author] || 0
+            'count': authorsLinesChanged[author] || 0,
+            'source': 'blame'
           });
         }
       }
@@ -191,14 +203,37 @@ function PullReviewAssignment (options) {
       .then(function (reviewers) {
         if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly) {
           var allReviewers = [];
+          var currentReviewers = {};
+
+          for (var i = 0; i < reviewers.length; i++) {
+            currentReviewers[reviewers[i].login] = true;
+          }
+
+          if (config.reviewPathFallbacks) {
+            throw Error('Not implemented yet');
+          }
+
           for (var reviewer in config.reviewers) {
             if (config.reviewers.hasOwnProperty(reviewer)) {
-              if (reviewers.length < config.minReviewers && reviewer !== authorLogin) {
-                allReviewers.push({
-                  'login': reviewer,
-                  'count': 0
-                });
+              if (currentReviewers[reviewer]) {
+                continue;
+              } else if (reviewer === authorLogin) {
+                continue;
+              } else if (isAuthorBlacklisted(reviewer)) {
+                continue;
+              } else if (config.requireNotification && isAuthorUnreachable(reviewer)) {
+                continue;
+              } else if (reviewers.length >= config.minReviewers) {
+                break;
               }
+
+              allReviewers.push({
+                'login': reviewer,
+                'count': 0,
+                'source': 'random'
+              });
+
+              currentReviewers[reviewer] = true;
             }
           }
 

@@ -27,3 +27,10 @@ reviewers:
 # list of users who will never be notified
 review_blacklist:
   - charlie
+
+# assign these reviewers if the path they're listed under matches changed files (only when assigning randomly)
+review_path_fallbacks:
+  app/web:
+  - alice
+  app/api:
+  - bob
