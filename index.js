@@ -7,11 +7,12 @@ var Promise = require('native-promise-only');
 var SUPPORTED_CONFIG_VERSIONS = [1];
 
 //todo: jsdoc
-//todo: underscore.js
 //todo: AUTHORS/OWNERS integration
 //todo: review stategy: blame/random
+//todo: consider fixturing a real pull request
+//todo: example usage
 
-function BlameRange (input) {
+function BlameRange(input) {
   var login = input.login;
   var count = input.count;
   var age = input.age;
@@ -35,7 +36,7 @@ function PullRequestFile(input) {
   return input;
 }
 
-function PullReviewConfig (input) {
+function PullReviewConfig(input) {
   var config = input;
   var yamlParseError, jsonParseError;
 
@@ -51,7 +52,7 @@ function PullReviewConfig (input) {
     throw Error('Missing or unsupported config version. Supported versions include: ' + SUPPORTED_CONFIG_VERSIONS.join(', '));
   }
 
-  function get (value, defaultValue) {
+  function get(value, defaultValue) {
     return value !== undefined ? value : defaultValue;
   }
 
@@ -88,12 +89,15 @@ function PullReviewConfig (input) {
   return config;
 }
 
-function PullReviewAssignment (options) {
-  var config = options.config || {'version': 1};
+function PullReviewAssignment(options) {
+  var config = options.config || {
+    'version': 1
+  };
   var files = options.files || [];
   var assignees = options.assignees || [];
   var authorLogin = options.authorLogin;
   var getBlameForFile = options.getBlameForFile;
+  var currentReviewers = {};
 
   if (!getBlameForFile) {
     throw Error('No function provided for retrieving blame for a file');
@@ -105,11 +109,11 @@ function PullReviewAssignment (options) {
 
   files = files.map(PullRequestFile);
 
-  files = files.filter(function (file) {
+  files = files.filter(function(file) {
     return file.status === 'modified';
   });
 
-  files.sort(function (a, b) {
+  files.sort(function(a, b) {
     return b.changes - a.changes;
   });
 
@@ -118,7 +122,7 @@ function PullReviewAssignment (options) {
   var maxReviewers = config.maxReviewers;
   var minReviewers = config.minReviewers;
 
-  assignees = assignees.filter(function (assignee) {
+  assignees = assignees.filter(function(assignee) {
     return assignee !== authorLogin;
   });
 
@@ -130,46 +134,36 @@ function PullReviewAssignment (options) {
 
   maxReviewers = maxReviewers - assignees.length;
 
-  function isAuthorBlacklisted (login) {
-    if (config && config.reviewBlacklist) {
-      return config.reviewBlacklist.indexOf(login) !== -1;
-    }
-
-    return false;
+  function isAuthorBlacklisted(login) {
+    return config.reviewBlacklist && config.reviewBlacklist.indexOf(login) !== -1;
   }
 
-  function isAuthorUnreachable (login) {
-    if (config && config.reviewers) {
-      return !config.reviewers[login];
-    }
+  function isAuthorUnreachable(login) {
+    return !config.reviewers[login];
+  }
 
-    return false;
+  function isEligibleReviewer(reviewer) {
+    return !currentReviewers[reviewer] && reviewer !== authorLogin && !isAuthorBlacklisted(reviewer) && (config.requireNotification ? !isAuthorUnreachable(reviewer) : true);
   }
 
   return Promise.all(topChangedFiles.map(getBlameForFile))
-    .then(function (blames) {
+    .then(function(blames) {
       var authorsLinesChanged = {};
 
       for (var i = 0; i < blames.length; i++) {
         var ranges = (blames[i] || []).map(BlameRange);
 
-        ranges.sort(function (a, b) {
+        ranges.sort(function(a, b) {
           return a.age - b.age;
         });
 
-        var usableBlames = ranges.filter(function (range) {
-          var blameAuthorIsPullRequestAuthor = range.login === authorLogin;
-          var blameAuthorIsBlacklisted = isAuthorBlacklisted(range.login);
-          var blameAuthorIsUnreachable = isAuthorUnreachable(range.login);
-
-          var blameIsUnusable = blameAuthorIsPullRequestAuthor || blameAuthorIsBlacklisted || (config.requireNotification && blameAuthorIsUnreachable);
-
-          return !blameIsUnusable;
+        var usableBlames = ranges.filter(function(range) {
+          return isEligibleReviewer(range.login);
         });
 
         var recentBlames = usableBlames.slice(0, Math.ceil(usableBlames.length * 0.75));
 
-        for(var j = 0; j < recentBlames.length; j++) {
+        for (var j = 0; j < recentBlames.length; j++) {
           var range = recentBlames[j];
           var linesChanged = range.count;
           var author = range.login;
@@ -184,7 +178,7 @@ function PullReviewAssignment (options) {
 
       var authorBlames = [];
 
-      for(var author in authorsLinesChanged) {
+      for (var author in authorsLinesChanged) {
         if (authorsLinesChanged.hasOwnProperty(author)) {
           authorBlames.push({
             'login': author,
@@ -194,61 +188,77 @@ function PullReviewAssignment (options) {
         }
       }
 
-      authorBlames.sort(function (a, b) {
+      authorBlames.sort(function(a, b) {
         return b.count - a.count;
       });
 
       return authorBlames.slice(0, maxReviewers);
     })
-      .then(function (reviewers) {
-        if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly) {
-          var allReviewers = [];
-          var currentReviewers = {};
+    .then(function(reviewers) {
+      var fallbackReviewers = [];
+      var randomReviewers = [];
 
-          for (var i = 0; i < reviewers.length; i++) {
-            currentReviewers[reviewers[i].login] = true;
-          }
+      for (var i = 0; i < reviewers.length; i++) {
+        currentReviewers[reviewers[i].login] = true;
+      }
 
-          if (config.reviewPathFallbacks) {
-            throw Error('Not implemented yet');
-          }
+      if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
+        for (var prefix in config.reviewPathFallbacks) {
+          if (config.reviewPathFallbacks.hasOwnProperty(prefix)) {
+            for (var i = 0; i < topChangedFiles.length; i++) {
+              var file = topChangedFiles[i];
+              if (file.filename.indexOf(prefix) === 0) {
+                for (var j = 0; j < config.reviewPathFallbacks[prefix].length; j++) {
+                  var reviewer = config.reviewPathFallbacks[prefix][j];
+                  if (isEligibleReviewer(reviewer)) {
+                    continue;
+                  }
 
-          for (var reviewer in config.reviewers) {
-            if (config.reviewers.hasOwnProperty(reviewer)) {
-              if (currentReviewers[reviewer]) {
-                continue;
-              } else if (reviewer === authorLogin) {
-                continue;
-              } else if (isAuthorBlacklisted(reviewer)) {
-                continue;
-              } else if (config.requireNotification && isAuthorUnreachable(reviewer)) {
-                continue;
-              } else if (reviewers.length >= config.minReviewers) {
-                break;
+                  fallbackReviewers.push({
+                    'login': reviewer,
+                    'count': 0,
+                    'source': 'fallback'
+                  });
+
+                  currentReviewers[reviewer] = true;
+                }
               }
-
-              allReviewers.push({
-                'login': reviewer,
-                'count': 0,
-                'source': 'random'
-              });
-
-              currentReviewers[reviewer] = true;
             }
           }
-
-          shuffle.knuthShuffle(allReviewers);
-          reviewers = reviewers.concat(allReviewers.slice(0, config.minReviewers - reviewers.length));
         }
 
-        return reviewers;
-      })
-      .then(function(reviewers) {
-        return reviewers.map(function (reviewer) {
-          reviewer.notify = config.reviewers[reviewer.login];
-          return reviewer;
-        });
+        reviewers = reviewers.concat(fallbackReviewers.slice(0, config.minReviewers - reviewers.length));
+      }
+
+      if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly) {
+        for (var reviewer in config.reviewers) {
+          if (config.reviewers.hasOwnProperty(reviewer)) {
+            if (!isEligibleReviewer(reviewer)) {
+              continue;
+            }
+
+            randomReviewers.push({
+              'login': reviewer,
+              'count': 0,
+              'source': 'random'
+            });
+
+            currentReviewers[reviewer] = true;
+          }
+        }
+
+        shuffle.knuthShuffle(randomReviewers);
+        reviewers = reviewers.concat(randomReviewers.slice(0, config.minReviewers - reviewers.length));
+      }
+
+      return reviewers;
+    })
+    .then(function(reviewers) {
+      return reviewers.map(function(reviewer) {
+        reviewer.notify = config.reviewers[reviewer.login];
+        return reviewer;
       });
+    });
 }
 
 module.exports = {

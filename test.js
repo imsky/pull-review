@@ -251,5 +251,31 @@ describe('pull-review', function () {
           reviewers.should.not.include('alice');
         });
     });
+
+    it('uses fallback paths when assigning minimum reviewers randomly', function () {
+      return PullReviewAssignment({
+        'config': config,
+        'authorLogin': 'alice',
+        'files': [
+          {
+            'filename': 'app/web/index.js',
+            'status': 'modified',
+            'changes': 1
+          },
+          {
+            'filename': 'app/api/index.js',
+            'status': 'modified',
+            'changes': 1
+          }
+        ],
+        'getBlameForFile': function () {
+          return [];
+        }
+      })
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(1);
+          reviewers[0].source.should.equal('fallback');
+        });
+    })
   });
 });
