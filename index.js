@@ -163,8 +163,7 @@ function PullReviewAssignment(options) {
 
         var recentBlames = usableBlames.slice(0, Math.ceil(usableBlames.length * 0.75));
 
-        for (var j = 0; j < recentBlames.length; j++) {
-          var range = recentBlames[j];
+        recentBlames.forEach(function (range) {
           var linesChanged = range.count;
           var author = range.login;
 
@@ -173,20 +172,18 @@ function PullReviewAssignment(options) {
           }
 
           authorsLinesChanged[author] += linesChanged;
-        }
+        });
       }
 
       var authorBlames = [];
 
-      for (var author in authorsLinesChanged) {
-        if (authorsLinesChanged.hasOwnProperty(author)) {
-          authorBlames.push({
-            'login': author,
-            'count': authorsLinesChanged[author] || 0,
-            'source': 'blame'
-          });
-        }
-      }
+      Object.keys(authorsLinesChanged || {}).forEach(function (author) {
+        authorBlames.push({
+          'login': author,
+          'count': authorsLinesChanged[author] || 0,
+          'source': 'blame'
+        });
+      });
 
       authorBlames.sort(function(a, b) {
         return b.count - a.count;
@@ -198,54 +195,50 @@ function PullReviewAssignment(options) {
       var fallbackReviewers = [];
       var randomReviewers = [];
 
-      for (var i = 0; i < reviewers.length; i++) {
-        currentReviewers[reviewers[i].login] = true;
-      }
+      reviewers.forEach(function (reviewer) {
+        currentReviewers[reviewer.login] = true;
+      });
 
       if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
-        for (var prefix in config.reviewPathFallbacks) {
-          if (config.reviewPathFallbacks.hasOwnProperty(prefix)) {
-            for (var i = 0; i < topChangedFiles.length; i++) {
-              var file = topChangedFiles[i];
-              if (file.filename.indexOf(prefix) === 0) {
-                for (var j = 0; j < config.reviewPathFallbacks[prefix].length; j++) {
-                  var reviewer = config.reviewPathFallbacks[prefix][j];
-                  if (isEligibleReviewer(reviewer)) {
-                    continue;
-                  }
+        Object.keys(config.reviewPathFallbacks || {}).forEach(function (prefix) {
+          topChangedFiles.forEach(function (file) {
+            if (file.filename.indexOf(prefix) === 0) {
+              var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];
 
-                  fallbackReviewers.push({
-                    'login': reviewer,
-                    'count': 0,
-                    'source': 'fallback'
-                  });
-
-                  currentReviewers[reviewer] = true;
+              fallbackAuthors.forEach(function (author) {
+                if (!isEligibleReviewer(author)) {
+                  return;
                 }
-              }
+
+                fallbackReviewers.push({
+                  'login': author,
+                  'count': 0,
+                  'source': 'fallback'
+                });
+
+                currentReviewers[author] = true;
+              });
             }
-          }
-        }
+          });
+        });
 
         reviewers = reviewers.concat(fallbackReviewers.slice(0, config.minReviewers - reviewers.length));
       }
 
       if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly) {
-        for (var reviewer in config.reviewers) {
-          if (config.reviewers.hasOwnProperty(reviewer)) {
-            if (!isEligibleReviewer(reviewer)) {
-              continue;
-            }
+        Object.keys(config.reviewers || {}).forEach(function (author) {
+          if (!isEligibleReviewer(author)) {
+            return;
+          }
 
-            randomReviewers.push({
-              'login': reviewer,
+          randomReviewers.push({
+              'login': author,
               'count': 0,
               'source': 'random'
             });
 
-            currentReviewers[reviewer] = true;
-          }
-        }
+          currentReviewers[author] = true;
+        });
 
         shuffle.knuthShuffle(randomReviewers);
         reviewers = reviewers.concat(randomReviewers.slice(0, config.minReviewers - reviewers.length));
