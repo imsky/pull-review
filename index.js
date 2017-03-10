@@ -222,6 +222,7 @@ function PullReviewAssignment(options) {
           });
         });
 
+        shuffle.knuthShuffle(fallbackReviewers);
         reviewers = reviewers.concat(fallbackReviewers.slice(0, config.minReviewers - reviewers.length));
       }
 
