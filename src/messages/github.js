@@ -5,7 +5,10 @@ function templateFn (resources, reviewers) {
     return;
   }
 
-  return reviewers.join(', ') + ': please review this pull request';
+  var request = reviewers.join(', ') + ': please review this pull request';
+  var message = request + '\n\n' + '> Powered by [hubot-review](https://github.com/imsky/hubot-review)';
+
+  return message;
 }
 
 function GitHubMessage (options) {
