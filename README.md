@@ -21,6 +21,10 @@ This repository hosts the algorithm *only*. It's meant to be used as a library i
 * For every blame "range", add up the number of lines changed for every user who has changed lines in the file
 * Leave only Y top authors by lines changed (Y is configurable)
 
+## Implementations
+
+* [hubot-review](https://github.com/imsky/hubot-review) enables using `pull-review` from Hubot, a chat bot that works with Slack, HipChat, etc.
+
 ## Configuration
 
 Configuration for `pull-review` is conventionally assumed to be a YAML/JSON file named `.pull-review` at the root of the repository.

@@ -8,7 +8,6 @@ var SUPPORTED_CONFIG_VERSIONS = [1];
 
 //todo: jsdoc
 //todo: AUTHORS/OWNERS integration
-//todo: review stategy: blame/random
 //todo: consider fixturing a real pull request
 //todo: example usage
 
@@ -109,15 +108,15 @@ function PullReviewAssignment(options) {
 
   files = files.map(PullRequestFile);
 
-  files = files.filter(function(file) {
+  var modifiedFiles = files.filter(function(file) {
     return file.status === 'modified';
   });
 
-  files.sort(function(a, b) {
+  modifiedFiles.sort(function(a, b) {
     return b.changes - a.changes;
   });
 
-  var topChangedFiles = config.maxFiles > 0 ? files.slice(0, config.maxFiles) : files;
+  var topModifiedFiles = config.maxFiles > 0 ? modifiedFiles.slice(0, config.maxFiles) : modifiedFiles;
 
   var maxReviewers = config.maxReviewers;
   var minReviewers = config.minReviewers;
@@ -146,7 +145,7 @@ function PullReviewAssignment(options) {
     return !currentReviewers[reviewer] && reviewer !== authorLogin && !isAuthorBlacklisted(reviewer) && (config.requireNotification ? !isAuthorUnreachable(reviewer) : true);
   }
 
-  return Promise.all(topChangedFiles.map(getBlameForFile))
+  return Promise.all(topModifiedFiles.map(getBlameForFile))
     .then(function(blames) {
       var authorsLinesChanged = {};
 
@@ -201,7 +200,7 @@ function PullReviewAssignment(options) {
 
       if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
         Object.keys(config.reviewPathFallbacks || {}).forEach(function (prefix) {
-          topChangedFiles.forEach(function (file) {
+          files.forEach(function (file) {
             if (file.filename.indexOf(prefix) === 0) {
               var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];
 
