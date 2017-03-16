@@ -133,16 +133,12 @@ function PullReviewAssignment(options) {
 
   maxReviewers = maxReviewers - assignees.length;
 
-  function isAuthorBlacklisted(login) {
-    return config.reviewBlacklist && config.reviewBlacklist.indexOf(login) !== -1;
-  }
-
-  function isAuthorUnreachable(login) {
-    return !config.reviewers[login];
-  }
-
   function isEligibleReviewer(reviewer) {
-    return !currentReviewers[reviewer] && reviewer !== authorLogin && !isAuthorBlacklisted(reviewer) && (config.requireNotification ? !isAuthorUnreachable(reviewer) : true);
+    var isReviewerSelected = currentReviewers[reviewer];
+    var isReviewerAuthor = reviewer === authorLogin;
+    var isReviewerUnreachable = (config.requireNotification ? !config.reviewers[reviewer] : false);
+    var isReviewerBlacklisted = config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
+    return !isReviewerSelected && !isReviewerAuthor && !isReviewerBlacklisted && !isReviewerUnreachable;
   }
 
   return Promise.all(topModifiedFiles.map(getBlameForFile))
