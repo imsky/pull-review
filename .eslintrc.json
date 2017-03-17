@@ -12,6 +12,8 @@
         ],
         "eqeqeq": ["error"],
         "no-func-assign": ["off"],
+        "require-jsdoc": ["warn"],
+        "valid-jsdoc": ["error"],
         "linebreak-style": [
             "error",
             "unix"
