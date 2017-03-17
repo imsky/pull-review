@@ -23,7 +23,7 @@ This repository hosts the algorithm *only*. It's meant to be used as a library i
 
 ## Implementations
 
-* [hubot-review](https://github.com/imsky/hubot-review) enables using `pull-review` from Hubot, a chat bot that works with Slack, HipChat, etc.
+* [hubot-review](https://github.com/imsky/hubot-review) enables using `pull-review` from [Hubot](https://hubot.github.com/), a chat bot that works with Slack, HipChat, etc.
 
 ## Configuration
 

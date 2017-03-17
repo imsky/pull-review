@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "pretest": "eslint --fix index.js",
     "test": "istanbul cover -x test.js _mocha -- -- test.js"
   },
   "repository": {
@@ -32,6 +33,7 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "codecov": "^1.0.1",
+    "eslint": "^3.17.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0"
   }

@@ -37,7 +37,6 @@ function PullRequestFile(input) {
 
 function PullReviewConfig(input) {
   var config = input;
-  var yamlParseError, jsonParseError;
 
   if (typeof input === 'string') {
     config = yaml.safeLoad(input);
@@ -228,10 +227,10 @@ function PullReviewAssignment(options) {
           }
 
           randomReviewers.push({
-              'login': author,
-              'count': 0,
-              'source': 'random'
-            });
+            'login': author,
+            'count': 0,
+            'source': 'random'
+          });
 
           currentReviewers[author] = true;
         });
