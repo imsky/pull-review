@@ -60,6 +60,13 @@ describe('pull-review', function () {
           'max_files': -1
         });
       }).should.throw(Error, 'Invalid number of maximum files');
+
+      (function () {
+        PullReviewConfig({
+          'version': 1,
+          'max_files_per_reviewer': -1
+        });
+      }).should.throw(Error, 'Invalid number of maximum files per reviewer');
     });
   });
 
@@ -276,6 +283,50 @@ describe('pull-review', function () {
           reviewers.should.have.lengthOf(1);
           reviewers[0].source.should.equal('fallback');
         });
-    })
+    });
+
+    describe('using max files per reviewer', function () {
+      var options = {
+        'config': config,
+        'authorLogin': 'charlie',
+        'getBlameForFile': function () {
+          return [];
+        }
+      };
+
+      it('assigns a minimum amount of reviewers', function () {
+        return PullReviewAssignment(Object.assign({}, options, {
+          'files': [
+            {
+              'filename': 'one_file',
+              'status': 'modified',
+              'changes': 1
+            }
+          ]
+        }))
+          .then(function (reviewers) {
+            reviewers.should.have.lengthOf(1);
+          });
+      });
+
+      it('assigns up to a maximum amount of reviewers', function () {
+        var files = [];
+
+        for (var i = 0; i < 100; i++) {
+          files.push({
+            'filename': 'one_file',
+            'status': 'modified',
+            'changes': 1
+          });
+        }
+
+        return PullReviewAssignment(Object.assign({}, options, {
+          'files': files
+        }))
+          .then(function (reviewers) {
+            reviewers.should.have.lengthOf(2);
+          });
+      });
+    });
   });
 });

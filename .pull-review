@@ -11,6 +11,9 @@ min_reviewers: 1
 # maximum number of reviewers to assign and notify for a pull request
 max_reviewers: 2
 
+# maximum number of files per reviewer (set to 0 for no limit)
+max_files_per_reviewer: 5
+
 # if at least a minimum number of reviewers is not found, assign a minimum number of reviewers randomly
 assign_min_reviewers_randomly: true
 

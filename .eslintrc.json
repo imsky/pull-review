@@ -10,6 +10,7 @@
             "error",
             2
         ],
+        "no-console": ["warn"],
         "eqeqeq": ["error"],
         "no-func-assign": ["off"],
         "require-jsdoc": ["warn"],

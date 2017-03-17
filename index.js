@@ -56,27 +56,31 @@ function PullReviewConfig(input) {
 
   var minReviewers = get(config.min_reviewers, 1);
   var maxReviewers = get(config.max_reviewers, 2);
-  var assignMinReviewersRandomly = get(config.assign_min_reviewers_randomly, true);
   var maxFiles = get(config.max_files, 5);
+  var maxFilesPerReviewer = get(config.max_files_per_reviewer, 0);
+  var assignMinReviewersRandomly = get(config.assign_min_reviewers_randomly, true);
   var reviewers = get(config.reviewers, {});
   var reviewBlacklist = get(config.review_blacklist, []);
   var reviewPathFallbacks = get(config.review_path_fallbacks, null);
   var requireNotification = get(config.require_notification, true);
 
-  if (minReviewers < 0) {
+  if (minReviewers < 0 || minReviewers === Infinity) {
     throw Error('Invalid number of minimum reviewers');
-  } else if (maxReviewers < 0) {
+  } else if (maxReviewers < 0 || maxReviewers === Infinity) {
     throw Error('Invalid number of maximum reviewers');
   } else if (minReviewers > maxReviewers) {
     throw Error('Minimum reviewers exceeds maximum reviewers');
-  } else if (maxFiles < 0) {
+  } else if (maxFiles < 0 || maxFiles === Infinity) {
     throw Error('Invalid number of maximum files');
+  } else if (maxFilesPerReviewer < 0 || maxFilesPerReviewer === Infinity) {
+    throw Error('Invalid number of maximum files per reviewer');
   }
 
   config = {
     'minReviewers': minReviewers,
     'maxReviewers': maxReviewers,
     'maxFiles': maxFiles,
+    'maxFilesPerReviewer': maxFilesPerReviewer,
     'reviewers': reviewers,
     'reviewBlacklist': reviewBlacklist,
     'reviewPathFallbacks': reviewPathFallbacks,
@@ -119,6 +123,7 @@ function PullReviewAssignment(options) {
 
   var maxReviewers = config.maxReviewers;
   var minReviewers = config.minReviewers;
+  var maxFilesPerReviewer = config.maxFilesPerReviewer;
 
   assignees = assignees.filter(function(assignee) {
     return assignee !== authorLogin;
@@ -130,7 +135,10 @@ function PullReviewAssignment(options) {
     throw Error('Pull request has minimum reviewers assigned');
   }
 
-  maxReviewers = maxReviewers - assignees.length;
+  var unassignedReviewers = maxReviewers - assignees.length;
+  var maxNeededReviewers = maxFilesPerReviewer > 0 ? Math.ceil(files.length / maxFilesPerReviewer) : unassignedReviewers;
+  var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
+  var minReviewersAssignable = maxFilesPerReviewer > 0 ? maxReviewersAssignable : minReviewers;
 
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = currentReviewers[reviewer];
@@ -183,7 +191,7 @@ function PullReviewAssignment(options) {
         return b.count - a.count;
       });
 
-      return authorBlames.slice(0, maxReviewers);
+      return authorBlames.slice(0, maxReviewersAssignable);
     })
     .then(function(reviewers) {
       var fallbackReviewers = [];
@@ -193,7 +201,7 @@ function PullReviewAssignment(options) {
         currentReviewers[reviewer.login] = true;
       });
 
-      if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
+      if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
         Object.keys(config.reviewPathFallbacks || {}).forEach(function (prefix) {
           files.forEach(function (file) {
             if (file.filename.indexOf(prefix) === 0) {
@@ -217,10 +225,10 @@ function PullReviewAssignment(options) {
         });
 
         shuffle.knuthShuffle(fallbackReviewers);
-        reviewers = reviewers.concat(fallbackReviewers.slice(0, config.minReviewers - reviewers.length));
+        reviewers = reviewers.concat(fallbackReviewers.slice(0, minReviewersAssignable - reviewers.length));
       }
 
-      if (reviewers.length < config.minReviewers && config.assignMinReviewersRandomly) {
+      if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
         Object.keys(config.reviewers || {}).forEach(function (author) {
           if (!isEligibleReviewer(author)) {
             return;
@@ -236,7 +244,7 @@ function PullReviewAssignment(options) {
         });
 
         shuffle.knuthShuffle(randomReviewers);
-        reviewers = reviewers.concat(randomReviewers.slice(0, config.minReviewers - reviewers.length));
+        reviewers = reviewers.concat(randomReviewers.slice(0, minReviewersAssignable - reviewers.length));
       }
 
       return reviewers;
