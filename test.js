@@ -295,15 +295,15 @@ describe('pull-review', function () {
       };
 
       it('assigns a minimum amount of reviewers', function () {
-        return PullReviewAssignment(Object.assign({}, options, {
-          'files': [
-            {
-              'filename': 'one_file',
-              'status': 'modified',
-              'changes': 1
-            }
-          ]
-        }))
+        options.files = [
+          {
+            'filename': 'one_file',
+            'status': 'modified',
+            'changes': 1
+          }
+        ];
+
+        return PullReviewAssignment(options)
           .then(function (reviewers) {
             reviewers.should.have.lengthOf(1);
           });
@@ -320,9 +320,9 @@ describe('pull-review', function () {
           });
         }
 
-        return PullReviewAssignment(Object.assign({}, options, {
-          'files': files
-        }))
+        options.files = files;
+
+        return PullReviewAssignment(options)
           .then(function (reviewers) {
             reviewers.should.have.lengthOf(2);
           });
