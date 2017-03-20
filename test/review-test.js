@@ -515,7 +515,7 @@ describe('(unit)', function () {
             'reviewers': reviewers
           });
 
-          message.text.should.contain('@foo, @bar: please review this pull request');
+          message.text.should.equal('@foo, @bar: please review this pull request');
           message.should.have.ownProperty('attachments');
         });
     });
@@ -554,7 +554,7 @@ describe('(unit)', function () {
             'reviewers': reviewers
           });
 
-          message.should.contain('@foo, @bar: please review this pull request');
+          message.should.equal('@foo, @bar: please review this pull request');
         });
     });
   });
@@ -576,7 +576,7 @@ describe('(integration)', function () {
         mockGraphQLBlame(ghapi, '/graphql');
         mockGraphQLBlame(ghapi, '/graphql');
         ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
-        ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\\n\\n> Powered by [hubot-review](https://github.com/imsky/hubot-review)\"}\n").reply(200);
+        ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
         mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
         return HubotReview({'text': 'review https://github.com/OWNER/REPO/pull/1'})
@@ -630,7 +630,7 @@ describe('(integration)', function () {
         mockGraphQLBlame(ghapi, '/graphql');
         mockGraphQLBlame(ghapi, '/graphql');
         ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
-        ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\\n\\n> Powered by [hubot-review](https://github.com/imsky/hubot-review)\"}\n").reply(200);
+        ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
         mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
         return HubotReview({'adapter': 'slack', 'text': 'review https://github.com/OWNER/REPO/pull/1'})
@@ -663,7 +663,7 @@ describe('(integration)', function () {
       mockGraphQLBlame(ghapi, '/graphql');
       mockGraphQLBlame(ghapi, '/graphql');
       ghapi.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
-      ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\\n\\n> Powered by [hubot-review](https://github.com/imsky/hubot-review)\"}\n").reply(200);
+      ghapi.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@mockuser2, @mockuser3: please review this pull request\"}\n").reply(200);
       mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
 
       room = helper.createRoom({
