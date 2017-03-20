@@ -1,3 +1,5 @@
+var TEST = process.env.NODE_ENV === 'test';
+
 var Message = require('./message');
 
 function templateFn (resources, reviewers) {
@@ -6,7 +8,11 @@ function templateFn (resources, reviewers) {
   }
 
   var request = reviewers.join(', ') + ': please review this pull request';
-  var message = request + '\n\n' + '> Powered by [hubot-review](https://github.com/imsky/hubot-review)';
+  var message = request;
+
+  if (!TEST) {
+    message += '\n\n' + '> Powered by [hubot-review](https://github.com/imsky/hubot-review)';
+  }
 
   return message;
 }
