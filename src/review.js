@@ -11,6 +11,7 @@ function Review (options) {
   var request = options.request;
 
   var isReview = request.isReview;
+  var reviewAgain = request.reviewAgain;
   var githubURLs = request.githubURLs || [];
 
   if (!isReview) {
@@ -33,6 +34,7 @@ function Review (options) {
     })
     .then(function (resources) {
       var resource = resources[0];
+      var unassignReviewers;
 
       if (resource.type !== 'pull') {
         throw Error('Reviews for resources other than pull requests are not supported');
@@ -52,14 +54,27 @@ function Review (options) {
         assignees.push(pullRequest.data.assignee);
       }
 
+      if (reviewAgain && assignees.length) {
+        unassignReviewers = github.unassignUsersFromResource(resource, assignees);
+      }
+
       var getConfig = github.getRepoFile(resource, '.pull-review', 'utf8')
         .catch(function () { return null; });
 
-      return Promise.all([getConfig, github.getPullRequestFiles(pullRequest)]);
+      return Promise.all([
+        getConfig,
+        github.getPullRequestFiles(pullRequest),
+        unassignReviewers
+      ]);
     })
     .then(function (res) {
       var config = PULL_REVIEW_CONFIG || res[0];
       var files = res[1] || [];
+      var unassignReviewers = res[2];
+
+      if (unassignReviewers) {
+        assignees = [];
+      }
 
       return PullReviewAssignment({
         'config': config,

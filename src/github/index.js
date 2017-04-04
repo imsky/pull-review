@@ -156,6 +156,18 @@ function assignUsersToResource (resource, assignees) {
   });
 }
 
+
+function unassignUsersFromResource (resource, assignees) {
+  assignees = assignees || [];
+
+  return github.issues.removeAssigneesFromissue({
+    'owner': resource.owner,
+    'repo': resource.repo,
+    'number': resource.number,
+    'assignees': assignees
+  });
+}
+
 function postPullRequestComment (resource, body) {
   return github.issues.createComment({
     'owner': resource.owner,
@@ -181,11 +193,13 @@ function getRepoFile (resource, path, encoding) {
     });
 }
 
+
 module.exports = {
   'getGithubResources': getGithubResources,
   'getPullRequestFiles': getPullRequestFiles,
   'getBlameForCommitFile': getBlameForCommitFile,
   'getRepoFile': getRepoFile,
   'assignUsersToResource': assignUsersToResource,
-  'postPullRequestComment': postPullRequestComment
+  'postPullRequestComment': postPullRequestComment,
+  'unassignUsersFromResource': unassignUsersFromResource
 };

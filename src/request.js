@@ -24,11 +24,18 @@ function Request (options) {
   }).filter(Boolean);
 
   var isReview = false;
+  var reviewAgain = false;
 
   for (var i = 0; i < githubURLs.length; i++) {
-    if (text.indexOf('review ' + githubURLs[i].href) !== -1) {
+    var reviewRequest = text.indexOf('review ' + githubURLs[i].href) !== -1;
+    var reviewAgainRequest = text.indexOf('review ' + githubURLs[i].href + ' again') !== -1;
+
+    if (reviewRequest || reviewAgainRequest) {
       isReview = true;
-      break;
+    }
+
+    if (reviewAgainRequest) {
+      reviewAgain = true;
     }
   }
 
@@ -40,6 +47,7 @@ function Request (options) {
 
   return {
     'isReview': isReview,
+    'reviewAgain': reviewAgain,
     'githubURLs': githubURLs
   };
 }

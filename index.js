@@ -19,9 +19,6 @@
 // Author:
 //   Ivan Malopinsky
 
-//todo: consider pull request review integration
-//todo: consider PR size tags
-
 var HubotReview = require('./src/hubot-review');
 
 module.exports = function (robot) {
