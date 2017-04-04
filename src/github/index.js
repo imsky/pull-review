@@ -159,8 +159,11 @@ function assignUsersToResource (resource, assignees) {
 
 function unassignUsersFromResource (resource, assignees) {
   assignees = assignees || [];
+  assignees = assignees.map(function (assignee) {
+    return assignee.login;
+  });
 
-  return github.issues.removeAssigneesFromissue({
+  return github.issues.removeAssigneesFromIssue({
     'owner': resource.owner,
     'repo': resource.repo,
     'number': resource.number,

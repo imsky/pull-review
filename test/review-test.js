@@ -63,6 +63,7 @@ function mockGitHubPullRequest(api, url, options) {
     'state': state,
     'title': 'Lorem ipsum',
     'body': options.body || 'Hello world',
+    'assignee': options.assignee || undefined,
     'assignees': options.assignees || undefined,
     'user': {
       'login': login,
@@ -274,7 +275,6 @@ describe('(unit)', function () {
         });
     });
 
-    it('#getBlameForCommitFile');
 
     describe('#assignUsersToResource', function () {
       it('works correctly', function () {
@@ -298,8 +298,6 @@ describe('(unit)', function () {
       });
     });
 
-    it('#postPullRequestComment');
-
     it('#getRepoFile', function () {
       mockFile(ghapi, '/repos/OWNER/REPO/contents/file.txt', {
         'content': 'Hello world'
@@ -313,6 +311,10 @@ describe('(unit)', function () {
           res.should.equal('Hello world');
         })
     });
+
+    it('#getBlameForCommitFile');
+    it('#postPullRequestComment');
+    it('#unassignUsersFromResource');
   });
 
   describe('Review', function () {
@@ -361,11 +363,9 @@ describe('(unit)', function () {
 
     it('adds only up to max reviewers if assignees are present', function () {
       mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1', {
-        'assignees': [
-          {
-            'login': 'someuser'
-          }
-        ]
+        'assignee': {
+          'login': 'someuser'
+        },
       });
       mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
       mockGraphQLBlame(ghapi, '/graphql');
@@ -375,6 +375,30 @@ describe('(unit)', function () {
       return Review({'request': r})
         .then(function (res) {
           res.reviewers.should.have.lengthOf(2);
+        });
+    });
+
+    it('unassigns reviewers when a "review again" request is made', function () {
+      mockGitHubPullRequest(ghapi, '/repos/OWNER/REPO/pulls/1', {
+        'assignees': [
+          {
+            'login': 'someuser'
+          },
+          {
+            'login': 'anotheruser'
+          }
+        ]
+      });
+      mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
+      mockGraphQLBlame(ghapi, '/graphql');
+      mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
+      ghapi.delete('/repos/OWNER/REPO/issues/1/assignees?assignees=%5B%22someuser%22%2C%22anotheruser%22%5D').reply(200);
+
+      var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1 again'});
+      return Review({'request': r})
+        .then(function (res) {
+          res.reviewers.should.have.lengthOf(2);
+          res.reviewers[0].login.should.not.equal('someuser');
         });
     });
   });
