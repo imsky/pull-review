@@ -163,12 +163,15 @@ function unassignUsersFromResource (resource, assignees) {
     return assignee.login;
   });
 
+
   return github.issues.removeAssigneesFromIssue({
     'owner': resource.owner,
     'repo': resource.repo,
     'number': resource.number,
-    'assignees': assignees
-  });
+    'body': {
+      'assignees': assignees
+    }
+  })
 }
 
 function postPullRequestComment (resource, body) {
