@@ -392,7 +392,7 @@ describe('(unit)', function () {
       mockGitHubPullRequestFiles(ghapi, '/repos/OWNER/REPO/pulls/1/files?per_page=100');
       mockGraphQLBlame(ghapi, '/graphql');
       mockConfig(ghapi, '/repos/OWNER/REPO/contents/.pull-review');
-      ghapi.delete('/repos/OWNER/REPO/issues/1/assignees?assignees=%5B%22someuser%22%2C%22anotheruser%22%5D').reply(200);
+      ghapi.delete('/repos/OWNER/REPO/issues/1/assignees').reply(200);
 
       var r = Request({'text': 'review https://github.com/OWNER/REPO/pull/1 again'});
       return Review({'request': r})
