@@ -309,7 +309,7 @@ describe('pull-review', function () {
           });
       });
 
-      it('assigns up to a maximum amount of reviewers', function () {
+      it('assigns up to a minimum amount of reviewers', function () {
         var files = [];
 
         for (var i = 0; i < 100; i++) {
@@ -324,7 +324,7 @@ describe('pull-review', function () {
 
         return PullReviewAssignment(options)
           .then(function (reviewers) {
-            reviewers.should.have.lengthOf(2);
+            reviewers.should.have.lengthOf(1);
           });
       });
     });

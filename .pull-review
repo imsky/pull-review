@@ -12,7 +12,7 @@ min_reviewers: 1
 max_reviewers: 2
 
 # maximum number of files per reviewer (set to 0 for no limit)
-max_files_per_reviewer: 5
+max_files_per_reviewer: 0
 
 # if at least a minimum number of reviewers is not found, assign a minimum number of reviewers randomly
 assign_min_reviewers_randomly: true
