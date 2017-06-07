@@ -25,10 +25,11 @@ function Request (options) {
 
   var isReview = false;
   var reviewAgain = false;
+  var processedText = text.toLowerCase().replace(/\s+/g, ' ');
 
   for (var i = 0; i < githubURLs.length; i++) {
-    var reviewRequest = text.indexOf('review ' + githubURLs[i].href) !== -1;
-    var reviewAgainRequest = text.indexOf('review ' + githubURLs[i].href + ' again') !== -1;
+    var reviewRequest = processedText.indexOf('review ' + githubURLs[i].href) !== -1;
+    var reviewAgainRequest = processedText.indexOf('review ' + githubURLs[i].href + ' again') !== -1;
 
     if (reviewRequest || reviewAgainRequest) {
       isReview = true;
