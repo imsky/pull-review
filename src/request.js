@@ -25,7 +25,7 @@ function Request (options) {
 
   var isReview = false;
   var reviewAgain = false;
-  var processedText = text.toLowerCase().replace(/\s+/g, ' ');
+  var processedText = text.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, '$1');
 
   for (var i = 0; i < githubURLs.length; i++) {
     var reviewRequest = processedText.indexOf('review ' + githubURLs[i].href) !== -1;

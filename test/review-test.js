@@ -12,7 +12,6 @@ var config = fs.readFileSync(path.join(__dirname, 'pull-review', 'config.yml'), 
 var url = require('../src/url');
 var github = require('../src/github');
 var Request = require('../src/request');
-var Response = require('../src/response');
 var Review = require('../src/review');
 var HubotReview = require('../src/hubot-review');
 var messages = require('../src/messages');
