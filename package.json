@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/imsky/pull-review#readme",
   "dependencies": {
+    "github": "^9.2.0",
+    "github-graphql-client": "^1.0.0",
     "js-yaml": "^3.8.1",
     "knuth-shuffle": "^1.0.1",
     "native-promise-only": "^0.8.1"
