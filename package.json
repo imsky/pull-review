@@ -1,5 +1,5 @@
 {
-  "name": "hubot-review",
+  "name": "hubot-pull-review",
   "description": "Assigns and notifies reviewers for GitHub pull requests",
   "version": "0.9.13",
   "author": "Ivan Malopinsky",
@@ -10,10 +10,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/imsky/hubot-review.git"
+    "url": "git://github.com/imsky/hubot-pull-review.git"
   },
   "bugs": {
-    "url": "https://github.com/imsky/hubot-review/issues"
+    "url": "https://github.com/imsky/hubot-pull-review/issues"
   },
   "dependencies": {
     "github": "^9.0.0",

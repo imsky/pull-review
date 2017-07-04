@@ -11,7 +11,7 @@ function templateFn (resources, reviewers) {
   var message = request;
 
   if (!TEST) {
-    message += '\n\n' + '> Powered by [hubot-review](https://github.com/imsky/hubot-review)';
+    message += '\n\n' + '> Powered by [hubot-pull-review](https://github.com/imsky/hubot-pull-review)';
   }
 
   return message;
