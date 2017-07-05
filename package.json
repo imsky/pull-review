@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "eslint --fix index.js",
-    "test": "istanbul cover -x test.js _mocha -- -- test.js"
+    "test": "istanbul cover -x test/*-test.js _mocha -- -- test/*-test.js"
   },
   "repository": {
     "type": "git",

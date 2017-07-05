@@ -5,9 +5,9 @@ var chai = require('chai');
 chai.use(require('chai-as-promised'));
 chai.should();
 
-var config = fs.readFileSync(path.join(__dirname, '.pull-review'), 'utf8');
+var config = fs.readFileSync(path.join(__dirname, '..', '.pull-review'), 'utf8');
 
-var pullReview = require('./index');
+var pullReview = require('../index');
 var PullReviewConfig = pullReview.PullReviewConfig;
 var PullReviewAssignment = pullReview.PullReviewAssignment;
 

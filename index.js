@@ -1,6 +1,6 @@
 'use strict';
 
-var Config = require('./src/pull-review-config');
+var PullReviewConfig = require('./src/pull-review-config');
 var PullReviewAssignment = require('./src/pull-review-assignment');
 
 //todo: jsdoc
