@@ -225,6 +225,11 @@ describe('(unit)', function () {
       r.should.have.ownProperty('isReview');
       r.isReview.should.be.true;
       r.githubURLs[0].href.should.equal('https://github.com/abc/pull/1');
+
+      var r = Request({'text': 'Review https://github.com/abc/pull/1'});
+      r.should.have.ownProperty('isReview');
+      r.isReview.should.be.true;
+      r.githubURLs[0].href.should.equal('https://github.com/abc/pull/1');
     });
 
     it('identifies non-reviews correctly', function () {

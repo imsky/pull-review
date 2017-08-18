@@ -25,11 +25,12 @@ function Request (options) {
 
   var isReview = false;
   var reviewAgain = false;
-  var processedText = text.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, '$1');
+  var processedText = text.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, '$1').toLowerCase();
 
   for (var i = 0; i < githubURLs.length; i++) {
-    var reviewRequest = processedText.indexOf('review ' + githubURLs[i].href) !== -1;
-    var reviewAgainRequest = processedText.indexOf('review ' + githubURLs[i].href + ' again') !== -1;
+    var githubUrlLowered = githubURLs[i].href.toLowerCase();
+    var reviewRequest = processedText.indexOf('review ' + githubUrlLowered) !== -1;
+    var reviewAgainRequest = processedText.indexOf('review ' + githubUrlLowered + ' again') !== -1;
 
     if (reviewRequest || reviewAgainRequest) {
       isReview = true;
