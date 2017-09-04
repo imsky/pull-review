@@ -7,9 +7,9 @@ var Github = require('github');
 
 var GraphQLRequest = require('./graphql');
 
-var TEST = process.env.NODE_ENV === 'test';
-var GITHUB_TOKEN = TEST ? 'test' : process.env.HUBOT_REVIEW_GITHUB_TOKEN;
+var GITHUB_TOKEN = process.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN;
 
+//todo: remove queries
 var queries = ['git-blame'];
 
 queries = queries.reduce(function (map, name) {
@@ -26,6 +26,7 @@ github.authenticate({
   'token': GITHUB_TOKEN
 });
 
+//todo: use BlameRange
 function BlameRangeList (options) {
   var blame = options.blame || {};
   var ranges = blame.ranges || [];
@@ -43,66 +44,19 @@ function BlameRangeList (options) {
   }).filter(Boolean);
 }
 
-function parseGithubPath (path) {
-  var parts = path.split('/').filter(function (p) {
-    return p.length > 0;
-  });
+function parseGithubURL (url) {
+  var githubUrlRe = /github\.com\/([^/]+)\/([^/]+)\/pull\/([0-9]+)/;
+  var match = url.match(githubUrlRe);
 
-  var type = parts[2];
-
-  if (type === 'issues') {
-    type = 'issue';
+  if (!match) {
+    return null;
   }
 
-  return {
-    'owner': parts[0],
-    'repo': parts[1],
-    'type': type,
-    'number': parts[3]
-  };
-}
-
-function getGithubResource(type, req) {
-  var nothing = Promise.resolve({});
-
-  if (type === 'pull') {
-    return github.pullRequests.get(req);
-  } else if (type === 'issue') {
-    return github.issues.get(req);
-  }
-
-  return nothing;
-}
-
-function fetchGithubResourceData (resource) {
-  var req = {
-    'owner': resource.owner,
-    'repo': resource.repo,
-    'number': resource.number
-  };
-
-  var ret = Promise.resolve(null);
-
-  if (resource.number !== undefined) {
-    ret = getGithubResource(resource.type, req);
-  }
-
-  return ret.then(function (response) {
-    if (!response) {
-      return response;
-    }
-
-    resource.data = response.data;
-    return resource;
+  return Object.freeze({
+    'owner': match[1],
+    'repo': match[2],
+    'number': match[3]
   });
-}
-
-function getGithubResources (githubURLs) {
-  var githubResources = githubURLs.map(function (uo) {
-    return parseGithubPath(uo.path);
-  });
-
-  return Promise.all(githubResources.map(fetchGithubResourceData));
 }
 
 function getPullRequestFiles (resource) {
@@ -157,12 +111,8 @@ function assignUsersToResource (resource, assignees) {
 }
 
 
-function unassignUsersFromResource (resource, assignees) {
+function unassignUsersFromPullRequest (resource, assignees) {
   assignees = assignees || [];
-  assignees = assignees.map(function (assignee) {
-    return assignee.login;
-  });
-
 
   return github.issues.removeAssigneesFromIssue({
     'owner': resource.owner,
@@ -199,13 +149,17 @@ function getRepoFile (resource, path, encoding) {
     });
 }
 
+function getPullRequest(options) {
+  return github.pullRequests.get(options);
+}
 
 module.exports = {
-  'getGithubResources': getGithubResources,
+  'getPullRequest': getPullRequest,
   'getPullRequestFiles': getPullRequestFiles,
   'getBlameForCommitFile': getBlameForCommitFile,
   'getRepoFile': getRepoFile,
   'assignUsersToResource': assignUsersToResource,
   'postPullRequestComment': postPullRequestComment,
-  'unassignUsersFromResource': unassignUsersFromResource
+  'unassignUsersFromPullRequest': unassignUsersFromPullRequest,
+  'parseGithubURL': parseGithubURL
 };
