@@ -1,14 +1,14 @@
 var shuffle = require('knuth-shuffle');
 var Promise = require('native-promise-only');
 
-var BlameRange = require('./blame-range');
-var PullRequestFile = require('./pull-request-file');
-var PullReviewConfig = require('./pull-review-config');
+var BlameRange = require('./models/blame-range');
+var PullRequestFile = require('./models/pull-request-file');
+var Config = require('./models/config');
 
 module.exports = function PullReviewAssignment(options) {
   options = options || {};
   var config = options.config || {
-    'version': 1
+    'version': 2
   };
   var files = options.files || [];
   var assignees = options.assignees || [];
@@ -22,7 +22,7 @@ module.exports = function PullReviewAssignment(options) {
     throw Error('No pull request author provided');
   }
 
-  config = PullReviewConfig(config);
+  config = Config(config);
 
   files = files.map(PullRequestFile);
 
@@ -165,7 +165,8 @@ module.exports = function PullReviewAssignment(options) {
       return reviewers;
     })
     .then(function(reviewers) {
-      return reviewers.map(function(reviewer) {
+      return reviewers.map(function (reviewer) {
+        //todo: v2 reviewer support here
         reviewer.notify = config.reviewers[reviewer.login];
         return reviewer;
       });

@@ -2,11 +2,13 @@
 
 var Promise = require('native-promise-only');
 
+var Action = require('./models/action');
 var github = require('./github');
 var PullReviewAssignment = require('./pull-review-assignment');
 
 module.exports = function Review (options) {
   options = options || {};
+  var actions = [];
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
   var pullRequestUrl = options.pullRequestUrl;
   var retryReview = Boolean(options.retryReview);
@@ -50,8 +52,13 @@ module.exports = function Review (options) {
         });
 
         if (retryReview) {
-          unassignAssignees = github.unassignUsersFromPullRequest(pullRequest, pullRequestAssignees);
-          pullRequestAssignees = [];
+          actions.push(Action({
+            'type': 'UNASSIGN_USERS_FROM_PULL_REQUEST',
+            'payload': {
+              'pullRequest': pullRequest,
+              'users': pullRequestAssignees
+            }
+          }));
         }
       }
 
@@ -71,7 +78,7 @@ module.exports = function Review (options) {
         'config': config,
         'files': pullRequestFiles,
         'authorLogin': pullRequestRecord.data.user.login,
-        'assignees': pullRequestAssignees,
+        'assignees': retryReview ? [] : pullRequestAssignees,
         'getBlameForFile': function (file) {
           return github.getBlameForCommitFile({
             'owner': pullRequest.owner,
@@ -91,9 +98,22 @@ module.exports = function Review (options) {
         return reviewer.login;
       });
 
-      return github.assignUsersToResource(pullRequest, newPullRequestAssignees);
-    })
-    .then(function () {
-      console.log('TODO: post a comment');
+      actions.push(Action({
+        'type': 'ASSIGN_USERS_TO_PULL_REQUEST',
+        'payload': {
+          'pullRequest': pullRequest,
+          'users': newPullRequestAssignees
+        }
+      }));
+
+      actions.push(Action({
+        'type': 'NOTIFY',
+        'payload': {
+          'pullRequest': pullRequest,
+          'users': newPullRequestAssignees
+        }
+      }));
+
+      return actions;
     });
 };

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint --fix index.js",
-    "test": "istanbul cover -x test/*-test.js _mocha -- -- test/*-test.js"
+    "_pretest": "eslint --fix index.js",
+    "test": "nyc mocha test/*-test.js"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,12 @@
     "chai-as-promised": "^6.0.0",
     "codecov": "^1.0.1",
     "eslint": "~2.13",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "nyc": "^11.1.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "branches": 95,
+    "reporter": ["lcov", "text-summary"]
   }
 }
