@@ -1,14 +1,19 @@
 'use strict';
 
-var PullReviewConfig = require('./src/models/config');
-var PullReviewAssignment = require('./src/pull-review-assignment');
+//todo: use https://assets-cdn.github.com/pinned-octocat.svg for Slack icon
 
-//todo: jsdoc
-//todo: consider fixturing a real pull request
-//todo: example usage
-//todo: rename PullReview* vars to remove PullReview prefix
+var Review = require('./src/review');
 
-module.exports = {
-  'PullReviewConfig': PullReviewConfig,
-  'PullReviewAssignment': PullReviewAssignment
+module.exports = function (input) {
+  var isHubot = input.name !== undefined && input.adapterName !== undefined && input.logger !== undefined && input.listen !== undefined && input.hear !== undefined;
+  var isReview = input.pullRequestURL !== undefined;
+
+  if (isHubot) {
+    //todo: set up robot.hear here
+    //todo: start server
+  } else if (isReview) {
+    return Review(input);
+  } else {
+    //todo: run in server mode only
+  }
 };

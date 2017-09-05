@@ -10,19 +10,20 @@ module.exports = function Review (options) {
   options = options || {};
   var actions = [];
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
-  var pullRequestUrl = options.pullRequestUrl;
+  var pullRequestURL = options.pullRequestURL;
   var retryReview = Boolean(options.retryReview);
+  var dryRun = Boolean(options.dryRun);
   var pullRequestRecord;
   var pullRequestFiles;
   var pullRequestAssignees;
   var newPullRequestAssignees;
   var repoPullReviewConfig;
 
-  if (!pullRequestUrl) {
+  if (!pullRequestURL) {
     throw Error('Missing pull request URL');
   }
 
-  var pullRequest = github.parseGithubURL(pullRequestUrl);
+  var pullRequest = github.parseGithubURL(pullRequestURL);
 
   if (!pullRequest) {
     throw Error('Invalid pull request');
@@ -30,14 +31,14 @@ module.exports = function Review (options) {
 
   return github.getPullRequest(pullRequest)
     .catch(function () {
-      throw Error('Failed to get pull request: ' + pullRequestUrl);
+      throw Error('Failed to get pull request: ' + pullRequestURL);
     })
     .then(function (res) {
       var unassignAssignees;
       pullRequestRecord = res;
 
       if (pullRequestRecord.data.state !== 'open') {
-        throw Error('Pull request is not open: ' + pullRequestUrl);
+        throw Error('Pull request is not open: ' + pullRequestURL);
       }
 
       if (pullRequestRecord.data.assignees) {
@@ -91,7 +92,7 @@ module.exports = function Review (options) {
     })
     .then(function (reviewers) {
       if (!reviewers || !reviewers.length) {
-        throw Error('No reviewers found: ' + pullRequestUrl);
+        throw Error('No reviewers found: ' + pullRequestURL);
       }
 
       newPullRequestAssignees = (reviewers || []).map(function (reviewer) {
@@ -113,6 +114,13 @@ module.exports = function Review (options) {
           'users': newPullRequestAssignees
         }
       }));
+
+      if (!dryRun) {
+        actions.push(Action({
+          'type': 'COMMIT',
+          'payload': true
+        }));
+      }
 
       return actions;
     });

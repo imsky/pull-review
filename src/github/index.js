@@ -1,8 +1,6 @@
 var fs = require('fs');
 var path = require('path');
 
-var Promise = require('native-promise-only');
-
 var Github = require('github');
 
 var GraphQLRequest = require('./graphql');
@@ -121,7 +119,7 @@ function unassignUsersFromPullRequest (resource, assignees) {
     'body': {
       'assignees': assignees
     }
-  })
+  });
 }
 
 function postPullRequestComment (resource, body) {

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "_pretest": "eslint --fix index.js",
-    "test": "nyc mocha test/*-test.js"
+    "pretest": "eslint --fix index.js src/**/*.js",
+    "test": "NODE_ENV=test nyc mocha test/*-test.js"
   },
   "repository": {
     "type": "git",
