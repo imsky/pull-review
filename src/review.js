@@ -10,6 +10,7 @@ module.exports = function Review (options) {
   options = options || {};
   var actions = [];
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
+  var pullReviewConfigPath = process.env.PULL_REVIEW_CONFIG_PATH || options.pullReviewConfigPath || '.pull-review';
   var pullRequestURL = options.pullRequestURL;
   var retryReview = Boolean(options.retryReview);
   var dryRun = Boolean(options.dryRun);
@@ -65,7 +66,7 @@ module.exports = function Review (options) {
 
       return Promise.all([
         github.getPullRequestFiles(pullRequestRecord),
-        config ? null : github.getRepoFile(pullRequestRecord, '.pull-review', 'utf8')
+        config ? null : github.getRepoFile(pullRequestRecord, pullReviewConfigPath, 'utf8')
           .catch(function () { return null; }),
         unassignAssignees
       ]);
