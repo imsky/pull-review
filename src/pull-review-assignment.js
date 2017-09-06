@@ -24,6 +24,10 @@ module.exports = function PullReviewAssignment(options) {
 
   config = Config(config);
 
+  var maxReviewers = config.maxReviewers;
+  var minReviewers = config.minReviewers;
+  var maxFilesPerReviewer = config.maxFilesPerReviewer;
+
   files = files.map(PullRequestFile);
 
   var modifiedFiles = files.filter(function(file) {
@@ -35,10 +39,6 @@ module.exports = function PullReviewAssignment(options) {
   });
 
   var topModifiedFiles = config.maxFiles > 0 ? modifiedFiles.slice(0, config.maxFiles) : modifiedFiles;
-
-  var maxReviewers = config.maxReviewers;
-  var minReviewers = config.minReviewers;
-  var maxFilesPerReviewer = config.maxFilesPerReviewer;
 
   assignees = assignees.filter(function(assignee) {
     return assignee !== authorLogin;

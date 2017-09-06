@@ -10,10 +10,9 @@ module.exports = function (input) {
 
   if (isHubot) {
     //todo: set up robot.hear here
-    //todo: start server
   } else if (isAPI) {
     return Review(input);
   } else {
-    //todo: run in server mode only
+    throw Error('Invalid input: either a review request or a Hubot reference must be provided');
   }
 };
