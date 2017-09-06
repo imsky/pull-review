@@ -31,7 +31,7 @@ module.exports = function Review (options) {
   }
 
   return github.getPullRequest(pullRequest)
-    .catch(function () {
+    .catch(function (e) {
       throw Error('Failed to get pull request: ' + pullRequestURL);
     })
     .then(function (res) {
@@ -65,8 +65,8 @@ module.exports = function Review (options) {
       }
 
       return Promise.all([
-        github.getPullRequestFiles(pullRequestRecord),
-        config ? null : github.getRepoFile(pullRequestRecord, pullReviewConfigPath, 'utf8')
+        github.getPullRequestFiles(pullRequest),
+        config ? null : github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8')
           .catch(function () { return null; }),
         unassignAssignees
       ]);
@@ -104,7 +104,8 @@ module.exports = function Review (options) {
         'type': 'ASSIGN_USERS_TO_PULL_REQUEST',
         'payload': {
           'pullRequest': pullRequest,
-          'users': newPullRequestAssignees
+          'assignees': newPullRequestAssignees,
+          'reviewers': reviewers
         }
       }));
 

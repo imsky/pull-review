@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint --fix index.js src/**/*.js",
+    "lint": "eslint --fix index.js src/**/*.js",
     "test": "NODE_ENV=test nyc mocha test/*-test.js"
   },
   "repository": {
@@ -37,11 +37,14 @@
     "codecov": "^1.0.1",
     "eslint": "~2.13",
     "mocha": "^3.2.0",
+    "nock": "^9.0.14",
     "nyc": "^11.1.0"
   },
   "nyc": {
     "check-coverage": true,
-    "branches": 95,
-    "reporter": ["lcov", "text-summary"]
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
   }
 }

@@ -8,6 +8,5 @@ chai.should();
 var config = fs.readFileSync(path.join(__dirname, '..', '.pull-review'), 'utf8');
 
 module.exports = {
-  'chai': chai,
   'config': config
 };

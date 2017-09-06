@@ -164,9 +164,8 @@ module.exports = function PullReviewAssignment(options) {
 
       return reviewers;
     })
-    .then(function(reviewers) {
+    .then(function (reviewers) {
       return reviewers.map(function (reviewer) {
-        //todo: v2 reviewer support here
         reviewer.notify = config.reviewers[reviewer.login];
         return reviewer;
       });
