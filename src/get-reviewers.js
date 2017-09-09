@@ -5,7 +5,7 @@ var BlameRange = require('./models/blame-range');
 var PullRequestFile = require('./models/pull-request-file');
 var Config = require('./models/config');
 
-module.exports = function PullReviewAssignment(options) {
+module.exports = function getReviewers (options) {
   options = options || {};
   var config = options.config || {
     'version': 2

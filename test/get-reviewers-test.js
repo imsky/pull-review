@@ -1,22 +1,22 @@
-var PullReviewAssignment = require('../src/pull-review-assignment');
+var getReviewers = require('../src/get-reviewers');
 
 var driver = require('./driver');
 var config = driver.config;
 
-describe('assignment', function () {
+describe('#getReviewers', function () {
   it('fails without required parameters', function () {
     (function () {
-      PullReviewAssignment({});
+      getReviewers({});
     }).should.throw();
 
     (function () {
-      PullReviewAssignment({'getBlameForFile': function () {}});
+      getReviewers({'getBlameForFile': function () {}});
     }).should.throw();
   });
 
   it('fails with too many assignees', function () {
     (function () {
-      PullReviewAssignment({
+      getReviewers({
         'authorLogin': 'mockuser',
         'getBlameForFile': function () {},
         'assignees': [1,2,3,4,5,6,7,8,9]
@@ -26,7 +26,7 @@ describe('assignment', function () {
 
   it('does not assign reviewers if minimum is met by assignees', function () {
     (function () {
-      PullReviewAssignment({
+      getReviewers({
         'authorLogin': 'mockuser',
         'getBlameForFile': function () {},
         'assignees': [1]
@@ -36,7 +36,7 @@ describe('assignment', function () {
 
   it('fails with bad file data', function () {
     (function () {
-      PullReviewAssignment({
+      getReviewers({
         'authorLogin': 'mockuser',
         'getBlameForFile': function () {},
         'files': [1,2,3]
@@ -45,7 +45,7 @@ describe('assignment', function () {
   });
 
   it('fails with bad blame data', function () {
-    return PullReviewAssignment({
+    return getReviewers({
       'authorLogin': 'mockuser',
       'files': [
         {
@@ -65,7 +65,7 @@ describe('assignment', function () {
   });
 
   it('filters out unreachable authors', function () {
-    return PullReviewAssignment({
+    return getReviewers({
       'config': {
         'version': 1,
         'reviewers': {
@@ -103,7 +103,7 @@ describe('assignment', function () {
   });
 
   it('works with blame correctly', function () {
-    return PullReviewAssignment({
+    return getReviewers({
       'config': {
         'version': 1,
         'reviewers': {
@@ -170,7 +170,7 @@ describe('assignment', function () {
   });
 
   it('assigns minimum reviewers randomly', function () {
-    return PullReviewAssignment({
+    return getReviewers({
       'config': {
         'version': 1,
         'reviewers': {
@@ -193,7 +193,7 @@ describe('assignment', function () {
   });
 
   it('uses fallback paths when assigning minimum reviewers randomly', function () {
-    return PullReviewAssignment({
+    return getReviewers({
       'config': config,
       'authorLogin': 'alice',
       'files': [
@@ -236,7 +236,7 @@ describe('assignment', function () {
         }
       ];
 
-      return PullReviewAssignment(options)
+      return getReviewers(options)
         .then(function (reviewers) {
           reviewers.should.have.lengthOf(1);
         });
@@ -255,7 +255,7 @@ describe('assignment', function () {
 
       options.files = files;
 
-      return PullReviewAssignment(options)
+      return getReviewers(options)
         .then(function (reviewers) {
           reviewers.should.have.lengthOf(1);
         });

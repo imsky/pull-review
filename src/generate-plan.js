@@ -1,12 +1,10 @@
 'use strict';
 
-var Promise = require('native-promise-only');
-
 var Action = require('./models/action');
 var github = require('./github');
-var PullReviewAssignment = require('./pull-review-assignment');
+var getReviewers = require('./get-reviewers');
 
-module.exports = function Review (options) {
+module.exports = function generatePlan (options) {
   options = options || {};
   var actions = [];
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
@@ -27,7 +25,7 @@ module.exports = function Review (options) {
   var pullRequest = github.parseGithubURL(pullRequestURL);
 
   if (!pullRequest) {
-    throw Error('Invalid pull request');
+    throw Error('Invalid pull request URL');
   }
 
   return github.getPullRequest(pullRequest)
@@ -58,7 +56,7 @@ module.exports = function Review (options) {
             'type': 'UNASSIGN_USERS_FROM_PULL_REQUEST',
             'payload': {
               'pullRequest': pullRequest,
-              'users': pullRequestAssignees
+              'assignees': pullRequestAssignees
             }
           }));
         }
@@ -76,7 +74,7 @@ module.exports = function Review (options) {
       repoPullReviewConfig = res[1];
       config = config || repoPullReviewConfig;
 
-      return PullReviewAssignment({
+      return getReviewers({
         'config': config,
         'files': pullRequestFiles,
         'authorLogin': pullRequestRecord.data.user.login,
@@ -96,7 +94,7 @@ module.exports = function Review (options) {
         throw Error('No reviewers found: ' + pullRequestURL);
       }
 
-      newPullRequestAssignees = (reviewers || []).map(function (reviewer) {
+      newPullRequestAssignees = reviewers.map(function (reviewer) {
         return reviewer.login;
       });
 

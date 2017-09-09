@@ -1,12 +1,12 @@
 var nock = require('nock');
 
-var Review = require('../src/review');
+var generatePlan = require('../src/generate-plan');
 
 var driver = require('./driver');
-var githubMock = require('./mock/github-mock');
+var githubMock = driver.githubMock;
 var config = driver.config;
 
-describe('review', function () {
+describe('#generatePlan', function () {
   afterEach(function () {
     return nock.cleanAll();
   });
@@ -16,7 +16,7 @@ describe('review', function () {
       'noBlame': true
     });
 
-    return Review({
+    return generatePlan({
       'config': config,
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     })
@@ -33,7 +33,7 @@ describe('review', function () {
   it('works with blame', function () {
     githubMock();
 
-    return Review({
+    return generatePlan({
       'config': config,
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     })
@@ -50,7 +50,7 @@ describe('review', function () {
       'assignees': [{ 'login': 'charlie' }]
     });
 
-    return Review({
+    return generatePlan({
       'config': config,
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
       'retryReview': true
@@ -58,18 +58,26 @@ describe('review', function () {
       .then(function (actions) {
         actions.should.have.lengthOf(4);
         actions[0].type.should.equal('UNASSIGN_USERS_FROM_PULL_REQUEST');
-        actions[0].payload.users[0].should.equal('charlie');
+        actions[0].payload.assignees[0].should.equal('charlie');
       });
   })
 
   it('fails without a pull request URL', function () {
-    return (function () { Review() }).should.throw('Missing pull request URL');
+    return (function () { generatePlan() }).should.throw('Missing pull request URL');
   });
+
+  it('fails with an invalid pull request URL', function () {
+    return (function () {
+      generatePlan({
+        'pullRequestURL': 'http://example.com'
+      });
+    }).should.throw('Invalid pull request URL');
+  })
 
   it('fails without config', function () {
     githubMock();
 
-    return Review({
+    return generatePlan({
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     }).should.eventually.be.rejectedWith(Error, 'No reviewers found: https://github.com/OWNER/REPO/pull/1');
   });
