@@ -5,6 +5,15 @@ var api = nock('https://api.github.com');
 module.exports = function (options) {
   options = options || {};
 
+  if (options.config) {
+    api.get('/repos/OWNER/REPO/contents/.pull-review').reply(200, {
+      'name': '.pull-review',
+      'path': '.pull-review',
+      'encoding': 'base64',
+      'content': (new Buffer(options.config || '', 'utf8')).toString('base64')
+    });
+  }
+
   api.get('/repos/OWNER/REPO/pulls/404').reply(404, {
     'message': 'Not Found'
   });

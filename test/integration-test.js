@@ -12,19 +12,20 @@ describe('pull-review', function () {
   });
 
   it('works with no assignees', function () {
-    githubMock();
+    githubMock({
+      'config': config
+    });
     return pullReview({
-      'config': config,
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     });
   });
 
   it('works with an assignee', function () {
     githubMock({
-      'assignee': { 'login': 'charlie' }
+      'assignee': { 'login': 'charlie' },
+      'config': config
     });
     return pullReview({
-      'config': config,
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
       'retryReview': true
     });

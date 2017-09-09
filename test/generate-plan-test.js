@@ -79,6 +79,6 @@ describe('#generatePlan', function () {
 
     return generatePlan({
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
-    }).should.eventually.be.rejectedWith(Error, 'No reviewers found: https://github.com/OWNER/REPO/pull/1');
+    }).should.eventually.be.rejectedWith(Error, 'Missing configuration');
   });
 });

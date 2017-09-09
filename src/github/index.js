@@ -135,19 +135,16 @@ function postPullRequestComment (resource, body) {
   });
 }
 
-function getRepoFile (resource, path, encoding) {
+function getRepoFile(resource, path, encoding) {
+  encoding = encoding || 'base64';
   return github.repos.getContent({
     'owner': resource.owner,
     'repo': resource.repo,
     'path': path
   })
     .then(function (res) {
-      if (encoding) {
-        var buffer = new Buffer(res.data.content, 'base64');
-        return buffer.toString(encoding);
-      }
-
-      return res.data.content;
+      var buffer = new Buffer(res.data.content, 'base64');
+      return buffer.toString(encoding);
     });
 }
 

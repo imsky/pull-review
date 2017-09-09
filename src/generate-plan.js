@@ -74,6 +74,10 @@ module.exports = function generatePlan (options) {
       repoPullReviewConfig = res[1];
       config = config || repoPullReviewConfig;
 
+      if (!config) {
+        throw Error('Missing configuration');
+      }
+
       return getReviewers({
         'config': config,
         'files': pullRequestFiles,

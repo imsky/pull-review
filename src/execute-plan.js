@@ -38,7 +38,9 @@ module.exports = function executePlan(actions) {
   return Promise.resolve()
     .then(function () {
       if (commitTransaction) {
-        return Promise.all(transaction);
+        return transaction.reduce(function (promise, fn) {
+          return promise.then(fn);
+        }, Promise.resolve());
       }
     })
     .then(function () {
