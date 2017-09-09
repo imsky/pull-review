@@ -9,6 +9,10 @@ module.exports = function (options) {
     'message': 'Not Found'
   });
 
+  api.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+
+  api.delete('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+
   api.get('/repos/OWNER/REPO/pulls/1')
     .reply(200, {
       'html_url': 'https://github.com/OWNER/REPO/pull/1',
@@ -112,4 +116,6 @@ module.exports = function (options) {
         'content': (new Buffer(options.configFile, 'utf8')).toString('base64')
       });
   }
+
+  return api;
 };

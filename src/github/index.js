@@ -95,7 +95,7 @@ function getBlameForCommitFile (resource) {
     });
 }
 
-function assignUsersToResource (resource, assignees) {
+function assignUsersToPullRequest (resource, assignees) {
   assignees = assignees || [];
 
   for(var i = 0; i < assignees.length; i++) {
@@ -160,7 +160,7 @@ module.exports = {
   'getPullRequestFiles': getPullRequestFiles,
   'getBlameForCommitFile': getBlameForCommitFile,
   'getRepoFile': getRepoFile,
-  'assignUsersToResource': assignUsersToResource,
+  'assignUsersToPullRequest': assignUsersToPullRequest,
   'postPullRequestComment': postPullRequestComment,
   'unassignUsersFromPullRequest': unassignUsersFromPullRequest,
   'parseGithubURL': parseGithubURL

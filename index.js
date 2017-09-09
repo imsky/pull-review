@@ -2,7 +2,7 @@
 
 //todo: use https://assets-cdn.github.com/pinned-octocat.svg for Slack icon
 
-var Review = require('./src/review');
+var PullReview = require('./src/index');
 
 module.exports = function (input) {
   var isHubot = input.name !== undefined && input.adapterName !== undefined && input.logger !== undefined && input.listen !== undefined && input.hear !== undefined;
@@ -11,7 +11,7 @@ module.exports = function (input) {
   if (isHubot) {
     //todo: set up robot.hear here
   } else if (isAPI) {
-    return Review(input);
+    return PullReview(input);
   } else {
     throw Error('Invalid input: either a review request or a Hubot reference must be provided');
   }
