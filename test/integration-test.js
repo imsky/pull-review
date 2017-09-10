@@ -1,14 +1,16 @@
 var nock = require('nock');
+var Helper = require('hubot-test-helper');
+
+var pullReview = require('../index');
 
 var driver = require('./driver');
 var githubMock = driver.githubMock;
 var config = driver.config;
-
-var pullReview = require('../index');
+var helper = new Helper('../index.js');
 
 describe('pull-review', function () {
   afterEach(function () {
-    return nock.cleanAll();
+    nock.cleanAll();
   });
 
   it('works with no assignees', function () {
@@ -28,6 +30,39 @@ describe('pull-review', function () {
     return pullReview({
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
       'retryReview': true
+    });
+  });
+
+  it('fails with invalid arguments', function () {
+    (function () { pullReview(); }).should.throw('Invalid input: either a review request or a Hubot reference must be provided');
+  });
+
+  describe('chat mode', function () {
+    var room;
+
+    beforeEach(function () {
+      githubMock({
+        'config': config
+      });
+
+      room = helper.createRoom({
+        'name': 'test'
+      });
+    })
+
+    afterEach(function () {
+      nock.cleanAll();
+      return room.destroy();
+    });
+
+    it('works', function (done) {
+      room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
+        .then(function () {
+          setTimeout(function () {
+            console.log(room.messages)
+            done();
+          }, 500);
+        });
     });
   });
 });

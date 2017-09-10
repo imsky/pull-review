@@ -24,9 +24,11 @@ module.exports = function executePlan(actions) {
           break;
         case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
           transaction.push(github.unassignUsersFromPullRequest(action.payload.pullRequest, action.payload.assignees));
+          break;
         case 'NOTIFY':
           //todo: implement
           transaction.push(function () { });
+          break;
         case 'COMMIT':
           commitTransaction = true;
           break;

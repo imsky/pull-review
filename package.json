@@ -35,7 +35,10 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "codecov": "^1.0.1",
+    "coffee-script": "^1.12.7",
     "eslint": "~2.13",
+    "hubot": "^2.19.0",
+    "hubot-test-helper": "^1.7.0",
     "mocha": "^3.2.0",
     "nock": "^9.0.14",
     "nyc": "^11.1.0"

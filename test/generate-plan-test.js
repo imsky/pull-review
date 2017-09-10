@@ -26,6 +26,7 @@ describe('#generatePlan', function () {
         actions[0].payload.assignees[0].should.not.equal('alice');
         actions[0].payload.reviewers[0].source.should.equal('random');
         actions[1].type.should.equal('NOTIFY');
+        actions[1].payload.channels[0].should.equal('github');
         actions[2].type.should.equal('COMMIT');
       });
   });
