@@ -21,13 +21,12 @@ describe('#generatePlan', function () {
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     })
       .then(function (actions) {
-        actions.should.have.lengthOf(3);
+        actions.should.have.lengthOf(2);
         actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
         actions[0].payload.assignees[0].should.not.equal('alice');
         actions[0].payload.reviewers[0].source.should.equal('random');
         actions[1].type.should.equal('NOTIFY');
-        actions[1].payload.channels[0].should.equal('github');
-        actions[2].type.should.equal('COMMIT');
+        actions[1].payload.channel.should.equal('github');
       });
   });
 
@@ -39,7 +38,7 @@ describe('#generatePlan', function () {
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     })
       .then(function (actions) {
-        actions.should.have.lengthOf(3);
+        actions.should.have.lengthOf(2);
         actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
         actions[0].payload.assignees[0].should.equal('bob');
         actions[0].payload.reviewers[0].source.should.equal('blame');
@@ -57,7 +56,7 @@ describe('#generatePlan', function () {
       'retryReview': true
     })
       .then(function (actions) {
-        actions.should.have.lengthOf(4);
+        actions.should.have.lengthOf(3);
         actions[0].type.should.equal('UNASSIGN_USERS_FROM_PULL_REQUEST');
         actions[0].payload.assignees[0].should.equal('charlie');
       });

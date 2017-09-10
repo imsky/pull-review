@@ -22,6 +22,8 @@ module.exports = function (options) {
 
   api.delete('/repos/OWNER/REPO/issues/1/assignees').reply(200);
 
+  api.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
+
   api.get('/repos/OWNER/REPO/pulls/1')
     .reply(200, {
       'html_url': 'https://github.com/OWNER/REPO/pull/1',
