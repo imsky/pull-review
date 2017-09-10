@@ -3,7 +3,6 @@
 var Action = require('./models/action');
 var github = require('./github');
 var getReviewers = require('./get-reviewers');
-var url = require('./url');
 
 module.exports = function generatePlan (options) {
   options = options || {};
@@ -12,48 +11,17 @@ module.exports = function generatePlan (options) {
   var pullReviewConfigPath = process.env.PULL_REVIEW_CONFIG_PATH || options.pullReviewConfigPath || '.pull-review';
   var pullRequestURL = options.pullRequestURL;
   var retryReview = Boolean(options.retryReview);
-  var dryRun = Boolean(options.dryRun);
   var isChat = Boolean(options.isChat);
-  var room = options.room;
-  var adapter = options.adapter;
-  var text = options.text;
+  var chatRoom = Boolean(options.chatRoom);
+  var chatChannel = options.chatChannel;
   var pullRequestRecord;
   var pullRequestFiles;
   var pullRequestAssignees;
   var newPullRequestAssignees;
   var repoPullReviewConfig;
 
-  if (isChat) {
-    if (!room || !text) {
-      throw Error('Missing chat data');
-    }
-
-    var urls = url.extractURLs(text);
-    var processedText = text.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, function (m) { return m.toLowerCase(); });
-
-    if (Array.isArray(urls)) {
-      for (var i = 0; i < urls.length; i++) {
-        var u = urls[i];
-        var uo = url.parseURL(u);
-
-        if (uo.hostname === 'github.com') {
-          var reviewIndex = processedText.indexOf('review ' + u);
-          if (reviewIndex !== -1) {
-            retryReview = processedText.indexOf('review ' + u + ' again') === reviewIndex;
-            pullRequestURL = u;
-            break;
-          }
-        }
-      }
-    }
-  }
-
   if (!pullRequestURL) {
-    if (isChat) {
-      return;
-    } else {
-      throw Error('Missing pull request URL');
-    }
+    throw Error('Missing pull request URL');
   }
 
   var pullRequest = github.parseGithubURL(pullRequestURL);
@@ -140,8 +108,8 @@ module.exports = function generatePlan (options) {
 
       var channels = ['github'];
 
-      if (isChat) {
-        channels.push(adapter === 'hubot:slack' ? 'hubot:slack' : 'hubot:generic');
+      if (isChat && chatChannel) {
+        channels.push(chatChannel);
       }
 
       actions.push(Action({
@@ -153,21 +121,16 @@ module.exports = function generatePlan (options) {
         }
       }));
 
-      actions.push(Action({
-        'type': 'NOTIFY',
-        'payload': {
-          'pullRequest': pullRequest,
-          'users': newPullRequestAssignees,
-          'channels': channels
-        }
-      }));
-
-      if (!dryRun) {
+      channels.forEach(function (channel) {
         actions.push(Action({
-          'type': 'COMMIT',
-          'payload': true
+          'type': 'NOTIFY',
+          'payload': {
+            'pullRequest': pullRequest,
+            'users': newPullRequestAssignees,
+            'channel': channel
+          }
         }));
-      }
+      });
 
       return actions;
     });

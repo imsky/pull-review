@@ -11,6 +11,7 @@
 //todo: use https://assets-cdn.github.com/pinned-octocat.svg for Slack icon
 
 var PullReview = require('./src/index');
+var url = require('./src/url');
 
 module.exports = function (input) {
   input = input || {};
@@ -21,8 +22,9 @@ module.exports = function (input) {
     var robot = input;
     robot.hear(/github\.com\//, function (res) {
       var adapter = robot.adapterName;
-      var text = res.message.text;
-      var room = res.message.room;
+      var chatText = res.message.text;
+      var chatRoom = res.message.room;
+      var chatChannel = adapter === 'slack' ? 'hubot:slack' : 'hubot:generic';
 
       function logError(e) {
         robot.logger.error('[pull-review]', e);
@@ -30,26 +32,51 @@ module.exports = function (input) {
       }
 
       if (adapter === 'slack') {
-        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMBYId(room);
-        room = slackRoom.name;
+        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMBYId(chatRoom);
+        chatRoom = slackRoom.name;
+      }
+
+      var pullRequestURL;
+      var retryReview;
+
+      var urls = url.extractURLs(chatText);
+      var processedText = chatText.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, function (m) { return m.toLowerCase(); });
+
+      if (Array.isArray(urls)) {
+        for (var i = 0; i < urls.length; i++) {
+          var u = urls[i];
+          var uo = url.parseURL(u);
+
+          if (uo.hostname === 'github.com') {
+            var reviewIndex = processedText.indexOf('review ' + u);
+            if (reviewIndex !== -1) {
+              retryReview = processedText.indexOf('review ' + u + ' again') === reviewIndex;
+              pullRequestURL = u;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!pullRequestURL) {
+        return;
       }
 
       PullReview({
+        'pullRequestURL': pullRequestURL,
+        'retryReview': retryReview,
+        'chatRoom': chatRoom,
+        'chatChannel': chatChannel,
         'isChat': true,
-        'text': text,
-        'room': room,
-        'adapter': adapter
+        'notifyFn': function (message) {
+          robot.logger.info(message);
+          res.send(message);
+        }
       })
         .then(function (response) {
-          if (!response) {
-            return;
-          }
-
           try {
             if (response instanceof Error) {
               logError(response);
-            } else {
-              res.send(response);
             }
           } catch (err) {
             logError(err);
