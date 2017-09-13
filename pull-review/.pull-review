@@ -1,0 +1,43 @@
+---
+# pull-review config version (required)
+version: 2
+
+# maximum number of files to evaluate per pull request (set to 0 for no limit)
+max_files: 5
+
+# minimum number of reviewers to assign and notify for a pull request
+min_reviewers: 1
+
+# maximum number of reviewers to assign and notify for a pull request
+max_reviewers: 2
+
+# maximum number of files per reviewer (set to 0 for no limit)
+max_files_per_reviewer: 0
+
+# if at least a minimum number of reviewers is not found, assign a minimum number of reviewers randomly
+assign_min_reviewers_randomly: true
+
+# require a user to be listed in the reviewers section in order to be assigned to a PR
+require_notification: true
+
+# list of users and their app-specific usernames
+reviewers:
+  alice:
+    slack: ajones
+  bob:
+    slack: bsmith
+  charlie:
+    slack: cwilliams
+  dee:
+    slack: dwhite
+
+# list of users who will never be notified
+review_blacklist:
+  - charlie
+
+# assign these reviewers if the path they're listed under matches changed files (only when assigning randomly)
+review_path_fallbacks:
+  app/web:
+  - alice
+  app/api:
+  - bob
