@@ -2,20 +2,16 @@ var fs = require('fs');
 var path = require('path');
 
 var Promise = require('native-promise-only');
-
 var Github = require('github');
+Github.Promise = Github.Promise || Promise;
+
+var BlameRange = require('../models/blame-range');
 
 var GraphQLRequest = require('./graphql');
 
-var TEST = process.env.NODE_ENV === 'test';
-var GITHUB_TOKEN = TEST ? 'test' : process.env.HUBOT_REVIEW_GITHUB_TOKEN;
+var GITHUB_TOKEN = process.env.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN;
 
-var queries = ['git-blame'];
-
-queries = queries.reduce(function (map, name) {
-  map[name] = fs.readFileSync(path.join(__dirname, name + '.graphql'), 'utf8');
-  return map;
-}, {});
+var blameQuery = fs.readFileSync(path.join(__dirname, 'git-blame.graphql'), 'utf8');
 
 var github = new Github({
   'protocol': 'https'
@@ -35,74 +31,27 @@ function BlameRangeList (options) {
       return null;
     }
 
-    return {
+    return BlameRange({
       'age': range.age,
       'count': range.endingLine - range.startingLine + 1,
       'login': range.commit.author.user.login
-    };
+    });
   }).filter(Boolean);
 }
 
-function parseGithubPath (path) {
-  var parts = path.split('/').filter(function (p) {
-    return p.length > 0;
-  });
+function parseGithubURL (url) {
+  var githubUrlRe = /github\.com\/([^/]+)\/([^/]+)\/pull\/([0-9]+)/;
+  var match = url.match(githubUrlRe);
 
-  var type = parts[2];
-
-  if (type === 'issues') {
-    type = 'issue';
+  if (!match) {
+    return null;
   }
 
   return {
-    'owner': parts[0],
-    'repo': parts[1],
-    'type': type,
-    'number': parts[3]
+    'owner': match[1],
+    'repo': match[2],
+    'number': match[3]
   };
-}
-
-function getGithubResource(type, req) {
-  var nothing = Promise.resolve({});
-
-  if (type === 'pull') {
-    return github.pullRequests.get(req);
-  } else if (type === 'issue') {
-    return github.issues.get(req);
-  }
-
-  return nothing;
-}
-
-function fetchGithubResourceData (resource) {
-  var req = {
-    'owner': resource.owner,
-    'repo': resource.repo,
-    'number': resource.number
-  };
-
-  var ret = Promise.resolve(null);
-
-  if (resource.number !== undefined) {
-    ret = getGithubResource(resource.type, req);
-  }
-
-  return ret.then(function (response) {
-    if (!response) {
-      return response;
-    }
-
-    resource.data = response.data;
-    return resource;
-  });
-}
-
-function getGithubResources (githubURLs) {
-  var githubResources = githubURLs.map(function (uo) {
-    return parseGithubPath(uo.path);
-  });
-
-  return Promise.all(githubResources.map(fetchGithubResourceData));
 }
 
 function getPullRequestFiles (resource) {
@@ -118,11 +67,9 @@ function getPullRequestFiles (resource) {
 }
 
 function getBlameForCommitFile (resource) {
-  var query = queries['git-blame'];
-
   return GraphQLRequest({
     'token': GITHUB_TOKEN,
-    'query': query,
+    'query': blameQuery,
     'variables': {
       'owner': resource.owner,
       'repo': resource.repo,
@@ -139,7 +86,7 @@ function getBlameForCommitFile (resource) {
     });
 }
 
-function assignUsersToResource (resource, assignees) {
+function assignUsersToPullRequest (resource, assignees) {
   assignees = assignees || [];
 
   for(var i = 0; i < assignees.length; i++) {
@@ -157,12 +104,8 @@ function assignUsersToResource (resource, assignees) {
 }
 
 
-function unassignUsersFromResource (resource, assignees) {
+function unassignUsersFromPullRequest (resource, assignees) {
   assignees = assignees || [];
-  assignees = assignees.map(function (assignee) {
-    return assignee.login;
-  });
-
 
   return github.issues.removeAssigneesFromIssue({
     'owner': resource.owner,
@@ -171,7 +114,7 @@ function unassignUsersFromResource (resource, assignees) {
     'body': {
       'assignees': assignees
     }
-  })
+  });
 }
 
 function postPullRequestComment (resource, body) {
@@ -183,29 +126,43 @@ function postPullRequestComment (resource, body) {
   });
 }
 
-function getRepoFile (resource, path, encoding) {
+function getRepoFile(resource, path, encoding) {
+  encoding = encoding || 'base64';
   return github.repos.getContent({
     'owner': resource.owner,
     'repo': resource.repo,
     'path': path
   })
     .then(function (res) {
-      if (encoding) {
-        var buffer = new Buffer(res.data.content, 'base64');
-        return buffer.toString(encoding);
-      }
-
-      return res.data.content;
+      var buffer = new Buffer(res.data.content, 'base64');
+      return buffer.toString(encoding);
     });
 }
 
+function getPullRequest(options) {
+  return github.pullRequests.get(options);
+}
+
+function getPullRequestCommits(resource) {
+  return github.pullRequests.getCommits({
+    'owner': resource.owner,
+    'repo': resource.repo,
+    'number': resource.number,
+    'per_page': 100
+  })
+    .then(function (res) {
+      return res.data;
+    });
+}
 
 module.exports = {
-  'getGithubResources': getGithubResources,
+  'getPullRequest': getPullRequest,
   'getPullRequestFiles': getPullRequestFiles,
+  'getPullRequestCommits': getPullRequestCommits,
   'getBlameForCommitFile': getBlameForCommitFile,
   'getRepoFile': getRepoFile,
-  'assignUsersToResource': assignUsersToResource,
+  'assignUsersToPullRequest': assignUsersToPullRequest,
   'postPullRequestComment': postPullRequestComment,
-  'unassignUsersFromResource': unassignUsersFromResource
+  'unassignUsersFromPullRequest': unassignUsersFromPullRequest,
+  'parseGithubURL': parseGithubURL
 };

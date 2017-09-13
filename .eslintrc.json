@@ -1,5 +1,7 @@
 {
     "env": {
+        "browser": true,
+        "commonjs": true,
         "node": true
     },
     "extends": "eslint:recommended",
@@ -11,6 +13,8 @@
         "no-console": ["warn"],
         "eqeqeq": ["error"],
         "no-func-assign": ["off"],
+        "require-jsdoc": ["warn"],
+        "valid-jsdoc": ["error"],
         "linebreak-style": [
             "error",
             "unix"
@@ -19,6 +23,7 @@
             "error",
             "single"
         ],
+        "quote-props": ["error", "always"],
         "semi": [
             "warn",
             "always"

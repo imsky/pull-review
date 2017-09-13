@@ -1,64 +1,90 @@
-// Description
+// Description:
 //   Assigns and notifies reviewers for GitHub pull requests
 //
-// Configuration:
-//   HUBOT_REVIEW_GITHUB_TOKEN - required API access token with GraphQL API enabled
-//   HUBOT_REVIEW_REQUIRED_ROOMS - optional comma-separated list of chat rooms where review requests are restricted to
-//   HUBOT_REVIEW_PULL_REVIEW_CONFIG - optional pull review config override encoded as JSON
-//   HUBOT_REVIEW_DRY_RUN - optional flag to log, but not execute review actions
-//   HUBOT_REVIEW_GITHUB_ICON_URL - optional fallback icon URL for unfurled GitHub URLs
-//
 // Commands:
-//   [hubot] <GitHub URL> - unfurl GitHub URLs on platforms like Slack
 //   [hubot] review <GitHub PR URL> - assign and notify reviewers for GitHub PR
-//
-// Notes:
-//  * Make sure to enable the GitHub GraphQL API for your user/organization
-//  * Make sure to add everyone who can be notified to .pull-review (reviews won't work otherwise)
+//   [hubot] review <GitHub PR URL> again - reassign and notify reviewers for GitHub PR
 //
 // Author:
 //   Ivan Malopinsky
 
-var HubotReview = require('./src/hubot-review');
+var PullReview = require('./src/index');
+var url = require('./src/url');
 
-module.exports = function (robot) {
-  robot.hear(/github\.com\//, function (res) {
-    var adapter = robot.adapterName;
-    var message = res.message;
-    var text = message.text;
-    var room = message.room;
+module.exports = function (input) {
+  input = input || {};
+  var isHubot = input.name !== undefined && input.adapterName !== undefined && input.logger !== undefined && input.listen !== undefined && input.hear !== undefined;
+  var isAPI = input.pullRequestURL !== undefined;
 
-    if (adapter === 'slack') {
-      var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(room) || {};
-      room = slackRoom.name;
-    }
+  if (isHubot) {
+    var robot = input;
+    robot.hear(/github\.com\//, function (res) {
+      var adapter = robot.adapterName;
+      var chatText = res.message.text;
+      var chatRoom = res.message.room;
+      var chatChannel = adapter === 'slack' ? 'hubot:slack' : 'hubot:generic';
 
-    var hubotReview = HubotReview({
-      'text': text,
-      'adapter': adapter,
-      'room': room
-    });
+      function logError(e) {
+        robot.logger.error('[pull-review]', e);
+        res.send('[pull-review] ' + e);
+      }
 
-    function sendError (e) {
-      robot.logger.error('[hubot-review]', e);
-      res.send('[hubot-review] ' + e);
-    }
+      if (adapter === 'slack') {
+        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMBYId(chatRoom);
+        chatRoom = slackRoom.name;
+      }
 
-    hubotReview.then(function (response) {
-      if (!response) {
+      var pullRequestURL;
+      var retryReview;
+
+      var urls = url.extractURLs(chatText);
+      var processedText = chatText.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, function (m) { return m.toLowerCase(); });
+
+      if (Array.isArray(urls)) {
+        for (var i = 0; i < urls.length; i++) {
+          var u = urls[i];
+          var uo = url.parseURL(u);
+
+          if (uo.hostname === 'github.com') {
+            var reviewIndex = processedText.indexOf('review ' + u);
+            if (reviewIndex !== -1) {
+              retryReview = processedText.indexOf('review ' + u + ' again') === reviewIndex;
+              pullRequestURL = u;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!pullRequestURL) {
         return;
       }
 
-      try {
-        if (response instanceof Error) {
-          sendError(response);
-        } else {
-          res.send(response);
+      PullReview({
+        'pullRequestURL': pullRequestURL,
+        'retryReview': retryReview,
+        'chatRoom': chatRoom,
+        'chatChannel': chatChannel,
+        'isChat': true,
+        'notifyFn': function (message) {
+          robot.logger.info(message);
+          res.send(message);
         }
-      } catch (e) {
-        sendError(e);
-      }
-    })
-      .catch(sendError);
-  });
+      })
+        .then(function (response) {
+          try {
+            if (response instanceof Error) {
+              logError(response);
+            }
+          } catch (err) {
+            logError(err);
+          }
+        })
+        .catch(logError);
+    });
+  } else if (isAPI) {
+    return PullReview(input);
+  } else {
+    throw Error('Invalid input: either a review request or a Hubot reference must be provided');
+  }
 };

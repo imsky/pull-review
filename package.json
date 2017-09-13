@@ -1,46 +1,56 @@
 {
-  "name": "hubot-pull-review",
-  "description": "Assigns and notifies reviewers for GitHub pull requests",
-  "version": "0.9.13",
-  "author": "Ivan Malopinsky",
-  "license": "MIT",
-  "keywords": [
-    "hubot",
-    "hubot-scripts"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/imsky/hubot-pull-review.git"
-  },
-  "bugs": {
-    "url": "https://github.com/imsky/hubot-pull-review/issues"
-  },
-  "dependencies": {
-    "github": "^9.0.0",
-    "github-graphql-client": "^1.0.0",
-    "native-promise-only": "^0.8.1",
-    "normalize-url": "~1.9.0",
-    "pull-review": "~1.5.0",
-    "url-regex": "~3.2.0"
-  },
-  "devDependencies": {
-    "chai": "^2.1.1",
-    "chai-as-promised": "^6.0.0",
-    "codecov": "^1.0.1",
-    "coffee-script": "^1.12.4",
-    "eslint": "~2.13",
-    "hubot": "2.x",
-    "hubot-test-helper": "^1.3.0",
-    "istanbul": "^0.4.5",
-    "matchdep": "~0.3.0",
-    "mocha": "^2.1.0",
-    "nock": "^9.0.7",
-    "sinon": "^1.13.0",
-    "sinon-chai": "^2.7.0"
-  },
+  "name": "pull-review",
+  "version": "2.0.0-pre",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint *.js src/*.js src/**/*.js",
-    "test": "NODE_ENV=test istanbul cover _mocha -- -- test/*-test.js test/**/*-test.js"
+    "lint": "eslint --fix index.js src/**/*.js",
+    "test": "NODE_ENV=test nyc mocha test/*-test.js",
+    "hubot": "hubot --adapter shell --name hubot --require test/hubot"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imsky/pull-review.git"
+  },
+  "keywords": [
+    "git",
+    "pull",
+    "request",
+    "github",
+    "review"
+  ],
+  "author": "Ivan Malopinsky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/imsky/pull-review/issues"
+  },
+  "homepage": "https://github.com/imsky/pull-review#readme",
+  "dependencies": {
+    "github": "~10.0",
+    "github-graphql-client": "~1.0",
+    "js-yaml": "~3.8",
+    "knuth-shuffle": "~1.0",
+    "native-promise-only": "~0.8",
+    "normalize-url": "~1.9",
+    "url-regex": "~3.2"
+  },
+  "devDependencies": {
+    "chai": "~3.5",
+    "chai-as-promised": "~6.0",
+    "codecov": "~1.0",
+    "coffee-script": "~1.12",
+    "eslint": "~2.13",
+    "hubot": "~2.19",
+    "hubot-test-helper": "~1.7",
+    "mocha": "~3.2",
+    "nock": "~9.0",
+    "nyc": "~10.3"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
   }
 }
