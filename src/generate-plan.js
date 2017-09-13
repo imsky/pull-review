@@ -122,12 +122,20 @@ module.exports = function generatePlan (options) {
       }));
 
       channels.forEach(function (channel) {
+        var channelUsers = reviewers.map(function (reviewer) {
+          if (channel === 'hubot:slack') {
+            return reviewer.notify.slack;
+          }
+
+          return reviewer.login;
+        });
+
         actions.push(Action({
           'type': 'NOTIFY',
           'payload': {
             'pullRequest': pullRequest,
             'pullRequestRecord': pullRequestRecord,
-            'users': newPullRequestAssignees,
+            'users': channelUsers,
             'channel': channel
           }
         }));

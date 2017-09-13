@@ -14,26 +14,18 @@ module.exports = function (options) {
     });
   }
 
-  api.get('/repos/OWNER/REPO/pulls/404').reply(404, {
-    'message': 'Not Found'
-  });
-
-  api.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
-
-  api.delete('/repos/OWNER/REPO/issues/1/assignees').reply(200);
-
-  api.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
-
-  api.get('/repos/OWNER/REPO/pulls/1')
+  function mockPullRequest(options) {
+    var number = options.number || 1;
+    api.get('/repos/OWNER/REPO/pulls/' + number)
     .reply(200, {
-      'html_url': 'https://github.com/OWNER/REPO/pull/1',
-      'number': 1,
-      'state': 'open',
-      'title': 'Hello world',
-      'body': 'The quick brown fox jumps over the lazy dog.',
+      'html_url': 'https://github.com/OWNER/REPO/pull/' + number,
+      'number': number,
+      'state': options.state || 'open',
+      'title': options.title || 'Hello world',
+      'body': options.body || '### Description\n\n The quick brown fox jumps over the lazy dog. Check out [GitHub.com](https://github.com)',
       'assignee': options.assignee,
       'assignees': options.assignees,
-      'user': {
+      'user': options.user || {
         'login': 'alice',
         'html_url': 'https://github.com/alice'
       },
@@ -41,6 +33,66 @@ module.exports = function (options) {
         'sha': 'c0ded0c'
       }
     });
+  }
+
+  function mockPullRequestFiles(options) {
+    var number = options.number || 1;
+
+    api.get('/repos/OWNER/REPO/pulls/' + number + '/files?per_page=100')
+    .reply(200, options.files || [
+      {
+        'filename': 'MOST_CHANGES',
+        'status': 'modified',
+        'changes': 3
+      },
+      {
+        'filename': 'LEAST_CHANGES',
+        'status': 'modified',
+        'changes': 1
+      },
+      {
+        'filename': 'JUST_ADDED',
+        'status': 'added',
+        'changes': 10
+      },
+      {
+        'filename': 'JUST_DELETED',
+        'status': 'deleted',
+        'changes': 20
+      }
+    ]);
+  }
+
+  api.get('/repos/OWNER/REPO/pulls/404').reply(404, {
+    'message': 'Not Found'
+  });
+
+  api.post('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+  api.post('/repos/OWNER/REPO/issues/2/assignees').reply(200);
+
+  api.delete('/repos/OWNER/REPO/issues/1/assignees').reply(200);
+
+  api.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
+  api.post('/repos/OWNER/REPO/issues/2/comments', "{\"body\":\"@bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
+
+  mockPullRequest({
+    'number': 1,
+    'assignee': options.assignee,
+    'assignees': options.assignees
+  });
+
+  mockPullRequest({
+    'number': 2,
+    'body': 'https://www.example.com/image.png'
+  });
+
+  mockPullRequestFiles({
+    'number': 1
+  });
+
+  mockPullRequestFiles({
+    'number': 2
+  });
 
   api.get('/repos/OWNER/REPO/pulls/1/files?per_page=100')
     .reply(200, [

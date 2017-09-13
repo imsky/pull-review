@@ -37,7 +37,55 @@ describe('pull-review', function () {
     (function () { pullReview(); }).should.throw('Invalid input: either a review request or a Hubot reference must be provided');
   });
 
-  describe('chat mode', function () {
+  describe('with Slack notifications', function () {
+    it('works with Markdown', function () {
+      githubMock({
+        'config': config
+      });
+
+      var message;
+
+      return pullReview({
+        'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
+        'chatRoom': 'test',
+        'chatChannel': 'hubot:slack',
+        'isChat': true,
+        'notifyFn': function (m) {
+          message = m;
+        }
+      })
+        .then(function () {
+          message.text.should.equal('@bsmith: please review this pull request');
+          message.attachments.should.have.lengthOf(1);
+          var attachment = message.attachments[0];
+          attachment.title.should.equal('OWNER/REPO: Hello world');
+          attachment.title_link.should.equal('https://github.com/OWNER/REPO/pull/1');
+          attachment.text.should.equal('*Description*\n\n The quick brown fox jumps over the lazy dog. Check out <https://github.com|GitHub.com>');
+          attachment.fallback.should.equal('Hello world by alice: https://github.com/OWNER/REPO/pull/1');
+        });
+    });
+
+    it('works with images', function (done) {
+      githubMock({
+        'config': config
+      });
+
+      pullReview({
+        'pullRequestURL': 'https://github.com/OWNER/REPO/pull/2',
+        'chatRoom': 'test',
+        'chatChannel': 'hubot:slack',
+        'isChat': true,
+        'notifyFn': function (message) {
+          message.attachments.should.have.lengthOf(1);
+          var attachment = message.attachments[0];
+          attachment.image_url.should.equal('https://example.com/image.png');
+          done();
+        }
+      });
+    });
+  });
+
+  describe('using Hubot', function () {
     var room;
 
     beforeEach(function () {

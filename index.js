@@ -8,8 +8,6 @@
 // Author:
 //   Ivan Malopinsky
 
-//todo: use https://assets-cdn.github.com/pinned-octocat.svg for Slack icon
-
 var PullReview = require('./src/index');
 var url = require('./src/url');
 
