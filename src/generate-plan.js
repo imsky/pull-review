@@ -13,6 +13,7 @@ module.exports = function generatePlan (options) {
   var retryReview = Boolean(options.retryReview);
   var isChat = Boolean(options.isChat);
   var chatRoom = Boolean(options.chatRoom);
+  var requiredChatRooms = process.env.PULL_REVIEW_REQUIRED_ROOMS ? process.env.PULL_REVIEW_REQUIRED_ROOMS.split(',') : [];
   var chatChannel = options.chatChannel;
   var pullRequestRecord;
   var pullRequestFiles;
@@ -28,9 +29,9 @@ module.exports = function generatePlan (options) {
 
   if (!pullRequest) {
     throw Error('Invalid pull request URL');
+  } else if (isChat && chatRoom && requiredChatRooms.length && requiredChatRooms.indexOf(chatRoom) == -1) {
+    throw Error('Review requests are disabled from this chat room');
   }
-
-  //todo: validate chat room
 
   return github.getPullRequest(pullRequest)
     .catch(function (e) {

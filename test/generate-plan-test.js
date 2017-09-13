@@ -8,7 +8,8 @@ var config = driver.config;
 
 describe('#generatePlan', function () {
   afterEach(function () {
-    return nock.cleanAll();
+    process.env.PULL_REVIEW_REQUIRED_ROOMS = '';
+    nock.cleanAll();
   });
 
   it('works without blame', function () {
@@ -80,5 +81,21 @@ describe('#generatePlan', function () {
     return generatePlan({
       'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
     }).should.eventually.be.rejectedWith(Error, 'Missing configuration');
+  });
+
+  it('fails with the wrong chat room', function () {
+    githubMock({
+      'config': config
+    });
+
+    process.env.PULL_REVIEW_REQUIRED_ROOMS = 'not-test';
+
+    (function () {
+      generatePlan({
+        'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
+        'chatRoom': 'test',
+        'isChat': true
+      })
+    }).should.throw('Review requests are disabled from this chat room');
   });
 });
