@@ -66,13 +66,11 @@ module.exports = function (options) {
   function mockPullRequestCommits(options) {
     var number = options.number || 1;
 
-    api.get('/repos/OWNER/REPO/pulls/' + number + '/commits')
+    api.get('/repos/OWNER/REPO/pulls/' + number + '/commits?per_page=100')
       .reply(200, options.commits || [
         {
-          'commit': {
-            'author': {
-              'login': 'alice'
-            }
+          'author': {
+            'login': 'alice'
           }
         }
       ]);
@@ -89,6 +87,7 @@ module.exports = function (options) {
 
   api.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
   api.post('/repos/OWNER/REPO/issues/2/comments', "{\"body\":\"@bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
+  api.post('/repos/OWNER/REPO/issues/1/comments', "{\"body\":\"@dee: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)\"}\n").reply(200);
 
   mockPullRequest({
     'number': 1,
@@ -110,7 +109,8 @@ module.exports = function (options) {
   });
 
   mockPullRequestCommits({
-    'number': 1
+    'number': 1,
+    'commits': options.commits
   });
 
   mockPullRequestCommits({

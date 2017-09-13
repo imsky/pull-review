@@ -33,6 +33,26 @@ describe('pull-review', function () {
     });
   });
 
+  it('filters out committers', function () {
+    githubMock({
+      'config': config,
+      'commits': [
+        {
+          'author': {
+            'login': 'bob'
+          }
+        }
+      ]
+    });
+    return pullReview({
+      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
+    })
+      .then(function (actions) {
+        actions.should.have.lengthOf(2);
+        actions[0].payload.assignees.should.not.include('bob');
+      });
+  })
+
   it('fails with invalid arguments', function () {
     (function () { pullReview(); }).should.throw('Invalid input: either a review request or a Hubot reference must be provided');
   });

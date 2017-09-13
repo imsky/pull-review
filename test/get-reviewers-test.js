@@ -102,7 +102,7 @@ describe('#getReviewers', function () {
       });
   });
 
-  it.only('filters out all commit authors', function () {
+  it('filters out all commit authors', function () {
     return getReviewers({
       'config': {
         'version': 2,

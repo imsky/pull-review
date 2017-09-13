@@ -28,6 +28,8 @@ reviewers:
     slack: bsmith
   charlie:
     slack: cwilliams
+  dee:
+    slack: dwhite
 
 # list of users who will never be notified
 review_blacklist:

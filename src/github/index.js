@@ -143,9 +143,22 @@ function getPullRequest(options) {
   return github.pullRequests.get(options);
 }
 
+function getPullRequestCommits(resource) {
+  return github.pullRequests.getCommits({
+    'owner': resource.owner,
+    'repo': resource.repo,
+    'number': resource.number,
+    'per_page': 100
+  })
+    .then(function (res) {
+      return res.data;
+    });
+}
+
 module.exports = {
   'getPullRequest': getPullRequest,
   'getPullRequestFiles': getPullRequestFiles,
+  'getPullRequestCommits': getPullRequestCommits,
   'getBlameForCommitFile': getBlameForCommitFile,
   'getRepoFile': getRepoFile,
   'assignUsersToPullRequest': assignUsersToPullRequest,

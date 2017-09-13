@@ -40,8 +40,8 @@ module.exports = function PullReview(options) {
 
       var transaction = [];
 
-      actions = actions.map(Action)
-        .forEach(function (action) {
+      actions = actions.map(Action);
+      actions.forEach(function (action) {
           switch (action.type) {
             case 'ASSIGN_USERS_TO_PULL_REQUEST':
               transaction.push(github.assignUsersToPullRequest(action.payload.pullRequest, action.payload.assignees));
