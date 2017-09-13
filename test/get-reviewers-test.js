@@ -102,6 +102,52 @@ describe('#getReviewers', function () {
       });
   });
 
+  it.only('filters out all commit authors', function () {
+    return getReviewers({
+      'config': {
+        'version': 2,
+        'reviewers': {
+          'bob': {},
+          'charlie': {}
+        },
+      },
+        'authorLogin': 'alice',
+        'files': [
+          {
+            'filename': 'test',
+            'status': 'modified',
+            'changes': 10
+          }
+        ],
+        'commits': [
+          {
+            'author': {
+              'login': 'charlie'
+            }
+          }
+        ],
+        'getBlameForFile': function () {
+          return [
+            {
+              'login': 'charlie',
+              'count': 9,
+              'age': 1
+            },
+            {
+              'login': 'bob',
+              'count': 1,
+              'age': 10
+            }
+          ];
+        }
+    })
+      .then(function (reviewers) {
+        reviewers = reviewers.map(function (r) { return r.login });
+        reviewers.should.not.include('charlie');
+        reviewers.should.include('bob');
+      });
+  })
+
   it('works with blame correctly', function () {
     return getReviewers({
       'config': {

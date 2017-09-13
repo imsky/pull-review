@@ -17,6 +17,7 @@ module.exports = function generatePlan (options) {
   var chatChannel = options.chatChannel;
   var pullRequestRecord;
   var pullRequestFiles;
+  var pullRequestCommits;
   var pullRequestAssignees;
   var newPullRequestAssignees;
   var repoPullReviewConfig;
@@ -38,7 +39,6 @@ module.exports = function generatePlan (options) {
       throw Error('Failed to get pull request: ' + pullRequestURL);
     })
     .then(function (res) {
-      var unassignAssignees;
       pullRequestRecord = res;
 
       if (pullRequestRecord.data.state !== 'open') {
@@ -69,14 +69,15 @@ module.exports = function generatePlan (options) {
 
       return Promise.all([
         github.getPullRequestFiles(pullRequest),
+        github.getPullRequestCommits(pullRequest),
         config ? null : github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8')
-          .catch(function () { return null; }),
-        unassignAssignees
+          .catch(function () { return null; })
       ]);
     })
     .then(function (res) {
       pullRequestFiles = res[0];
-      repoPullReviewConfig = res[1];
+      pullRequestCommits = res[1];
+      repoPullReviewConfig = res[2];
       config = config || repoPullReviewConfig;
 
       if (!config) {
@@ -86,6 +87,7 @@ module.exports = function generatePlan (options) {
       return getReviewers({
         'config': config,
         'files': pullRequestFiles,
+        'commits': pullRequestCommits,
         'authorLogin': pullRequestRecord.data.user.login,
         'assignees': retryReview ? [] : pullRequestAssignees,
         'getBlameForFile': function (file) {

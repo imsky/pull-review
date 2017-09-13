@@ -63,6 +63,21 @@ module.exports = function (options) {
     ]);
   }
 
+  function mockPullRequestCommits(options) {
+    var number = options.number || 1;
+
+    api.get('/repos/OWNER/REPO/pulls/' + number + '/commits')
+      .reply(200, options.commits || [
+        {
+          'commit': {
+            'author': {
+              'login': 'alice'
+            }
+          }
+        }
+      ]);
+  }
+
   api.get('/repos/OWNER/REPO/pulls/404').reply(404, {
     'message': 'Not Found'
   });
@@ -91,6 +106,14 @@ module.exports = function (options) {
   });
 
   mockPullRequestFiles({
+    'number': 2
+  });
+
+  mockPullRequestCommits({
+    'number': 1
+  });
+
+  mockPullRequestCommits({
     'number': 2
   });
 

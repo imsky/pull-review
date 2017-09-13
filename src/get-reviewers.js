@@ -11,10 +11,12 @@ module.exports = function getReviewers (options) {
     'version': 2
   };
   var files = options.files || [];
+  var commits = options.commits || [];
   var assignees = options.assignees || [];
   var authorLogin = options.authorLogin;
   var getBlameForFile = options.getBlameForFile;
   var currentReviewers = {};
+  var currentCommitters = {};
 
   if (!getBlameForFile) {
     throw Error('No function provided for retrieving blame for a file');
@@ -40,6 +42,10 @@ module.exports = function getReviewers (options) {
 
   var topModifiedFiles = config.maxFiles > 0 ? modifiedFiles.slice(0, config.maxFiles) : modifiedFiles;
 
+  commits.forEach(function (commit) {
+    currentCommitters[commit.author.login] = true;
+  });
+
   assignees = assignees.filter(function(assignee) {
     return assignee !== authorLogin;
   });
@@ -57,10 +63,15 @@ module.exports = function getReviewers (options) {
 
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = currentReviewers[reviewer];
+    var isReviewerCurrentCommitter = currentCommitters[reviewer];
     var isReviewerAuthor = reviewer === authorLogin;
     var isReviewerUnreachable = (config.requireNotification ? !config.reviewers[reviewer] : false);
     var isReviewerBlacklisted = config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
-    return !isReviewerSelected && !isReviewerAuthor && !isReviewerBlacklisted && !isReviewerUnreachable;
+    return !isReviewerCurrentCommitter &&
+      !isReviewerUnreachable &&
+      !isReviewerBlacklisted &&
+      !isReviewerSelected &&
+      !isReviewerAuthor;
   }
 
   return Promise.all(topModifiedFiles.map(getBlameForFile))
