@@ -1,7 +1,9 @@
 var fs = require('fs');
 var path = require('path');
 
+var Promise = require('native-promise-only');
 var Github = require('github');
+Github.Promise = Github.Promise || Promise;
 
 var GraphQLRequest = require('./graphql');
 
