@@ -59,9 +59,11 @@ describe('pull-review', function () {
       room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
         .then(function () {
           setTimeout(function () {
-            console.log(room.messages)
+            room.messages.should.have.lengthOf(2);
+            room.messages[1][0].should.equal('hubot');
+            room.messages[1][1].should.equal('@bob: please review this pull request - https://github.com/OWNER/REPO/pull/1');
             done();
-          }, 500);
+          }, 100);
         });
     });
   });

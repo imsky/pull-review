@@ -126,6 +126,7 @@ module.exports = function generatePlan (options) {
           'type': 'NOTIFY',
           'payload': {
             'pullRequest': pullRequest,
+            'pullRequestRecord': pullRequestRecord,
             'users': newPullRequestAssignees,
             'channel': channel
           }

@@ -6,10 +6,23 @@ var github = require('./github');
 var generatePlan = require('./generate-plan');
 var Action = require('./models/action');
 var GithubMessage = require('./models/messages/github');
+var HubotMessage = require('./models/messages/hubot');
 
 var defaultNotifyFn = function defaultNotifyFn(message) {
   console.info(message);
 };
+
+var generateNotification = function generateNotification (input) {
+  input = input || {};
+  var channel = input.channel.split(':');
+  var source = channel[0];
+
+  if (source === 'hubot') {
+    return HubotMessage(input);
+  } else {
+    throw Error('Unsupported source: ' + source);
+  }
+}
 
 module.exports = function PullReview(options) {
   options = options || {};
@@ -40,8 +53,14 @@ module.exports = function PullReview(options) {
               if (action.payload.channel === 'github') {
                 transaction.push(github.postPullRequestComment(action.payload.pullRequest, GithubMessage(action.payload)));
               } else {
-                transaction.push(new Promise(function (resolve) {
-                  resolve(notifyFn(action.payload));
+                transaction.push(new Promise(function (resolve, reject) {
+                  try {
+                    var notification = generateNotification(action.payload);
+                    resolve(notifyFn(notification));
+                  } catch (e) {
+                    console.error(e);
+                    reject(Error('Failed to notify'));
+                  }
                 }));
               }
               break;
