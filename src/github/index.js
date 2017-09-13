@@ -9,10 +9,6 @@ var GraphQLRequest = require('./graphql');
 
 var GITHUB_TOKEN = process.env.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN;
 
-if (!GITHUB_TOKEN) {
-  throw Error('Missing GitHub token');
-}
-
 //todo: remove queries
 var queries = ['git-blame'];
 

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint --fix index.js src/**/*.js",
-    "test": "NODE_ENV=test nyc mocha test/*-test.js"
+    "test": "NODE_ENV=test nyc mocha test/*-test.js",
+    "hubot": "hubot --adapter shell --name hubot --require test/hubot"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,7 @@
   },
   "homepage": "https://github.com/imsky/pull-review#readme",
   "dependencies": {
-    "github": "~9.2",
+    "github": "~10.0",
     "github-graphql-client": "~1.0",
     "js-yaml": "~3.8",
     "knuth-shuffle": "~1.0",

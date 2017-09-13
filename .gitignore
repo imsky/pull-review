@@ -2,6 +2,7 @@
 # qkst.io/dotfiles/gitignore
 
 coverage
+.hubot_history
 
 # Sensitive files
 *.key
