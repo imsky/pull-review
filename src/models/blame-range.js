@@ -5,6 +5,8 @@ module.exports = function BlameRange(input) {
 
   if (!login || !count || !age) {
     throw Error('Missing blame range data');
+  } else if (count < 1) {
+    throw Error('Blame range count is below 1')
   }
 
   return input;

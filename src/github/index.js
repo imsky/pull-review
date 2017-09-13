@@ -5,17 +5,13 @@ var Promise = require('native-promise-only');
 var Github = require('github');
 Github.Promise = Github.Promise || Promise;
 
+var BlameRange = require('../models/blame-range');
+
 var GraphQLRequest = require('./graphql');
 
 var GITHUB_TOKEN = process.env.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN;
 
-//todo: remove queries
-var queries = ['git-blame'];
-
-queries = queries.reduce(function (map, name) {
-  map[name] = fs.readFileSync(path.join(__dirname, name + '.graphql'), 'utf8');
-  return map;
-}, {});
+var blameQuery = fs.readFileSync(path.join(__dirname, 'git-blame.graphql'), 'utf8');
 
 var github = new Github({
   'protocol': 'https'
@@ -26,7 +22,6 @@ github.authenticate({
   'token': GITHUB_TOKEN
 });
 
-//todo: use BlameRange
 function BlameRangeList (options) {
   var blame = options.blame || {};
   var ranges = blame.ranges || [];
@@ -36,11 +31,11 @@ function BlameRangeList (options) {
       return null;
     }
 
-    return {
+    return BlameRange({
       'age': range.age,
       'count': range.endingLine - range.startingLine + 1,
       'login': range.commit.author.user.login
-    };
+    });
   }).filter(Boolean);
 }
 
@@ -72,11 +67,9 @@ function getPullRequestFiles (resource) {
 }
 
 function getBlameForCommitFile (resource) {
-  var query = queries['git-blame'];
-
   return GraphQLRequest({
     'token': GITHUB_TOKEN,
-    'query': query,
+    'query': blameQuery,
     'variables': {
       'owner': resource.owner,
       'repo': resource.repo,
