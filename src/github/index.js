@@ -66,7 +66,7 @@ function getPullRequestFiles (resource) {
     });
 }
 
-function getBlameForCommitFile (resource) {
+function getBlameForCommitFile(resource) {
   return GraphQLRequest({
     'token': GITHUB_TOKEN,
     'query': blameQuery,
@@ -81,7 +81,8 @@ function getBlameForCommitFile (resource) {
       var blame = res.data.repository.object.blame;
       return BlameRangeList({'blame': blame});
     })
-    .catch(function () {
+    .catch(function (e) {
+      console.error(e)
       return null;
     });
 }

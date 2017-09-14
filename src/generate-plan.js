@@ -94,7 +94,10 @@ module.exports = function generatePlan (options) {
           return github.getBlameForCommitFile({
             'owner': pullRequest.owner,
             'repo': pullRequest.repo,
-            'sha': pullRequestRecord.data.head.sha,
+            //since only modified files are analyzed, the blame for those files is looked up on the original branch
+            //of course the files could change significantly on the branch, however this at least filters out otherwise
+            //unusable blame data that just points to the branch author
+            'sha': pullRequestRecord.data.base.sha,
             'path': file.filename
           });
         }
