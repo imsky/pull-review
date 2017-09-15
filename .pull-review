@@ -14,6 +14,9 @@ max_reviewers: 2
 # maximum number of files per reviewer (set to 0 for no limit)
 max_files_per_reviewer: 0
 
+# maximum number of lines changed per reviewer (set to 0 for no limit)
+max_lines_per_reviewer: 0
+
 # if at least a minimum number of reviewers is not found, assign a minimum number of reviewers randomly
 assign_min_reviewers_randomly: true
 
@@ -41,3 +44,6 @@ review_path_fallbacks:
   - alice
   app/api:
   - bob
+  app/ops:
+  - alice
+  - dee

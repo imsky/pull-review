@@ -1,6 +1,10 @@
 var nock = require('nock');
 
+var github = require('../../src/github');
+
 var api = nock('https://api.github.com');
+
+var blameQuery = github.blameQuery;
 
 module.exports = function (options) {
   options = options || {};
@@ -29,7 +33,7 @@ module.exports = function (options) {
         'login': 'alice',
         'html_url': 'https://github.com/alice'
       },
-      'head': {
+      'base': {
         'sha': 'c0ded0c'
       }
     });
@@ -43,22 +47,30 @@ module.exports = function (options) {
       {
         'filename': 'MOST_CHANGES',
         'status': 'modified',
-        'changes': 3
+        'additions': 20,
+        'deletions': 30,
+        'changes': 50
       },
       {
         'filename': 'LEAST_CHANGES',
         'status': 'modified',
-        'changes': 1
+        'changes': 10,
+        'additions': 5,
+        'deletions': 5
       },
       {
         'filename': 'JUST_ADDED',
         'status': 'added',
-        'changes': 10
+        'changes': 10,
+        'additions': 10,
+        'deletions': 0
       },
       {
         'filename': 'JUST_DELETED',
         'status': 'deleted',
-        'changes': 20
+        'changes': 20,
+        'additions': 0,
+        'deletions': 20
       }
     ]);
   }
@@ -141,8 +153,9 @@ module.exports = function (options) {
       }
     ]);
 
-  if (!options.noBlame) {
-    api.post('/graphql')
+  function mockGitBlame(options) {
+    var file = options.file || 'README';
+    api.post('/graphql', {"query":"query ($owner: String!, $repo: String!, $sha: String!, $path: String!) {\n  repository(owner: $owner, name: $repo) {\n    object(expression: $sha) {\n      ...blame\n    }\n  }\n}\n\nfragment blame on Commit {\n  blame(path: $path) {\n    ranges {\n      startingLine\n      endingLine\n      age\n      commit {\n        oid\n        author {\n          name\n          user {\n            email\n            login\n          }\n        }\n      }\n    }\n  }\n}","variables":{"owner":"OWNER","repo":"REPO","sha":"c0ded0c","path":file}}).times(5)
       .reply(200, {
         'data': {
           'repository': {
@@ -193,14 +206,11 @@ module.exports = function (options) {
       });
   }
 
-  if (options.configFile) {
-    api.get('/repos/OWNER/REPO/contents/.pull-review')
-      .reply(200, {
-        'name': '.pull-review',
-        'path': '.pull-review',
-        'encoding': 'base64',
-        'content': (new Buffer(options.configFile, 'utf8')).toString('base64')
-      });
+  if (!options.noBlame) {
+    mockGitBlame({'file': 'MOST_CHANGES'});
+    mockGitBlame({'file': 'LEAST_CHANGES'});
+    mockGitBlame({'file': 'JUST_DELETED'});
+    mockGitBlame({'file': 'JUST_ADDED'});
   }
 
   return api;

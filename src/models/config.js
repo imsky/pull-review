@@ -23,6 +23,7 @@ module.exports = function PullReviewConfig(input) {
   var maxReviewers = get(input.max_reviewers, 2);
   var maxFiles = get(input.max_files, 5);
   var maxFilesPerReviewer = get(input.max_files_per_reviewer, 0);
+  var maxLinesPerReviewer = get(input.max_lines_per_reviewer, 0);
   var assignMinReviewersRandomly = get(input.assign_min_reviewers_randomly, true);
   var reviewers = get(input.reviewers, {});
   var reviewBlacklist = get(input.review_blacklist, []);
@@ -37,8 +38,10 @@ module.exports = function PullReviewConfig(input) {
     throw Error('Minimum reviewers exceeds maximum reviewers');
   } else if (maxFiles < 0 || maxFiles === Infinity) {
     throw Error('Invalid number of maximum files');
-  } else if (maxFilesPerReviewer < 0 || maxFilesPerReviewer === Infinity) {
+  } else if (maxFilesPerReviewer < 0 || maxFilesPerReviewer === Infinity || (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)) {
     throw Error('Invalid number of maximum files per reviewer');
+  } else if (maxLinesPerReviewer < 0 || maxLinesPerReviewer === Infinity || (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)) {
+    throw Error('Invalid number of maximum lines per reviewer');
   }
 
   return Object.freeze({
@@ -46,6 +49,7 @@ module.exports = function PullReviewConfig(input) {
     'maxReviewers': maxReviewers,
     'maxFiles': maxFiles,
     'maxFilesPerReviewer': maxFilesPerReviewer,
+    'maxLinesPerReviewer': maxLinesPerReviewer,
     'reviewers': reviewers,
     'reviewBlacklist': reviewBlacklist,
     'reviewPathFallbacks': reviewPathFallbacks,

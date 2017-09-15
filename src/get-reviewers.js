@@ -29,8 +29,18 @@ module.exports = function getReviewers (options) {
   var maxReviewers = config.maxReviewers;
   var minReviewers = config.minReviewers;
   var maxFilesPerReviewer = config.maxFilesPerReviewer;
+  var maxLinesPerReviewer = config.maxLinesPerReviewer;
+  var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
 
   files = files.map(PullRequestFile);
+
+  var nonRemovedFiles = files.filter(function (file) {
+    return files.status !== 'removed';
+  });
+
+  var changedLines = Math.abs(nonRemovedFiles.reduce(function (sum, file) {
+    return sum + (file.additions - file.deletions);
+  }, 0));
 
   var modifiedFiles = files.filter(function(file) {
     return file.status === 'modified';
@@ -57,9 +67,23 @@ module.exports = function getReviewers (options) {
   }
 
   var unassignedReviewers = maxReviewers - assignees.length;
-  var maxNeededReviewers = maxFilesPerReviewer > 0 ? Math.ceil(files.length / maxFilesPerReviewer) : unassignedReviewers;
+  var maxNeededReviewers = unassignedReviewers;
+
+  var maxReviewersUsingLines = maxLinesPerReviewer > 0 ? Math.ceil(changedLines / maxLinesPerReviewer) : 0;
+  var maxReviewersUsingFiles = maxFilesPerReviewer > 0 ? Math.ceil(files.length / maxFilesPerReviewer) : 0;
+
+  if (maxReviewersAssignedDynamically) {
+    if (!maxFilesPerReviewer && maxLinesPerReviewer) {
+      maxNeededReviewers = maxReviewersUsingLines;
+    } else if (!maxLinesPerReviewer && maxFilesPerReviewer) {
+      maxNeededReviewers = maxReviewersUsingFiles;
+    } else {
+      maxNeededReviewers = Math.min(maxReviewersUsingLines, maxReviewersUsingFiles);
+    }
+  }
+
   var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
-  var minReviewersAssignable = maxFilesPerReviewer > 0 ? maxReviewersAssignable : minReviewers;
+  var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
 
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = currentReviewers[reviewer];

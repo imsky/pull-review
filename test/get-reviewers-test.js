@@ -306,5 +306,74 @@ describe('#getReviewers', function () {
           reviewers.should.have.lengthOf(1);
         });
     });
+
+    it('works with max files defined');
+  });
+
+  describe('using max lines per reviewer', function () {
+    var options = {
+      'config': {
+        'version': 2,
+        'reviewers': {
+          'alice': {},
+          'bob': {},
+          'charlie': {},
+          'dee': {}
+        },
+        'max_lines_per_reviewer': 0
+      },
+      'files': [
+        {   
+          'filename': 'MOST_CHANGES',
+          'status': 'modified',
+          'additions': 20,
+          'deletions': 30,
+          'changes': 50
+        },
+        {
+          'filename': 'LEAST_CHANGES',
+          'status': 'modified',
+          'changes': 10,
+          'additions': 5,
+          'deletions': 5
+        },
+        {
+          'filename': 'JUST_ADDED',
+          'status': 'added',
+          'changes': 10,
+          'additions': 10,
+          'deletions': 0
+        },
+        {
+          'filename': 'JUST_DELETED',
+          'status': 'deleted',
+          'changes': 20,
+          'additions': 0,
+          'deletions': 20
+        }
+      ],
+      'authorLogin': 'wally',
+      'getBlameForFile': function () {
+        return [];
+      }
+    };
+
+    it('assigns a minimum of reviewers', function () {
+      return getReviewers(options)
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(1);
+        });
+    });
+
+    it('assigns a maximum of reviewers', function () {
+      return getReviewers(Object.assign({}, options, {
+        'config': Object.assign({}, options.config, {
+          'max_lines_per_reviewer': 4
+        })
+      }))
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(2);
+        });
+    });
   });
 });

@@ -157,6 +157,7 @@ function getPullRequestCommits(resource) {
 }
 
 module.exports = {
+  'blameQuery': blameQuery,
   'getPullRequest': getPullRequest,
   'getPullRequestFiles': getPullRequestFiles,
   'getPullRequestCommits': getPullRequestCommits,
