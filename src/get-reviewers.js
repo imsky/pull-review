@@ -152,7 +152,11 @@ module.exports = function getReviewers (options) {
       });
 
       if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
-        Object.keys(config.reviewPathFallbacks || {}).forEach(function (prefix) {
+        Object.keys(config.reviewPathFallbacks || {})
+          .sort(function (a, b) {
+            return b.length - a.length;
+          })
+          .forEach(function (prefix) {
           files.forEach(function (file) {
             if (file.filename.indexOf(prefix) === 0) {
               var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];

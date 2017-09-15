@@ -366,11 +366,8 @@ describe('#getReviewers', function () {
     });
 
     it('assigns a maximum of reviewers', function () {
-      return getReviewers(Object.assign({}, options, {
-        'config': Object.assign({}, options.config, {
-          'max_lines_per_reviewer': 4
-        })
-      }))
+      options.config.max_lines_per_reviewer = 4;
+      return getReviewers(options)
         .then(function (reviewers) {
           reviewers.should.have.lengthOf(2);
         });
