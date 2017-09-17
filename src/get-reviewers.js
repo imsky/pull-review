@@ -5,10 +5,10 @@ var BlameRange = require('./models/blame-range');
 var PullRequestFile = require('./models/pull-request-file');
 var Config = require('./models/config');
 
-module.exports = function getReviewers (options) {
+module.exports = function getReviewers(options) {
   options = options || {};
   var config = options.config || {
-    'version': 2
+    version: 2
   };
   var files = options.files || [];
   var commits = options.commits || [];
@@ -34,13 +34,15 @@ module.exports = function getReviewers (options) {
 
   files = files.map(PullRequestFile);
 
-  var nonRemovedFiles = files.filter(function (file) {
-    return files.status !== 'removed';
+  var nonRemovedFiles = files.filter(function(file) {
+    return file.status !== 'removed';
   });
 
-  var changedLines = Math.abs(nonRemovedFiles.reduce(function (sum, file) {
-    return sum + (file.additions - file.deletions);
-  }, 0));
+  var changedLines = Math.abs(
+    nonRemovedFiles.reduce(function(sum, file) {
+      return sum + (file.additions - file.deletions);
+    }, 0)
+  );
 
   var modifiedFiles = files.filter(function(file) {
     return file.status === 'modified';
@@ -57,13 +59,13 @@ module.exports = function getReviewers (options) {
   var currentCommitters = {};
   var uniqueAuthors = 0;
 
-  commits.forEach(function (commit) {
+  commits.forEach(function(commit) {
     currentCommitters[commit.author.login] = true;
   });
 
   if (retryReview) {
     if (assignees.length) {
-      assignees.forEach(function (assignee) {
+      assignees.forEach(function(assignee) {
         excludedReviewers[assignee] = true;
       });
     }
@@ -100,20 +102,21 @@ module.exports = function getReviewers (options) {
   var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
   var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
 
-
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = currentReviewers[reviewer];
     var isReviewerCurrentCommitter = currentCommitters[reviewer];
     var isReviewerAuthor = reviewer === authorLogin;
-    var isReviewerUnreachable = (config.requireNotification ? !config.reviewers[reviewer] : false);
+    var isReviewerUnreachable = config.requireNotification ? !config.reviewers[reviewer] : false;
     var isReviewerBlacklisted = config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
     var isReviewerExcluded = excludedReviewers[reviewer];
-    return !isReviewerCurrentCommitter &&
+    return (
+      !isReviewerCurrentCommitter &&
       !isReviewerUnreachable &&
       !isReviewerBlacklisted &&
       !isReviewerExcluded &&
       !isReviewerSelected &&
-      !isReviewerAuthor;
+      !isReviewerAuthor
+    );
   }
 
   return Promise.all(topModifiedFiles.map(getBlameForFile))
@@ -133,7 +136,7 @@ module.exports = function getReviewers (options) {
 
         var recentBlames = usableBlames.slice(0, Math.ceil(usableBlames.length * 0.75));
 
-        recentBlames.forEach(function (range) {
+        recentBlames.forEach(function(range) {
           var linesChanged = range.count;
           var author = range.login;
 
@@ -149,11 +152,11 @@ module.exports = function getReviewers (options) {
 
       var authorBlames = [];
 
-      Object.keys(authorsLinesChanged || {}).forEach(function (author) {
+      Object.keys(authorsLinesChanged || {}).forEach(function(author) {
         authorBlames.push({
-          'login': author,
-          'count': authorsLinesChanged[author] || 0,
-          'source': 'blame'
+          login: author,
+          count: authorsLinesChanged[author] || 0,
+          source: 'blame'
         });
       });
 
@@ -176,29 +179,29 @@ module.exports = function getReviewers (options) {
         reviewers = reviewers.filter(Boolean);
       }
 
-      reviewers.forEach(function (reviewer) {
+      reviewers.forEach(function(reviewer) {
         currentReviewers[reviewer.login] = true;
       });
 
       if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
         Object.keys(config.reviewPathFallbacks || {})
-          .sort(function (a, b) {
+          .sort(function(a, b) {
             return b.length - a.length;
           })
-          .forEach(function (prefix) {
-            files.forEach(function (file) {
+          .forEach(function(prefix) {
+            files.forEach(function(file) {
               if (file.filename.indexOf(prefix) === 0) {
                 var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];
 
-                fallbackAuthors.forEach(function (author) {
+                fallbackAuthors.forEach(function(author) {
                   if (!isEligibleReviewer(author)) {
                     return;
                   }
 
                   fallbackReviewers.push({
-                    'login': author,
-                    'count': 0,
-                    'source': 'fallback'
+                    login: author,
+                    count: 0,
+                    source: 'fallback'
                   });
 
                   currentReviewers[author] = true;
@@ -212,15 +215,15 @@ module.exports = function getReviewers (options) {
       }
 
       if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
-        Object.keys(config.reviewers || {}).forEach(function (author) {
+        Object.keys(config.reviewers || {}).forEach(function(author) {
           if (!isEligibleReviewer(author)) {
             return;
           }
 
           randomReviewers.push({
-            'login': author,
-            'count': 0,
-            'source': 'random'
+            login: author,
+            count: 0,
+            source: 'random'
           });
 
           currentReviewers[author] = true;
@@ -232,8 +235,8 @@ module.exports = function getReviewers (options) {
 
       return reviewers;
     })
-    .then(function (reviewers) {
-      return reviewers.map(function (reviewer) {
+    .then(function(reviewers) {
+      return reviewers.map(function(reviewer) {
         reviewer.notify = config.reviewers[reviewer.login];
         return reviewer;
       });

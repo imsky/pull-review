@@ -1,10 +1,12 @@
 'use strict';
 
+var Promise = require('native-promise-only');
+
 var Action = require('./models/action');
 var github = require('./github');
 var getReviewers = require('./get-reviewers');
 
-module.exports = function generatePlan (options) {
+module.exports = function generatePlan(options) {
   options = options || {};
   var actions = [];
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
@@ -13,7 +15,9 @@ module.exports = function generatePlan (options) {
   var retryReview = Boolean(options.retryReview);
   var isChat = Boolean(options.isChat);
   var chatRoom = Boolean(options.chatRoom);
-  var requiredChatRooms = process.env.PULL_REVIEW_REQUIRED_ROOMS ? process.env.PULL_REVIEW_REQUIRED_ROOMS.split(',') : [];
+  var requiredChatRooms = process.env.PULL_REVIEW_REQUIRED_ROOMS
+    ? process.env.PULL_REVIEW_REQUIRED_ROOMS.split(',')
+    : [];
   var chatChannel = options.chatChannel;
   var pullRequestRecord;
   var pullRequestFiles;
@@ -30,15 +34,16 @@ module.exports = function generatePlan (options) {
 
   if (!pullRequest) {
     throw Error('Invalid pull request URL');
-  } else if (isChat && chatRoom && requiredChatRooms.length && requiredChatRooms.indexOf(chatRoom) == -1) {
+  } else if (isChat && chatRoom && requiredChatRooms.length && requiredChatRooms.indexOf(chatRoom) === -1) {
     throw Error('Review requests are disabled from this chat room');
   }
 
-  return github.getPullRequest(pullRequest)
-    .catch(function (e) {
+  return github
+    .getPullRequest(pullRequest)
+    .catch(function() {
       throw Error('Failed to get pull request: ' + pullRequestURL);
     })
-    .then(function (res) {
+    .then(function(res) {
       pullRequestRecord = res;
 
       if (pullRequestRecord.data.state !== 'open') {
@@ -52,29 +57,34 @@ module.exports = function generatePlan (options) {
       }
 
       if (pullRequestAssignees && pullRequestAssignees.length) {
-        pullRequestAssignees = pullRequestAssignees.map(function (assignee) {
+        pullRequestAssignees = pullRequestAssignees.map(function(assignee) {
           return assignee.login;
         });
 
         if (retryReview) {
-          actions.push(Action({
-            'type': 'UNASSIGN_USERS_FROM_PULL_REQUEST',
-            'payload': {
-              'pullRequest': pullRequest,
-              'assignees': pullRequestAssignees
-            }
-          }));
+          actions.push(
+            Action({
+              type: 'UNASSIGN_USERS_FROM_PULL_REQUEST',
+              payload: {
+                pullRequest: pullRequest,
+                assignees: pullRequestAssignees
+              }
+            })
+          );
         }
       }
 
       return Promise.all([
         github.getPullRequestFiles(pullRequest),
         github.getPullRequestCommits(pullRequest),
-        config ? null : github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8')
-          .catch(function () { return null; })
+        config
+          ? null
+          : github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8').catch(function() {
+            return null;
+          })
       ]);
     })
-    .then(function (res) {
+    .then(function(res) {
       pullRequestFiles = res[0];
       pullRequestCommits = res[1];
       repoPullReviewConfig = res[2];
@@ -85,31 +95,31 @@ module.exports = function generatePlan (options) {
       }
 
       return getReviewers({
-        'config': config,
-        'files': pullRequestFiles,
-        'commits': pullRequestCommits,
-        'authorLogin': pullRequestRecord.data.user.login,
-        'assignees': pullRequestAssignees,
-        'retryReview': retryReview,
-        'getBlameForFile': function (file) {
+        config: config,
+        files: pullRequestFiles,
+        commits: pullRequestCommits,
+        authorLogin: pullRequestRecord.data.user.login,
+        assignees: pullRequestAssignees,
+        retryReview: retryReview,
+        getBlameForFile: function(file) {
           return github.getBlameForCommitFile({
-            'owner': pullRequest.owner,
-            'repo': pullRequest.repo,
+            owner: pullRequest.owner,
+            repo: pullRequest.repo,
             //since only modified files are analyzed, the blame for those files is looked up on the original branch
             //of course the files could change significantly on the branch, however this at least filters out otherwise
             //unusable blame data that just points to the branch author
-            'sha': pullRequestRecord.data.base.sha,
-            'path': file.filename
+            sha: pullRequestRecord.data.base.sha,
+            path: file.filename
           });
         }
       });
     })
-    .then(function (reviewers) {
+    .then(function(reviewers) {
       if (!reviewers || !reviewers.length) {
         throw Error('No reviewers found: ' + pullRequestURL);
       }
 
-      newPullRequestAssignees = reviewers.map(function (reviewer) {
+      newPullRequestAssignees = reviewers.map(function(reviewer) {
         return reviewer.login;
       });
 
@@ -119,17 +129,19 @@ module.exports = function generatePlan (options) {
         channels.push(chatChannel);
       }
 
-      actions.push(Action({
-        'type': 'ASSIGN_USERS_TO_PULL_REQUEST',
-        'payload': {
-          'pullRequest': pullRequest,
-          'assignees': newPullRequestAssignees,
-          'reviewers': reviewers
-        }
-      }));
+      actions.push(
+        Action({
+          type: 'ASSIGN_USERS_TO_PULL_REQUEST',
+          payload: {
+            pullRequest: pullRequest,
+            assignees: newPullRequestAssignees,
+            reviewers: reviewers
+          }
+        })
+      );
 
-      channels.forEach(function (channel) {
-        var channelUsers = reviewers.map(function (reviewer) {
+      channels.forEach(function(channel) {
+        var channelUsers = reviewers.map(function(reviewer) {
           if (channel === 'hubot:slack') {
             return reviewer.notify.slack;
           }
@@ -137,15 +149,17 @@ module.exports = function generatePlan (options) {
           return reviewer.login;
         });
 
-        actions.push(Action({
-          'type': 'NOTIFY',
-          'payload': {
-            'pullRequest': pullRequest,
-            'pullRequestRecord': pullRequestRecord,
-            'users': channelUsers,
-            'channel': channel
-          }
-        }));
+        actions.push(
+          Action({
+            type: 'NOTIFY',
+            payload: {
+              pullRequest: pullRequest,
+              pullRequestRecord: pullRequestRecord,
+              users: channelUsers,
+              channel: channel
+            }
+          })
+        );
       });
 
       return actions;

@@ -12,7 +12,7 @@ var defaultNotifyFn = function defaultNotifyFn(message) {
   console.info(message);
 };
 
-var generateNotification = function generateNotification (input) {
+var generateNotification = function generateNotification(input) {
   input = input || {};
   var channel = input.channel.split(':');
   var source = channel[0];
@@ -22,7 +22,7 @@ var generateNotification = function generateNotification (input) {
   } else {
     throw Error('Unsupported source: ' + source);
   }
-}
+};
 
 module.exports = function PullReview(options) {
   options = options || {};
@@ -31,7 +31,7 @@ module.exports = function PullReview(options) {
   var notifyFn = options.notifyFn || defaultNotifyFn;
 
   return generatePlan(options)
-    .then(function (res) {
+    .then(function(res) {
       actions = res;
 
       if (dryRun) {
@@ -41,19 +41,22 @@ module.exports = function PullReview(options) {
       var transaction = [];
 
       actions = actions.map(Action);
-      actions.forEach(function (action) {
-          switch (action.type) {
-            case 'ASSIGN_USERS_TO_PULL_REQUEST':
-              transaction.push(github.assignUsersToPullRequest(action.payload.pullRequest, action.payload.assignees));
-              break;
-            case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
-              transaction.push(github.unassignUsersFromPullRequest(action.payload.pullRequest, action.payload.assignees));
-              break;
-            case 'NOTIFY':
-              if (action.payload.channel === 'github') {
-                transaction.push(github.postPullRequestComment(action.payload.pullRequest, GithubMessage(action.payload)));
-              } else {
-                transaction.push(new Promise(function (resolve, reject) {
+      actions.forEach(function(action) {
+        switch (action.type) {
+        case 'ASSIGN_USERS_TO_PULL_REQUEST':
+          transaction.push(github.assignUsersToPullRequest(action.payload.pullRequest, action.payload.assignees));
+          break;
+        case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
+          transaction.push(github.unassignUsersFromPullRequest(action.payload.pullRequest, action.payload.assignees));
+          break;
+        case 'NOTIFY':
+          if (action.payload.channel === 'github') {
+            transaction.push(
+                github.postPullRequestComment(action.payload.pullRequest, GithubMessage(action.payload))
+              );
+          } else {
+            transaction.push(
+                new Promise(function(resolve, reject) {
                   try {
                     var notification = generateNotification(action.payload);
                     resolve(notifyFn(notification));
@@ -61,22 +64,22 @@ module.exports = function PullReview(options) {
                     console.error(e);
                     reject(Error('Failed to notify'));
                   }
-                }));
-              }
-              break;
-            default:
-              throw Error('Unhandled action: ' + action.type);
+                })
+              );
           }
-        });
+          break;
+        default:
+          throw Error('Unhandled action: ' + action.type);
+        }
+      });
 
-      return Promise.resolve()
-        .then(function () {
-          return transaction.reduce(function (promise, fn) {
-            return promise.then(fn);
-          }, Promise.resolve());
-        });
+      return Promise.resolve().then(function() {
+        return transaction.reduce(function(promise, fn) {
+          return promise.then(fn);
+        }, Promise.resolve());
+      });
     })
-    .then(function () {
+    .then(function() {
       return actions;
     });
 };
