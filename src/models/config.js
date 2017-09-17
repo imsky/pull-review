@@ -25,6 +25,7 @@ module.exports = function PullReviewConfig(input) {
   var maxFilesPerReviewer = get(input.max_files_per_reviewer, 0);
   var maxLinesPerReviewer = get(input.max_lines_per_reviewer, 0);
   var assignMinReviewersRandomly = get(input.assign_min_reviewers_randomly, true);
+  var minAuthorsOfChangedFiles = get(input.min_authors_of_changed_files, 0);
   var reviewers = get(input.reviewers, {});
   var reviewBlacklist = get(input.review_blacklist, []);
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);
@@ -50,6 +51,7 @@ module.exports = function PullReviewConfig(input) {
     'maxFiles': maxFiles,
     'maxFilesPerReviewer': maxFilesPerReviewer,
     'maxLinesPerReviewer': maxLinesPerReviewer,
+    'minAuthorsOfChangedFiles': minAuthorsOfChangedFiles,
     'reviewers': reviewers,
     'reviewBlacklist': reviewBlacklist,
     'reviewPathFallbacks': reviewPathFallbacks,

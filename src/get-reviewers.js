@@ -15,8 +15,6 @@ module.exports = function getReviewers (options) {
   var assignees = options.assignees || [];
   var authorLogin = options.authorLogin;
   var getBlameForFile = options.getBlameForFile;
-  var currentReviewers = {};
-  var currentCommitters = {};
 
   if (!getBlameForFile) {
     throw Error('No function provided for retrieving blame for a file');
@@ -31,6 +29,7 @@ module.exports = function getReviewers (options) {
   var maxFilesPerReviewer = config.maxFilesPerReviewer;
   var maxLinesPerReviewer = config.maxLinesPerReviewer;
   var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
+  var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
 
   files = files.map(PullRequestFile);
 
@@ -51,6 +50,10 @@ module.exports = function getReviewers (options) {
   });
 
   var topModifiedFiles = config.maxFiles > 0 ? modifiedFiles.slice(0, config.maxFiles) : modifiedFiles;
+
+  var currentReviewers = {};
+  var excludedReviewers = {};
+  var currentCommitters = {};
 
   commits.forEach(function (commit) {
     currentCommitters[commit.author.login] = true;
@@ -84,6 +87,7 @@ module.exports = function getReviewers (options) {
 
   var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
   var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
+  var uniqueAuthors = 0;
 
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = currentReviewers[reviewer];
@@ -91,9 +95,11 @@ module.exports = function getReviewers (options) {
     var isReviewerAuthor = reviewer === authorLogin;
     var isReviewerUnreachable = (config.requireNotification ? !config.reviewers[reviewer] : false);
     var isReviewerBlacklisted = config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
+    var isReviewerExcluded = excludedReviewers[reviewer];
     return !isReviewerCurrentCommitter &&
       !isReviewerUnreachable &&
       !isReviewerBlacklisted &&
+      !isReviewerExcluded &&
       !isReviewerSelected &&
       !isReviewerAuthor;
   }
@@ -127,6 +133,8 @@ module.exports = function getReviewers (options) {
         });
       }
 
+      uniqueAuthors = Object.keys(authorsLinesChanged).length;
+
       var authorBlames = [];
 
       Object.keys(authorsLinesChanged || {}).forEach(function (author) {
@@ -147,36 +155,45 @@ module.exports = function getReviewers (options) {
       var fallbackReviewers = [];
       var randomReviewers = [];
 
+      if (uniqueAuthors < minAuthorsOfChangedFiles && reviewers.length >= minReviewersAssignable && reviewers.length) {
+        //unassign one random reviewer if there are already enough reviewers
+        reviewers = reviewers.slice(0, maxReviewersAssignable);
+        var excludedReviewerIndex = Math.floor(Math.random() * reviewers.length);
+        excludedReviewers[reviewers[excludedReviewerIndex].login] = true;
+        reviewers[excludedReviewerIndex] = null;
+        reviewers = reviewers.filter(Boolean);
+      }
+
       reviewers.forEach(function (reviewer) {
         currentReviewers[reviewer.login] = true;
       });
 
-      if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly && config.reviewPathFallbacks) {
+      if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
         Object.keys(config.reviewPathFallbacks || {})
           .sort(function (a, b) {
             return b.length - a.length;
           })
           .forEach(function (prefix) {
-          files.forEach(function (file) {
-            if (file.filename.indexOf(prefix) === 0) {
-              var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];
+            files.forEach(function (file) {
+              if (file.filename.indexOf(prefix) === 0) {
+                var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];
 
-              fallbackAuthors.forEach(function (author) {
-                if (!isEligibleReviewer(author)) {
-                  return;
-                }
+                fallbackAuthors.forEach(function (author) {
+                  if (!isEligibleReviewer(author)) {
+                    return;
+                  }
 
-                fallbackReviewers.push({
-                  'login': author,
-                  'count': 0,
-                  'source': 'fallback'
+                  fallbackReviewers.push({
+                    'login': author,
+                    'count': 0,
+                    'source': 'fallback'
+                  });
+
+                  currentReviewers[author] = true;
                 });
-
-                currentReviewers[author] = true;
-              });
-            }
+              }
+            });
           });
-        });
 
         shuffle.knuthShuffle(fallbackReviewers);
         reviewers = reviewers.concat(fallbackReviewers.slice(0, minReviewersAssignable - reviewers.length));
