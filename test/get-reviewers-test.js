@@ -264,6 +264,31 @@ describe('#getReviewers', function () {
       });
   });
 
+  it('ignores existing reviewers when retrying review', function () {
+    return getReviewers({
+      'config': {
+        'version': 2,
+        'reviewers': {
+          'alice': {},
+          'bob': {},
+          'charlie': {},
+          'dee': {}
+        }
+      },
+      'authorLogin': 'alice',
+      'assignees': ['bob', 'charlie'],
+      'getBlameForFile': function () {
+        return [];
+      },
+      'retryReview': true
+    })
+      .then(function (reviewers) {
+        reviewers.should.have.lengthOf(1);
+        reviewers[0].login.should.equal('dee');
+        reviewers[0].source.should.equal('random');
+      });
+  });
+
   describe('using max files per reviewer', function () {
     var options = {
       'config': config,

@@ -89,7 +89,8 @@ module.exports = function generatePlan (options) {
         'files': pullRequestFiles,
         'commits': pullRequestCommits,
         'authorLogin': pullRequestRecord.data.user.login,
-        'assignees': retryReview ? [] : pullRequestAssignees,
+        'assignees': pullRequestAssignees,
+        'retryReview': retryReview,
         'getBlameForFile': function (file) {
           return github.getBlameForCommitFile({
             'owner': pullRequest.owner,

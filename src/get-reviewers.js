@@ -15,6 +15,7 @@ module.exports = function getReviewers (options) {
   var assignees = options.assignees || [];
   var authorLogin = options.authorLogin;
   var getBlameForFile = options.getBlameForFile;
+  var retryReview = Boolean(options.retryReview);
 
   if (!getBlameForFile) {
     throw Error('No function provided for retrieving blame for a file');
@@ -28,8 +29,8 @@ module.exports = function getReviewers (options) {
   var minReviewers = config.minReviewers;
   var maxFilesPerReviewer = config.maxFilesPerReviewer;
   var maxLinesPerReviewer = config.maxLinesPerReviewer;
-  var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
   var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
+  var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
 
   files = files.map(PullRequestFile);
 
@@ -54,10 +55,21 @@ module.exports = function getReviewers (options) {
   var currentReviewers = {};
   var excludedReviewers = {};
   var currentCommitters = {};
+  var uniqueAuthors = 0;
 
   commits.forEach(function (commit) {
     currentCommitters[commit.author.login] = true;
   });
+
+  if (retryReview) {
+    if (assignees.length) {
+      assignees.forEach(function (assignee) {
+        excludedReviewers[assignee] = true;
+      });
+    }
+
+    assignees = [];
+  }
 
   assignees = assignees.filter(function(assignee) {
     return assignee !== authorLogin;
@@ -87,7 +99,7 @@ module.exports = function getReviewers (options) {
 
   var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
   var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
-  var uniqueAuthors = 0;
+
 
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = currentReviewers[reviewer];
