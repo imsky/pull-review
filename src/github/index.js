@@ -56,6 +56,7 @@ function parseGithubURL(url) {
   };
 }
 
+//NB: files are either added, modified, or removed
 function getPullRequestFiles(resource) {
   return github.pullRequests
     .getFiles({

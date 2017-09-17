@@ -67,7 +67,7 @@ module.exports = function (options) {
       },
       {
         'filename': 'JUST_DELETED',
-        'status': 'deleted',
+        'status': 'removed',
         'changes': 20,
         'additions': 0,
         'deletions': 20
@@ -148,14 +148,14 @@ module.exports = function (options) {
       },
       {
         'filename': 'JUST_DELETED',
-        'status': 'deleted',
+        'status': 'removed',
         'changes': 20
       }
     ]);
 
   function mockGitBlame(options) {
     var file = options.file || 'README';
-    api.post('/graphql', {"query":"query ($owner: String!, $repo: String!, $sha: String!, $path: String!) {\n  repository(owner: $owner, name: $repo) {\n    object(expression: $sha) {\n      ...blame\n    }\n  }\n}\n\nfragment blame on Commit {\n  blame(path: $path) {\n    ranges {\n      startingLine\n      endingLine\n      age\n      commit {\n        oid\n        author {\n          name\n          user {\n            email\n            login\n          }\n        }\n      }\n    }\n  }\n}","variables":{"owner":"OWNER","repo":"REPO","sha":"c0ded0c","path":file}}).times(5)
+    api.post('/graphql', {"query":"query($owner: String!, $repo: String!, $sha: String!, $path: String!) {\n  repository(owner: $owner, name: $repo) {\n    object(expression: $sha) {\n      ...blame\n    }\n  }\n}\n\nfragment blame on Commit {\n  blame(path: $path) {\n    ranges {\n      startingLine\n      endingLine\n      age\n      commit {\n        oid\n        author {\n          name\n          user {\n            email\n            login\n          }\n        }\n      }\n    }\n  }\n}\n","variables":{"owner":"OWNER","repo":"REPO","sha":"c0ded0c","path":file}}).times(5)
       .reply(200, {
         'data': {
           'repository': {

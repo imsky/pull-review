@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "format": "prettier --write index.js src/*.js src/**/*.js",
     "lint": "eslint --fix index.js src/*.js src/**/*.js",
-    "prepublish": "npm run format && npm run lint",
-    "test": "NODE_ENV=test node --harmony ./node_modules/.bin/nyc mocha test/*-test.js",
+    "prepublish": "npm run lint",
+    "test": "NODE_ENV=test nyc mocha test/*-test.js",
     "hubot": "hubot --adapter shell --name hubot --require test/hubot"
   },
   "repository": {
@@ -46,8 +45,7 @@
     "hubot-test-helper": "~1.7",
     "mocha": "~3.2",
     "nock": "~9.0",
-    "nyc": "~10.3",
-    "prettier": "^1.7.0"
+    "nyc": "~10.3"
   },
   "nyc": {
     "check-coverage": true,
