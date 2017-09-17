@@ -23,7 +23,6 @@
             "error",
             "single"
         ],
-        "quote-props": ["error", "always"],
         "semi": [
             "warn",
             "always"

@@ -11,14 +11,19 @@
 var PullReview = require('./src/index');
 var url = require('./src/url');
 
-module.exports = function (input) {
+module.exports = function(input) {
   input = input || {};
-  var isHubot = input.name !== undefined && input.adapterName !== undefined && input.logger !== undefined && input.listen !== undefined && input.hear !== undefined;
+  var isHubot =
+    input.name !== undefined &&
+    input.adapterName !== undefined &&
+    input.logger !== undefined &&
+    input.listen !== undefined &&
+    input.hear !== undefined;
   var isAPI = input.pullRequestURL !== undefined;
 
   if (isHubot) {
     var robot = input;
-    robot.hear(/github\.com\//, function (res) {
+    robot.hear(/github\.com\//, function(res) {
       var adapter = robot.adapterName;
       var chatText = res.message.text;
       var chatRoom = res.message.room;
@@ -38,7 +43,9 @@ module.exports = function (input) {
       var retryReview;
 
       var urls = url.extractURLs(chatText);
-      var processedText = chatText.replace(/\s+/g, ' ').replace(/(\breview | again\b)/ig, function (m) { return m.toLowerCase(); });
+      var processedText = chatText.replace(/\s+/g, ' ').replace(/(\breview | again\b)/gi, function(m) {
+        return m.toLowerCase();
+      });
 
       if (Array.isArray(urls)) {
         for (var i = 0; i < urls.length; i++) {
@@ -61,17 +68,17 @@ module.exports = function (input) {
       }
 
       PullReview({
-        'pullRequestURL': pullRequestURL,
-        'retryReview': retryReview,
-        'chatRoom': chatRoom,
-        'chatChannel': chatChannel,
-        'isChat': true,
-        'notifyFn': function (message) {
+        pullRequestURL: pullRequestURL,
+        retryReview: retryReview,
+        chatRoom: chatRoom,
+        chatChannel: chatChannel,
+        isChat: true,
+        notifyFn: function(message) {
           robot.logger.info(message);
           res.send(message);
         }
       })
-        .then(function (response) {
+        .then(function(response) {
           try {
             if (response instanceof Error) {
               logError(response);

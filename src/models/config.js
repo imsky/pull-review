@@ -12,7 +12,9 @@ module.exports = function PullReviewConfig(input) {
   }
 
   if (!input.version || SUPPORTED_CONFIG_VERSIONS.indexOf(input.version) === -1) {
-    throw Error('Missing or unsupported config version. Supported versions include: ' + SUPPORTED_CONFIG_VERSIONS.join(', '));
+    throw Error(
+      'Missing or unsupported config version. Supported versions include: ' + SUPPORTED_CONFIG_VERSIONS.join(', ')
+    );
   }
 
   function get(value, defaultValue) {
@@ -39,23 +41,31 @@ module.exports = function PullReviewConfig(input) {
     throw Error('Minimum reviewers exceeds maximum reviewers');
   } else if (maxFiles < 0 || maxFiles === Infinity) {
     throw Error('Invalid number of maximum files');
-  } else if (maxFilesPerReviewer < 0 || maxFilesPerReviewer === Infinity || (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)) {
+  } else if (
+    maxFilesPerReviewer < 0 ||
+    maxFilesPerReviewer === Infinity ||
+    (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)
+  ) {
     throw Error('Invalid number of maximum files per reviewer');
-  } else if (maxLinesPerReviewer < 0 || maxLinesPerReviewer === Infinity || (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)) {
+  } else if (
+    maxLinesPerReviewer < 0 ||
+    maxLinesPerReviewer === Infinity ||
+    (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)
+  ) {
     throw Error('Invalid number of maximum lines per reviewer');
   }
 
   return Object.freeze({
-    'minReviewers': minReviewers,
-    'maxReviewers': maxReviewers,
-    'maxFiles': maxFiles,
-    'maxFilesPerReviewer': maxFilesPerReviewer,
-    'maxLinesPerReviewer': maxLinesPerReviewer,
-    'minAuthorsOfChangedFiles': minAuthorsOfChangedFiles,
-    'reviewers': reviewers,
-    'reviewBlacklist': reviewBlacklist,
-    'reviewPathFallbacks': reviewPathFallbacks,
-    'requireNotification': requireNotification,
-    'assignMinReviewersRandomly': assignMinReviewersRandomly
+    minReviewers: minReviewers,
+    maxReviewers: maxReviewers,
+    maxFiles: maxFiles,
+    maxFilesPerReviewer: maxFilesPerReviewer,
+    maxLinesPerReviewer: maxLinesPerReviewer,
+    minAuthorsOfChangedFiles: minAuthorsOfChangedFiles,
+    reviewers: reviewers,
+    reviewBlacklist: reviewBlacklist,
+    reviewPathFallbacks: reviewPathFallbacks,
+    requireNotification: requireNotification,
+    assignMinReviewersRandomly: assignMinReviewersRandomly
   });
 };
