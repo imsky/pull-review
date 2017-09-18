@@ -67,6 +67,7 @@ module.exports = function(input) {
         return;
       }
 
+      try {
       PullReview({
         pullRequestURL: pullRequestURL,
         retryReview: retryReview,
@@ -88,6 +89,9 @@ module.exports = function(input) {
           }
         })
         .catch(logError);
+     } catch (err) {
+       logError(err);
+     }
     });
   } else if (isAPI) {
     return PullReview(input);
