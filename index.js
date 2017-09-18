@@ -68,17 +68,17 @@ module.exports = function(input) {
       }
 
       try {
-      PullReview({
-        pullRequestURL: pullRequestURL,
-        retryReview: retryReview,
-        chatRoom: chatRoom,
-        chatChannel: chatChannel,
-        isChat: true,
-        notifyFn: function(message) {
-          robot.logger.info(message);
-          res.send(message);
-        }
-      })
+        PullReview({
+          pullRequestURL: pullRequestURL,
+          retryReview: retryReview,
+          chatRoom: chatRoom,
+          chatChannel: chatChannel,
+          isChat: true,
+          notifyFn: function(message) {
+            robot.logger.info(message);
+            res.send(message);
+          }
+        })
         .then(function(response) {
           try {
             if (response instanceof Error) {
@@ -89,9 +89,9 @@ module.exports = function(input) {
           }
         })
         .catch(logError);
-     } catch (err) {
-       logError(err);
-     }
+      } catch (err) {
+        logError(err);
+      }
     });
   } else if (isAPI) {
     return PullReview(input);

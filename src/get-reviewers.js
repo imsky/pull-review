@@ -99,7 +99,8 @@ module.exports = function getReviewers(options) {
     }
   }
 
-  var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
+  //todo: consider cleaning up this logic, since it clamps the max needed reviewers such that it's never unintentionally 0
+  var maxReviewersAssignable = Math.min(unassignedReviewers, Math.max(maxNeededReviewers, minReviewers));
   var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
 
   function isEligibleReviewer(reviewer) {
