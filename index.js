@@ -35,7 +35,7 @@ module.exports = function(input) {
       }
 
       if (adapter === 'slack') {
-        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMBYId(chatRoom);
+        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(chatRoom);
         chatRoom = slackRoom.name;
       }
 
