@@ -134,10 +134,10 @@ When Pull Review encounters a file whose path begins with `web/ui`, `alice` will
 
 ### Environment variables
 
-* `PULL_REVIEW_GITHUB_TOKEN` (required) - the GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes.
-* `PULL_REVIEW_CONFIG_PATH` (default: `.pull-review`) - the location of the Pull Review config file in the pull request repo.
-* `PULL_REVIEW_REQUIRED_ROOMS` - a comma-separated list of chat rooms where a review request may be made, for example: `dev,ops`.
-* `PULL_REVIEW_CONFIG` - a JSON/YAML Pull Review configuration, which will override any configuration in the repository
+* `PULL_REVIEW_GITHUB_TOKEN`: the GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes. This environment variable is **required** when using Pull Review as a Hubot plugin.
+* `PULL_REVIEW_CONFIG_PATH`: the location of the Pull Review config file in the pull request repo (default is `.pull-review`).
+* `PULL_REVIEW_REQUIRED_ROOMS`: a comma-separated list of chat rooms where a review request may be made, for example: `dev,ops`.
+* `PULL_REVIEW_CONFIG`: a JSON/YAML Pull Review configuration, which will override any configuration in the repository
 
 ## Algorithm
 

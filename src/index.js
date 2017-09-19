@@ -2,7 +2,7 @@
 
 var Promise = require('native-promise-only');
 
-var github = require('./github');
+var Github = require('./github');
 var generatePlan = require('./generate-plan');
 var Action = require('./models/action');
 var GithubMessage = require('./models/messages/github');
@@ -29,6 +29,8 @@ module.exports = function PullReview(options) {
   var actions;
   var dryRun = Boolean(options.dryRun);
   var notifyFn = options.notifyFn || defaultNotifyFn;
+  var github = Github(options.githubToken);
+  options.github = github;
 
   return generatePlan(options)
     .then(function(res) {

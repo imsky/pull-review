@@ -9,18 +9,10 @@ var BlameRange = require('../models/blame-range');
 
 var GraphQLRequest = require('./graphql');
 
-var GITHUB_TOKEN = process.env.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN;
-
 var blameQuery = fs.readFileSync(path.join(__dirname, 'git-blame.graphql'), 'utf8');
 
-var github = new Github({
-  protocol: 'https'
-});
-
-github.authenticate({
-  type: 'token',
-  token: GITHUB_TOKEN
-});
+var github;
+var token;
 
 function BlameRangeList(options) {
   var blame = options.blame || {};
@@ -72,7 +64,7 @@ function getPullRequestFiles(resource) {
 
 function getBlameForCommitFile(resource) {
   return GraphQLRequest({
-    token: GITHUB_TOKEN,
+    token: token,
     query: blameQuery,
     variables: {
       owner: resource.owner,
@@ -161,15 +153,28 @@ function getPullRequestCommits(resource) {
     });
 }
 
-module.exports = {
-  blameQuery: blameQuery,
-  getPullRequest: getPullRequest,
-  getPullRequestFiles: getPullRequestFiles,
-  getPullRequestCommits: getPullRequestCommits,
-  getBlameForCommitFile: getBlameForCommitFile,
-  getRepoFile: getRepoFile,
-  assignUsersToPullRequest: assignUsersToPullRequest,
-  postPullRequestComment: postPullRequestComment,
-  unassignUsersFromPullRequest: unassignUsersFromPullRequest,
-  parseGithubURL: parseGithubURL
+module.exports = function (githubToken) {
+  token = process.env.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN || githubToken;
+
+  github = new Github({
+    protocol: 'https'
+  });
+
+  github.authenticate({
+    type: 'token',
+    token: token
+  });
+
+  return {
+    blameQuery: blameQuery,
+    getPullRequest: getPullRequest,
+    getPullRequestFiles: getPullRequestFiles,
+    getPullRequestCommits: getPullRequestCommits,
+    getBlameForCommitFile: getBlameForCommitFile,
+    getRepoFile: getRepoFile,
+    assignUsersToPullRequest: assignUsersToPullRequest,
+    postPullRequestComment: postPullRequestComment,
+    unassignUsersFromPullRequest: unassignUsersFromPullRequest,
+    parseGithubURL: parseGithubURL
+  }
 };

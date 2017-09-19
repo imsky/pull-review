@@ -2,13 +2,14 @@
 
 var Promise = require('native-promise-only');
 
+var Github = require('./github');
 var Action = require('./models/action');
-var github = require('./github');
 var getReviewers = require('./get-reviewers');
 
 module.exports = function generatePlan(options) {
   options = options || {};
   var actions = [];
+  var github = options.github || Github(options.githubToken);
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
   var pullReviewConfigPath = process.env.PULL_REVIEW_CONFIG_PATH || options.pullReviewConfigPath || '.pull-review';
   var pullRequestURL = options.pullRequestURL;
