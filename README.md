@@ -1,6 +1,6 @@
 # Pull Review
 
-[![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review)
+[![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
 <!-- todo: screenshot -->
 
@@ -45,7 +45,6 @@ review https://github.com/imsky/pull-review/pull/1 again please
 ```js
 var PullReview = require('pull-review');
 
-```js
 PullReview({
   pullRequestURL: 'https://github.com/imsky/pull-review/pull/1',
 
@@ -101,8 +100,8 @@ A map of maps, with the main keys being the GitHub usernames of users, and the c
 
 ```yaml
 reviewers:
-	alice:
-		slack: alice_slack
+  alice:
+    slack: alice_slack
 ```
 
 When Pull Review sends its notification, it will notify `@alice` on GitHub and `@alice_slack` on Slack.
