@@ -1,4 +1,5 @@
 module.exports = function (input) {
+  input = input || {};
   var users = input.users;
 
   if (!users) {

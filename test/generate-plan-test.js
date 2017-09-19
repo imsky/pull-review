@@ -98,4 +98,17 @@ describe('#generatePlan', function () {
       })
     }).should.throw('Review requests are disabled from room test');
   });
+
+  it('fails with closed pull requests', function () {
+    githubMock({
+      'config': config,
+      'state': 'closed'
+    });
+
+    return generatePlan({
+      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
+      'chatRoom': 'test',
+      'isChat': true
+    }).should.eventually.be.rejectedWith(Error, 'Pull request is not open: https://github.com/OWNER/REPO/pull/1');
+  });
 });

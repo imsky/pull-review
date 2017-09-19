@@ -58,5 +58,12 @@ describe('config', function () {
         'max_files_per_reviewer': -1
       });
     }).should.throw(Error, 'Invalid number of maximum files per reviewer');
+
+    (function () {
+      PullReviewConfig({
+        'version': 1,
+        'max_lines_per_reviewer': -1
+      });
+    }).should.throw(Error, 'Invalid number of maximum lines per reviewer');
   });
 });

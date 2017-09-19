@@ -13,6 +13,17 @@ describe('pull-review', function () {
     nock.cleanAll();
   });
 
+  it('works in dry run mode', function () {
+    githubMock({
+      'config': config
+    });
+
+    return pullReview({
+      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
+      'dryRun': true
+    });
+  });
+
   it('works with no assignees', function () {
     githubMock({
       'config': config
@@ -134,5 +145,34 @@ describe('pull-review', function () {
           }, 100);
         });
     });
+
+    it('does nothing without a pull request URL', function (done) {
+      room.user.say('alice', 'github.com/imsky/pull-review')
+        .then(function () {
+          setTimeout(function () {
+            room.messages.should.have.lengthOf(1);
+            done();
+          }, 100);
+        });
+    });
+
+    it('fails when no reviewers are found', function (done) {
+      nock.cleanAll();
+      githubMock({
+        'config': JSON.stringify({
+          version: 1,
+          reviewers: {}
+        })
+      });
+
+      room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
+        .then(function () {
+          setTimeout(function () {
+            room.messages.should.have.lengthOf(2);
+            room.messages[1][1].should.equal('[pull-review] Error: No reviewers found: https://github.com/OWNER/REPO/pull/1');
+            done();
+          }, 100);
+        });
+    })
   });
 });

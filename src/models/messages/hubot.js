@@ -3,6 +3,7 @@ var url = require('../../url');
 var GITHUB_ICON_URL = 'https://assets-cdn.github.com/pinned-octocat.svg';
 
 module.exports = function (input) {
+  input = input || {};
   var users = input.users;
   var channel = input.channel;
   var pullRequestRecord = input.pullRequestRecord;

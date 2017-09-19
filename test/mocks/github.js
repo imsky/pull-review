@@ -103,6 +103,7 @@ module.exports = function (options) {
 
   mockPullRequest({
     'number': 1,
+    'state': options.state,
     'assignee': options.assignee,
     'assignees': options.assignees
   });

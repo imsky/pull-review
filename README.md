@@ -47,12 +47,15 @@ var PullReview = require('pull-review');
 
 ```js
 PullReview({
-	pullRequestURL: 'https://github.com/imsky/pull-review/pull/1',
-	// if retryReview is set to true, any current assignees will be unassigned and new reviewers will be assigned
-	retryReview: false,
-	// if dryRun is set to true, Pull Review will not assign or notify reviewers, but will instead provide a list of reviewers and the notification channels it plans to use
-	dryRun: false
+  pullRequestURL: 'https://github.com/imsky/pull-review/pull/1',
+
+  // if retryReview is set to true, any current assignees will be unassigned and new reviewers will be assigned
+  retryReview: false,
+
+  // if dryRun is set to true, Pull Review will not assign or notify reviewers, but will instead provide a list of reviewers and the notification channels it plans to use
+  dryRun: false
 });
+```
 
 ## Configuration
 
@@ -138,7 +141,7 @@ Pull Review was partly inspired by [mention-bot](https://github.com/facebook/men
 * Assign the authors with most lines written for the top modified files as the reviewers
 * If there are [not enough reviewers](#min_reviewers), add more reviewers from [path fallback rules](review_path_fallbacks) and, if there are still not enough, from a [pool of all reviewers](#reviewers)
 
-For pull requests where more reviewers are needed, limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of code per reviewer](#max_lines_per_reviewer).
+If more reviewers are necessary, limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of code per reviewer](#max_lines_per_reviewer).
 
 ## Support
 

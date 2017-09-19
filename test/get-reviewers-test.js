@@ -3,11 +3,42 @@ var getReviewers = require('../src/get-reviewers');
 var driver = require('./driver');
 var config = driver.config;
 
+var DEFAULT_FILES = [
+  {
+    'filename': 'MOST_CHANGES',
+    'status': 'modified',
+    'additions': 20,
+    'deletions': 30,
+    'changes': 50
+  },
+  {
+    'filename': 'LEAST_CHANGES',
+    'status': 'modified',
+    'changes': 10,
+    'additions': 5,
+    'deletions': 5
+  },
+  {
+    'filename': 'JUST_ADDED',
+    'status': 'added',
+    'changes': 10,
+    'additions': 10,
+    'deletions': 0
+  },
+  {
+    'filename': 'JUST_DELETED',
+    'status': 'deleted',
+    'changes': 20,
+    'additions': 0,
+    'deletions': 20
+  }
+];
+
 describe('#getReviewers', function () {
   it('fails without required parameters', function () {
     (function () {
-      getReviewers({});
-    }).should.throw();
+      getReviewers()
+    }).should.throw(Error, 'No function provided for retrieving blame for a file');
 
     (function () {
       getReviewers({'getBlameForFile': function () {}});
@@ -332,7 +363,28 @@ describe('#getReviewers', function () {
         });
     });
 
-    it('works with max files defined');
+    it('works with max files defined', function () {
+      return getReviewers({
+        'config': {
+          'version': 1,
+          'reviewers': {
+            'alice': {},
+            'bob': {},
+            'charlie': {},
+            'dee': {}
+          },
+          'max_files_per_reviewer': 1
+        },
+        'files': DEFAULT_FILES,
+        'authorLogin': 'wally',
+        'getBlameForFile': function () {
+          return [];
+        }
+      })
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(2);
+        });
+    });
   });
 
   describe('using max lines per reviewer', function () {
@@ -347,36 +399,7 @@ describe('#getReviewers', function () {
         },
         'max_lines_per_reviewer': 0
       },
-      'files': [
-        {
-          'filename': 'MOST_CHANGES',
-          'status': 'modified',
-          'additions': 20,
-          'deletions': 30,
-          'changes': 50
-        },
-        {
-          'filename': 'LEAST_CHANGES',
-          'status': 'modified',
-          'changes': 10,
-          'additions': 5,
-          'deletions': 5
-        },
-        {
-          'filename': 'JUST_ADDED',
-          'status': 'added',
-          'changes': 10,
-          'additions': 10,
-          'deletions': 0
-        },
-        {
-          'filename': 'JUST_DELETED',
-          'status': 'deleted',
-          'changes': 20,
-          'additions': 0,
-          'deletions': 20
-        }
-      ],
+      'files': DEFAULT_FILES,
       'authorLogin': 'wally',
       'getBlameForFile': function () {
         return [];
@@ -395,6 +418,42 @@ describe('#getReviewers', function () {
       return getReviewers(options)
         .then(function (reviewers) {
           reviewers.should.have.lengthOf(2);
+        });
+    });
+  });
+
+  describe('using both max files and max lines per reviewer', function () {
+    var options = {
+      'config': {
+        'version': 1,
+        'reviewers': {
+          'alice': {},
+          'bob': {},
+          'charlie': {},
+          'dee': {}
+        },
+        'max_lines_per_reviewer': 4,
+        'max_files_per_reviewer': 4
+      },
+      'files': DEFAULT_FILES,
+      'authorLogin': 'wally',
+      'getBlameForFile': function () {
+        return [];
+      }
+    };
+
+    it('assigns the minimum of the two', function () {
+      return getReviewers(options)
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(1);
+        });
+    });
+
+    it('does not assign a number below the minimum of reviewers', function () {
+      options.config.max_lines_per_reviewer = 1000;
+      return getReviewers(options)
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(1);
         });
     });
   });
