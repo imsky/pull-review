@@ -48,11 +48,19 @@ var PullReview = require('pull-review');
 PullReview({
   pullRequestURL: 'https://github.com/imsky/pull-review/pull/1',
 
-  // if retryReview is set to true, any current assignees will be unassigned and new reviewers will be assigned
+  // if retryReview is set to true, any current assignees
+  // will be unassigned and new reviewers will be assigned
   retryReview: false,
 
-  // if dryRun is set to true, Pull Review will not assign or notify reviewers, but will instead provide a list of reviewers and the notification channels it plans to use
-  dryRun: false
+  // if dryRun is set to true, Pull Review will not
+  // assign or notify reviewers, but will instead
+  // provide a list of reviewers and the notification
+  // channels it plans to use
+  dryRun: false,
+
+  // custom Pull Review configuration, overriding any
+  // configuration that already exists in the repo
+  config: {version: 1}
 });
 ```
 
@@ -127,8 +135,9 @@ When Pull Review encounters a file whose path begins with `web/ui`, `alice` will
 ### Environment variables
 
 * `PULL_REVIEW_GITHUB_TOKEN` (required) - the GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes.
-* `PULL_REVIEW_CONFIG_PATH` (default `.pull-review`) - the location of the Pull Review config file in the pull request repo.
+* `PULL_REVIEW_CONFIG_PATH` (default: `.pull-review`) - the location of the Pull Review config file in the pull request repo.
 * `PULL_REVIEW_REQUIRED_ROOMS` - a comma-separated list of chat rooms where a review request may be made, for example: `dev,ops`.
+* `PULL_REVIEW_CONFIG` - a JSON/YAML Pull Review configuration, which will override any configuration in the repository
 
 ## Algorithm
 
