@@ -1,6 +1,6 @@
 ---
 # pull-review config version (required)
-version: 2
+version: 1
 
 # maximum number of files to evaluate per pull request (set to 0 for no limit)
 max_files: 5

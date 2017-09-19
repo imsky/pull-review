@@ -8,7 +8,7 @@ var Config = require('./models/config');
 module.exports = function getReviewers(options) {
   options = options || {};
   var config = options.config || {
-    version: 2
+    version: 1
   };
   var files = options.files || [];
   var commits = options.commits || [];
@@ -54,7 +54,7 @@ module.exports = function getReviewers(options) {
 
   var topModifiedFiles = config.maxFiles > 0 ? modifiedFiles.slice(0, config.maxFiles) : modifiedFiles;
 
-  var currentReviewers = {};
+  var selectedReviewers = {};
   var excludedReviewers = {};
   var currentCommitters = {};
   var uniqueAuthors = 0;
@@ -97,14 +97,15 @@ module.exports = function getReviewers(options) {
     } else {
       maxNeededReviewers = Math.min(maxReviewersUsingLines, maxReviewersUsingFiles);
     }
+
+    maxNeededReviewers = Math.max(minReviewers, maxNeededReviewers);
   }
 
-  //todo: consider cleaning up this logic, since it clamps the max needed reviewers such that it's never unintentionally 0
-  var maxReviewersAssignable = Math.min(unassignedReviewers, Math.max(maxNeededReviewers, minReviewers));
+  var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
   var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
 
   function isEligibleReviewer(reviewer) {
-    var isReviewerSelected = currentReviewers[reviewer];
+    var isReviewerSelected = selectedReviewers[reviewer];
     var isReviewerCurrentCommitter = currentCommitters[reviewer];
     var isReviewerAuthor = reviewer === authorLogin;
     var isReviewerUnreachable = config.requireNotification ? !config.reviewers[reviewer] : false;
@@ -181,7 +182,7 @@ module.exports = function getReviewers(options) {
       }
 
       reviewers.forEach(function(reviewer) {
-        currentReviewers[reviewer.login] = true;
+        selectedReviewers[reviewer.login] = true;
       });
 
       if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
@@ -205,7 +206,7 @@ module.exports = function getReviewers(options) {
                     source: 'fallback'
                   });
 
-                  currentReviewers[author] = true;
+                  selectedReviewers[author] = true;
                 });
               }
             });
@@ -227,7 +228,7 @@ module.exports = function getReviewers(options) {
             source: 'random'
           });
 
-          currentReviewers[author] = true;
+          selectedReviewers[author] = true;
         });
 
         shuffle.knuthShuffle(randomReviewers);

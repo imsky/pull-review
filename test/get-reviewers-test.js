@@ -105,7 +105,7 @@ describe('#getReviewers', function () {
   it('filters out all commit authors', function () {
     return getReviewers({
       'config': {
-        'version': 2,
+        'version': 1,
         'reviewers': {
           'bob': {},
           'charlie': {}
@@ -267,7 +267,7 @@ describe('#getReviewers', function () {
   it('ignores existing reviewers when retrying review', function () {
     return getReviewers({
       'config': {
-        'version': 2,
+        'version': 1,
         'reviewers': {
           'alice': {},
           'bob': {},
@@ -338,7 +338,7 @@ describe('#getReviewers', function () {
   describe('using max lines per reviewer', function () {
     var options = {
       'config': {
-        'version': 2,
+        'version': 1,
         'reviewers': {
           'alice': {},
           'bob': {},
@@ -348,7 +348,7 @@ describe('#getReviewers', function () {
         'max_lines_per_reviewer': 0
       },
       'files': [
-        {   
+        {
           'filename': 'MOST_CHANGES',
           'status': 'modified',
           'additions': 20,
@@ -403,7 +403,7 @@ describe('#getReviewers', function () {
     it('unassigns existing reviewers if the minimum of distinct authors is not met', function () {
       return getReviewers({
         'config': {
-          'version': 2,
+          'version': 1,
           'reviewers': {
             'alice': {},
             'bob': {},

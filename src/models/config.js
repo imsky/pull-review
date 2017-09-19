@@ -1,6 +1,6 @@
 var yaml = require('js-yaml');
 
-var SUPPORTED_CONFIG_VERSIONS = [1, 2];
+var SUPPORTED_CONFIG_VERSIONS = [1];
 
 module.exports = function PullReviewConfig(input) {
   if (typeof input === 'string') {

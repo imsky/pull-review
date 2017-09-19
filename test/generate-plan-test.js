@@ -96,6 +96,6 @@ describe('#generatePlan', function () {
         'chatRoom': 'test',
         'isChat': true
       })
-    }).should.throw('Review requests are disabled from this chat room');
+    }).should.throw('Review requests are disabled from room test');
   });
 });
