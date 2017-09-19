@@ -23,6 +23,15 @@
             "error",
             "single"
         ],
+        "quote-props": [
+            "error",
+            "consistent-as-needed",
+            {
+                "keywords": true,
+                "unnecessary": true,
+                "numbers": true
+            }
+        ],
         "semi": [
             "warn",
             "always"

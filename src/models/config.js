@@ -33,7 +33,7 @@ module.exports = function PullReviewConfig(input) {
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);
   var requireNotification = get(input.require_notification, true);
 
-  if (minReviewers < 0 || minReviewers === Infinity) {
+  if (minReviewers < 1 || minReviewers === Infinity) {
     throw Error('Invalid number of minimum reviewers');
   } else if (maxReviewers < 0 || maxReviewers === Infinity) {
     throw Error('Invalid number of maximum reviewers');

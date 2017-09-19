@@ -19,7 +19,7 @@ describe('config', function () {
       PullReviewConfig(123);
     }).should.throw();
 
-    PullReviewConfig(JSON.stringify({"version": 1}))
+    PullReviewConfig(JSON.stringify({'version': 1}));
   });
 
   it('fails with bad settings', function () {

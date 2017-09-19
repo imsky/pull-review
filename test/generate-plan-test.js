@@ -43,7 +43,7 @@ describe('#generatePlan', function () {
         actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
         actions[0].payload.assignees[0].should.equal('bob');
         actions[0].payload.reviewers[0].source.should.equal('blame');
-      })
+      });
   });
 
   it('reassigns reviewers', function () {
@@ -61,10 +61,10 @@ describe('#generatePlan', function () {
         actions[0].type.should.equal('UNASSIGN_USERS_FROM_PULL_REQUEST');
         actions[0].payload.assignees[0].should.equal('charlie');
       });
-  })
+  });
 
   it('fails without a pull request URL', function () {
-    return (function () { generatePlan() }).should.throw('Missing pull request URL');
+    return (function () { generatePlan(); }).should.throw('Missing pull request URL');
   });
 
   it('fails with an invalid pull request URL', function () {
@@ -73,7 +73,7 @@ describe('#generatePlan', function () {
         'pullRequestURL': 'http://example.com'
       });
     }).should.throw('Invalid pull request URL');
-  })
+  });
 
   it('fails without config', function () {
     githubMock();

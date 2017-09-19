@@ -59,7 +59,7 @@ describe('#getReviewers', function () {
           {
             'login': 'mockuser'
           }
-        ]
+        ];
       }
     }).should.eventually.be.rejectedWith(Error, 'Missing blame range data');
   });
@@ -92,11 +92,11 @@ describe('#getReviewers', function () {
             'count': 1,
             'age': 1
           }
-        ]
+        ];
       }
     })
       .then(function (reviewers) {
-        reviewers = reviewers.map(function (r) { return r.login });
+        reviewers = reviewers.map(function (r) { return r.login; });
         reviewers.should.not.include('mockuser');
         reviewers.should.include('testuser');
       });
@@ -109,44 +109,44 @@ describe('#getReviewers', function () {
         'reviewers': {
           'bob': {},
           'charlie': {}
-        },
-      },
-        'authorLogin': 'alice',
-        'files': [
-          {
-            'filename': 'test',
-            'status': 'modified',
-            'changes': 10
-          }
-        ],
-        'commits': [
-          {
-            'author': {
-              'login': 'charlie'
-            }
-          }
-        ],
-        'getBlameForFile': function () {
-          return [
-            {
-              'login': 'charlie',
-              'count': 9,
-              'age': 1
-            },
-            {
-              'login': 'bob',
-              'count': 1,
-              'age': 10
-            }
-          ];
         }
+      },
+      'authorLogin': 'alice',
+      'files': [
+        {
+          'filename': 'test',
+          'status': 'modified',
+          'changes': 10
+        }
+      ],
+      'commits': [
+        {
+          'author': {
+            'login': 'charlie'
+          }
+        }
+      ],
+      'getBlameForFile': function () {
+        return [
+          {
+            'login': 'charlie',
+            'count': 9,
+            'age': 1
+          },
+          {
+            'login': 'bob',
+            'count': 1,
+            'age': 10
+          }
+        ];
+      }
     })
       .then(function (reviewers) {
-        reviewers = reviewers.map(function (r) { return r.login });
+        reviewers = reviewers.map(function (r) { return r.login; });
         reviewers.should.not.include('charlie');
         reviewers.should.include('bob');
       });
-  })
+  });
 
   it('works with blame correctly', function () {
     return getReviewers({
@@ -228,11 +228,11 @@ describe('#getReviewers', function () {
       'authorLogin': 'alice',
       'files': [],
       'getBlameForFile': function () {
-        return []
+        return [];
       }
     })
       .then(function (reviewers) {
-        reviewers = reviewers.map(function (r) { return r.login });
+        reviewers = reviewers.map(function (r) { return r.login; });
         reviewers.should.have.lengthOf(1);
         reviewers.should.not.include('alice');
       });

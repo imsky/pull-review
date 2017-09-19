@@ -20,9 +20,6 @@ max_lines_per_reviewer: 0
 # if at least a minimum number of reviewers is not found, assign a minimum number of reviewers randomly
 assign_min_reviewers_randomly: true
 
-# if at least a minimum number of authors that are not also committers did not contribute to the code the pull request changes, assign the difference as reviewers (this is used to prevent "review loops" where the same people are reviewing each other's code)
-min_non_contributing_authors: 1
-
 # if the pull request changes code with fewer than a minimum number of authors, add more reviewers if possible (set to 0 to disable)
 min_authors_of_changed_files: 0
 

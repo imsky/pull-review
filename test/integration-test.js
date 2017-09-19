@@ -51,7 +51,7 @@ describe('pull-review', function () {
         actions.should.have.lengthOf(2);
         actions[0].payload.assignees.should.not.include('bob');
       });
-  })
+  });
 
   it('fails with invalid arguments', function () {
     (function () { pullReview(); }).should.throw('Invalid input: either a review request or a Hubot reference must be provided');
@@ -116,7 +116,7 @@ describe('pull-review', function () {
       room = helper.createRoom({
         'name': 'test'
       });
-    })
+    });
 
     afterEach(function () {
       nock.cleanAll();

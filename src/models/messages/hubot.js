@@ -49,16 +49,16 @@ module.exports = function (input) {
       .replace(/\[([^\\]+)\]\((.*?\..*?)\)/gm, '<$2|$1>');
 
     var attachment = {
-      'title': repoName + ': ' + title,
-      'title_link': pullRequestRecord.data.html_url,
-      'text': imagesInBody ? '' : bodyToSlackMarkdown,
-      'author_name': authorName,
-      'author_link': pullRequestRecord.data.user.html_url,
-      'fallback': title + ' by ' + authorName + ': ' + pullRequestRecord.data.html_url,
-      'mrkdwn_in': ['text', 'pretext', 'fields'],
-      'color': '#24292e',
-      'footer': 'GitHub',
-      'footer_icon': GITHUB_ICON_URL
+      title: repoName + ': ' + title,
+      title_link: pullRequestRecord.data.html_url,
+      text: imagesInBody ? '' : bodyToSlackMarkdown,
+      author_name: authorName,
+      author_link: pullRequestRecord.data.user.html_url,
+      fallback: title + ' by ' + authorName + ': ' + pullRequestRecord.data.html_url,
+      mrkdwn_in: ['text', 'pretext', 'fields'],
+      color: '#24292e',
+      footer: 'GitHub',
+      footer_icon: GITHUB_ICON_URL
     };
 
     if (imagesInBody) {
@@ -66,8 +66,8 @@ module.exports = function (input) {
     }
 
     return {
-      'text': message,
-      'attachments': [attachment]
+      text: message,
+      attachments: [attachment]
     };
   }
 };

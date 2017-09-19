@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint --fix index.js src/*.js src/**/*.js",
+    "lint": "eslint --fix index.js src",
     "prepublish": "npm run lint",
     "test": "NODE_ENV=test nyc mocha test/*-test.js",
     "hubot": "hubot --adapter shell --name hubot --require test/hubot"
