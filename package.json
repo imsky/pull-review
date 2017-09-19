@@ -3,6 +3,9 @@
   "version": "2.0.0-rc.5",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "pull-review": "./bin/pull-review.js"
+  },
   "scripts": {
     "lint": "eslint --fix index.js src",
     "prepublish": "npm run lint",
