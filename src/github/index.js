@@ -14,16 +14,11 @@ var blameQuery = fs.readFileSync(path.join(__dirname, 'git-blame.graphql'), 'utf
 var github;
 var token;
 
-function BlameRangeList(options) {
-  var blame = options.blame || {};
-  var ranges = blame.ranges || [];
+function BlameRangeList(blame) {
+  var ranges = blame.ranges;
 
   return ranges
     .map(function(range) {
-      if (!range.commit.author.user) {
-        return null;
-      }
-
       return BlameRange({
         age: range.age,
         count: range.endingLine - range.startingLine + 1,
@@ -74,24 +69,15 @@ function getBlameForCommitFile(resource) {
     }
   })
     .then(function(res) {
-      var blame = res.data.repository.object.blame;
-      return BlameRangeList({blame: blame});
+      return BlameRangeList(res.data.repository.object.blame);
     })
     .catch(function(e) {
-      console.error(e);
+      console.error('[pull-review] getBlameForCommitFile', e);
       return null;
     });
 }
 
 function assignUsersToPullRequest(resource, assignees) {
-  assignees = assignees || [];
-
-  for (var i = 0; i < assignees.length; i++) {
-    if (typeof assignees[i] !== 'string') {
-      throw Error('Assignees must be specified as strings');
-    }
-  }
-
   return github.issues.addAssigneesToIssue({
     owner: resource.owner,
     repo: resource.repo,
@@ -101,8 +87,6 @@ function assignUsersToPullRequest(resource, assignees) {
 }
 
 function unassignUsersFromPullRequest(resource, assignees) {
-  assignees = assignees || [];
-
   return github.issues.removeAssigneesFromIssue({
     owner: resource.owner,
     repo: resource.repo,
@@ -122,8 +106,7 @@ function postPullRequestComment(resource, body) {
   });
 }
 
-function getRepoFile(resource, path, encoding) {
-  encoding = encoding || 'base64';
+function getRepoFile(resource, path) {
   return github.repos
     .getContent({
       owner: resource.owner,
@@ -132,7 +115,7 @@ function getRepoFile(resource, path, encoding) {
     })
     .then(function(res) {
       var buffer = new Buffer(res.data.content, 'base64');
-      return buffer.toString(encoding);
+      return buffer.toString('utf8');
     });
 }
 

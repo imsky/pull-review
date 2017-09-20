@@ -22,8 +22,6 @@ var generateNotification = function generateNotification(input) {
 
   if (source === 'hubot') {
     return HubotMessage(input);
-  } else {
-    throw Error('Unsupported source: ' + source);
   }
 };
 
