@@ -18,6 +18,13 @@ function BlameRangeList(blame) {
   var ranges = blame.ranges;
 
   return ranges
+    .filter(function (range) {
+      return  range &&
+              range.commit &&
+              range.commit.author &&
+              range.commit.author.user &&
+              range.commit.author.user.login;
+    })
     .map(function(range) {
       return BlameRange({
         age: range.age,
