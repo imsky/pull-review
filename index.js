@@ -8,6 +8,8 @@
 // Author:
 //   Ivan Malopinsky
 
+process.env.DEBUG = process.env.DEBUG || 'pull-review';
+
 var PullReview = require('./src/index');
 var url = require('./src/url');
 

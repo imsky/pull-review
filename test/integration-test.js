@@ -2,6 +2,7 @@ var nock = require('nock');
 var Helper = require('hubot-test-helper');
 
 var pullReview = require('../index');
+var cli = require('../src/cli');
 
 var driver = require('./driver');
 var githubMock = driver.githubMock;
@@ -174,5 +175,22 @@ describe('pull-review', function () {
           }, 100);
         });
     })
+  });
+
+  describe('using CLI', function () {
+    this.timeout(30 * 1000);
+
+    it('works', function () {
+      githubMock({
+        'config': config
+      });
+
+      cli.parse(['node', 'pull-review', 'https://github.com/OWNER/REPO/pull/1']);
+      return cli.cliPromise
+        .then(function (actions) {
+          actions.should.have.lengthOf(2);
+          actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
+        });
+    });
   });
 });

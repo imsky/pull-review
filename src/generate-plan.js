@@ -9,6 +9,7 @@ var getReviewers = require('./get-reviewers');
 module.exports = function generatePlan(options) {
   options = options || {};
   var actions = [];
+  //todo: consider getting rid of the fallback Github client
   var github = options.github || Github(options.githubToken);
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
   var pullReviewConfigPath = process.env.PULL_REVIEW_CONFIG_PATH || options.pullReviewConfigPath || '.pull-review';

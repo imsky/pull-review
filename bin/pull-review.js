@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-var pullReview = require('../index');
-
+var cli = require('../src/cli');
+cli.parse(process.argv);

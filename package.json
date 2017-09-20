@@ -30,6 +30,8 @@
   },
   "homepage": "https://github.com/imsky/pull-review#readme",
   "dependencies": {
+    "commander": "^2.11.0",
+    "debug": "^3.0.1",
     "github": "~10.0",
     "github-graphql-client": "~1.0",
     "js-yaml": "~3.8",
