@@ -6,19 +6,49 @@
 
 **Pull Review** assigns pull request reviewers intelligently.
 
-Using [Git data](https://git-scm.com/docs/git-blame), Pull Review looks through the files changed by a pull request and assigns the most relevant users as reviewers. The most relevant users are calculated as those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other parameters, can be easily configured. Pull Review works in chat using [Hubot](https://hubot.github.com/) and programmatically via API.
+Using [Git data](https://git-scm.com/docs/git-blame), Pull Review looks through the files changed by a pull request and assigns the most relevant users as reviewers. The most relevant users are calculated as those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other parameters, can be easily configured.
+
+Pull Review can be used on the [command line](#cli), via [API](#api), or in chat with [Hubot](#hubot).
 
 ## Installation
 
-`npm install pull-review`
+```
+npm install pull-review
+```
 
 ## Usage
 
-Make sure the `PULL_REVIEW_GITHUB_TOKEN` environment variable is set to the GitHub token you'd like to use.
+First, set up a `.pull-review` configuration file in the repository where you'd like to use Pull Review. Here is a minimal `.pull-review` file:
+
+```yaml
+version: 1
+
+reviewers:
+  your_github_username: {}
+```
+
+For details on configuration options, check out the [configuration](#configuration) section.
+
+### CLI
+
+Run `npm install -g pull-review` to install the global `pull-review` binary. You can then use Pull Review like so:
+
+```bash
+# execute a regular reviewer assignment for a PR
+pull-review https://github.com/imsky/pull-review/pull/1
+
+# don't assign/notify reviewers, print out what Pull Review will do instead
+pull-review --dry-run https://github.com/imsky/pull-review/pull/1
+
+# re-run review of a PR in case the currently assigned reviewers are unavailable
+pull-review --retry-review https://github.com/imsky/pull-review/pull/1
+
+# provide a specific GitHub token in case PULL_REVIEW_GITHUB_TOKEN isn't set
+pull-review --github-token YOUR_GITHUB_TOKEN https://github.com/imsky/pull-review/pull/1
+```
 
 ### Hubot
 
-Install `pull-review` with npm.
 
 Make sure `pull-review` is listed in `external-scripts.json`:
 
@@ -27,6 +57,8 @@ Make sure `pull-review` is listed in `external-scripts.json`:
   "pull-review"
 ]
 ```
+
+Make sure the `PULL_REVIEW_GITHUB_TOKEN` environment variable is set to the GitHub token you'd like to use.
 
 Afterwards, you can request review assignments like this:
 
@@ -39,6 +71,8 @@ If you've already requested review and the reviewers are not responding, you can
 ```
 review https://github.com/imsky/pull-review/pull/1 again please
 ```
+
+`"review...again"` is equivalent to using the `--retry-review` flag with the CLI or the `retryReview` option with the API.
 
 ### API
 
@@ -60,7 +94,11 @@ PullReview({
 
   // custom Pull Review configuration, overriding any
   // configuration that already exists in the repo
-  config: {version: 1}
+  config: {version: 1},
+
+  // you can provide a GitHub token here instead of
+  // using the PULL_REVIEW_GITHUB_TOKEN environment variable
+  githubToken: null
 });
 ```
 
