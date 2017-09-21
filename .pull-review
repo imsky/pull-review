@@ -43,10 +43,10 @@ review_blacklist:
 
 # assign these reviewers if the path they're listed under matches changed files (only when assigning randomly)
 review_path_fallbacks:
-  app/web:
+  app/web/**:
   - alice
-  app/api:
+  app/api/**:
   - bob
-  app/ops:
+  app/ops/**:
   - alice
   - dee

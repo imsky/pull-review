@@ -1,5 +1,6 @@
 var shuffle = require('knuth-shuffle');
 var Promise = require('native-promise-only');
+var minimatch = require('minimatch');
 
 var BlameRange = require('./models/blame-range');
 var PullRequestFile = require('./models/pull-request-file');
@@ -190,25 +191,30 @@ module.exports = function getReviewers(options) {
           .sort(function(a, b) {
             return b.length - a.length;
           })
-          .forEach(function(prefix) {
-            files.forEach(function(file) {
-              if (file.filename.indexOf(prefix) === 0) {
-                var fallbackAuthors = config.reviewPathFallbacks[prefix] || [];
+          .forEach(function(pattern) {
+            var matchingFiles = files.filter(function (file) {
+              return minimatch(file.filename, pattern, {
+                dot: true,
+                matchBase: true
+              });
+            });
 
-                fallbackAuthors.forEach(function(author) {
-                  if (!isEligibleReviewer(author)) {
-                    return;
-                  }
+            matchingFiles.forEach(function(file) {
+              var fallbackAuthors = config.reviewPathFallbacks[pattern] || [];
 
-                  fallbackReviewers.push({
-                    login: author,
-                    count: 0,
-                    source: 'fallback'
-                  });
+              fallbackAuthors.forEach(function(author) {
+                if (!isEligibleReviewer(author)) {
+                  return;
+                }
 
-                  selectedReviewers[author] = true;
+                fallbackReviewers.push({
+                  login: author,
+                  count: 0,
+                  source: 'fallback'
                 });
-              }
+
+                selectedReviewers[author] = true;
+              });
             });
           });
 

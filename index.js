@@ -8,7 +8,9 @@
 // Author:
 //   Ivan Malopinsky
 
-process.env.DEBUG = process.env.DEBUG || 'pull-review';
+if (process.env.NODE_ENV !== 'test') {
+  process.env.DEBUG = 'pull-review';
+}
 
 var PullReview = require('./src/index');
 var url = require('./src/url');
