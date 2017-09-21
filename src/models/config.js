@@ -32,27 +32,30 @@ module.exports = function PullReviewConfig(input) {
   var reviewBlacklist = get(input.review_blacklist, []);
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);
   var requireNotification = get(input.require_notification, true);
+  var fileBlacklist = get(input.file_blacklist, []);
 
-  if (minReviewers < 1 || minReviewers === Infinity) {
+  if (minReviewers < 1) {
     throw Error('Invalid number of minimum reviewers');
-  } else if (maxReviewers < 0 || maxReviewers === Infinity) {
+  } else if (maxReviewers < 0) {
     throw Error('Invalid number of maximum reviewers');
   } else if (minReviewers > maxReviewers) {
     throw Error('Minimum reviewers exceeds maximum reviewers');
-  } else if (maxFiles < 0 || maxFiles === Infinity) {
+  } else if (maxFiles < 0) {
     throw Error('Invalid number of maximum files');
   } else if (
-    maxFilesPerReviewer < 0 ||
-    maxFilesPerReviewer === Infinity ||
-    (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)
+    maxFilesPerReviewer < 0 || (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)
   ) {
     throw Error('Invalid number of maximum files per reviewer');
   } else if (
-    maxLinesPerReviewer < 0 ||
-    maxLinesPerReviewer === Infinity ||
-    (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)
+    maxLinesPerReviewer < 0 || (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)
   ) {
     throw Error('Invalid number of maximum lines per reviewer');
+  } else if (minAuthorsOfChangedFiles < 0) {
+    throw Error('Invalid number of minimum authors of changed files');
+  } else if (!Array.isArray(reviewBlacklist)) {
+    throw Error('Review blacklist must be an array');
+  } else if (!Array.isArray(fileBlacklist)) {
+    throw Error('File blacklist must be an array');
   }
 
   return Object.freeze({
@@ -66,6 +69,7 @@ module.exports = function PullReviewConfig(input) {
     reviewBlacklist: reviewBlacklist,
     reviewPathFallbacks: reviewPathFallbacks,
     requireNotification: requireNotification,
-    assignMinReviewersRandomly: assignMinReviewersRandomly
+    assignMinReviewersRandomly: assignMinReviewersRandomly,
+    fileBlacklist: fileBlacklist
   });
 };

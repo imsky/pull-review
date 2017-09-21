@@ -23,7 +23,7 @@ assign_min_reviewers_randomly: true
 # if the pull request changes code with fewer than a minimum number of authors, add more reviewers if possible (set to 0 to disable)
 min_authors_of_changed_files: 0
 
-# require a user to be listed in the reviewers section in order to be assigned to a PR
+# require a user to be listed in the reviewers section in order to be assigned to a pull request
 require_notification: true
 
 # list of users and their app-specific usernames
@@ -50,3 +50,7 @@ review_path_fallbacks:
   app/ops/**:
   - alice
   - dee
+
+# list of minimatch (glob) patterns to ignore when getting files from a pull request
+file_blacklist:
+  - app/ignored_*.*

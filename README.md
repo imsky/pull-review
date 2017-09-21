@@ -18,7 +18,7 @@ npm install pull-review
 
 ## Usage
 
-First, set up a `.pull-review` configuration file in the repository where you'd like to use Pull Review. Here is a minimal `.pull-review` file:
+First, add a `.pull-review` configuration file in your repository. Here is a minimal `.pull-review` file:
 
 ```yaml
 version: 1
@@ -54,7 +54,7 @@ If you've already requested review and the reviewers are not responding, you can
 review https://github.com/imsky/pull-review/pull/1 again please
 ```
 
-`"review...again"` is equivalent to using the `--retry-review` flag with the CLI or the `retryReview` option with the API.
+`"review...again"` is equivalent to using the `--retry-review` flag with the CLI or the `retryReview` API option.
 
 ### CLI
 
@@ -169,15 +169,24 @@ A list of usernames to never notify. This is useful to exclude machine users and
 
 #### review_path_fallbacks
 
-A map of lists, with the main keys being the path prefixes, and the lists including the users to assign to those path prefixes. Example:
+A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists including the users to assign to those path prefixes. Example:
 
 ```yaml
 review_path_fallbacks:
-  web/ui:
+  web/ui/**:
   - alice
 ```
 
 When Pull Review encounters a file whose path begins with `web/ui`, `alice` will be assigned if not enough Git blame information is available.
+
+#### file_blacklist
+
+An array of [minimatch](https://github.com/isaacs/minimatch) (glob) patterns that should be filtered out when retrieving files for a pull request. Blacklisted files will not be considered in Git blame processing, in [fallback path processing](#review_path_fallbacks), or in [max files per reviewer](#max_files_per_reviewer) or [max lines per reviewer](#max_lines_per_reviewer) calculations. Example:
+
+```yaml
+file_blacklist:
+  - web/ui/*.js
+```
 
 ### Environment variables
 

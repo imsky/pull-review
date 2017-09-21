@@ -32,8 +32,20 @@ module.exports = function getReviewers(options) {
   var maxLinesPerReviewer = config.maxLinesPerReviewer;
   var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
   var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
+  var fileBlacklist = config.fileBlacklist;
 
   files = files.map(PullRequestFile);
+
+  if (fileBlacklist.length) {
+    fileBlacklist.forEach(function (pattern) {
+      files = files.filter(function (file) {
+        return !minimatch(file.filename, pattern, {
+          dot: true,
+          matchBase: true
+        });
+      });
+    });
+  }
 
   var nonRemovedFiles = files.filter(function(file) {
     return file.status !== 'removed';

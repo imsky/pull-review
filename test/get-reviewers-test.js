@@ -295,6 +295,34 @@ describe('#getReviewers', function () {
       });
   });
 
+  it('filters out blacklisted files', function () {
+    return getReviewers({
+      'config': config,
+      'authorLogin': 'alice',
+      'files': [
+        {
+          'filename': 'app/ignored_file.txt',
+          'status': 'modified',
+          'changes': 1
+        }
+      ],
+      'getBlameForFile': function () {
+        return [
+          {
+            'login': 'dee',
+            'count': 1000,
+            'age': 1
+          }
+        ]
+      }
+    })
+      .then(function (reviewers) {
+        reviewers.should.have.lengthOf(1);
+        reviewers[0].source.should.not.equal('blame');
+        reviewers[0].count.should.equal(0);
+      });
+  });
+
   it('ignores existing reviewers when retrying review', function () {
     return getReviewers({
       'config': {
