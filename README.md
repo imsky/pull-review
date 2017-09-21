@@ -1,6 +1,6 @@
 # Pull Review
 
-[![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
 <!-- todo: screenshot -->
 
@@ -167,9 +167,22 @@ Currently only Slack is supported.
 
 A list of usernames to never notify. This is useful to exclude machine users and users who are on vacation or otherwise unavailable for reviews.
 
+#### review_path_assignments
+
+A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists include the users to assign. Example:
+
+
+```yaml
+review_path_assignments:
+  web/server/**:
+  - bob
+```
+
+When Pull Review encounters a file whose path begins with `web/server`, `bob` will be assigned ahead of other reviewers.
+
 #### review_path_fallbacks
 
-A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists including the users to assign to those path prefixes. Example:
+A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists include the users to assign. Example:
 
 ```yaml
 review_path_fallbacks:
@@ -177,7 +190,7 @@ review_path_fallbacks:
   - alice
 ```
 
-When Pull Review encounters a file whose path begins with `web/ui`, `alice` will be assigned if not enough Git blame information is available.
+When Pull Review encounters a file whose path begins with `web/ui`, `alice` will be assigned if more reviewers are required.
 
 #### file_blacklist
 

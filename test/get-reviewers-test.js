@@ -295,6 +295,40 @@ describe('#getReviewers', function () {
       });
   });
 
+  it('uses assigned paths when assigning initial reviewers', function () {
+    return getReviewers({
+      'config': config,
+      'authorLogin': 'alice',
+      'files': [
+        {
+          'filename': 'app/server.py',
+          'status': 'modified',
+          'changes': 1
+        },
+        {
+          'filename': 'app/api/index.js',
+          'status': 'modified',
+          'changes': 1
+        }
+      ],
+      'getBlameForFile': function () {
+        return [
+          {
+            'login': 'dee',
+            'count': 1000,
+            'age': 1
+          }
+        ];
+      }
+    })
+      .then(function (reviewers) {
+        reviewers.should.have.lengthOf(2);
+        reviewers[0].login.should.equal('bob');
+        reviewers[0].source.should.equal('assignment');
+        reviewers[1].login.should.equal('dee');
+      });
+  })
+
   it('filters out blacklisted files', function () {
     return getReviewers({
       'config': config,

@@ -41,7 +41,12 @@ reviewers:
 review_blacklist:
   - charlie
 
-# assign these reviewers if the path they're listed under matches changed files (only when assigning randomly)
+# always assign the following users based on minimatch (glob) patterns
+review_path_assignments:
+  "*.py":
+  - bob
+
+# if more reviewers are required, assign the following users based on minimatch (glob) patterns 
 review_path_fallbacks:
   app/web/**:
   - alice

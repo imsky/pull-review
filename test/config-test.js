@@ -65,5 +65,26 @@ describe('config', function () {
         'max_lines_per_reviewer': -1
       });
     }).should.throw(Error, 'Invalid number of maximum lines per reviewer');
+
+    (function () {
+      PullReviewConfig({
+        'version': 1,
+        'min_authors_of_changed_files': -1
+      });
+    }).should.throw(Error, 'Invalid number of minimum authors of changed files');
+
+    (function () {
+      PullReviewConfig({
+        'version': 1,
+        'review_blacklist': null
+      });
+    }).should.throw(Error, 'Review blacklist must be an array');
+
+    (function () {
+      PullReviewConfig({
+        'version': 1,
+        'file_blacklist': null
+      });
+    }).should.throw(Error, 'File blacklist must be an array');
   });
 });

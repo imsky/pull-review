@@ -33,6 +33,8 @@ module.exports = function getReviewers(options) {
   var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
   var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
   var fileBlacklist = config.fileBlacklist;
+  var reviewPathFallbacks = config.reviewPathFallbacks;
+  var reviewPathAssignments = config.reviewPathAssignments;
 
   files = files.map(PullRequestFile);
 
@@ -134,6 +136,41 @@ module.exports = function getReviewers(options) {
     );
   }
 
+  var assignedReviewers = [];
+
+  Object.keys(reviewPathAssignments || {})
+    .sort(function(a, b) {
+      return b.length - a.length;
+    })
+    .forEach(function(pattern) {
+      var matchingFiles = files.filter(function (file) {
+        return minimatch(file.filename, pattern, {
+          dot: true,
+          matchBase: true
+        });
+      });
+
+      matchingFiles.forEach(function(file) {
+        var assignedAuthors = reviewPathAssignments[pattern] || [];
+
+        assignedAuthors.forEach(function(author) {
+          if (!isEligibleReviewer(author)) {
+            return;
+          }
+
+          assignedReviewers.push({
+            login: author,
+            count: 0,
+            source: 'assignment'
+          });
+
+          selectedReviewers[author] = true;
+        });
+      });
+    });
+
+  shuffle.knuthShuffle(assignedReviewers);
+
   return Promise.all(topModifiedFiles.map(getBlameForFile))
     .then(function(blames) {
       var authorsLinesChanged = {};
@@ -165,21 +202,21 @@ module.exports = function getReviewers(options) {
 
       uniqueAuthors = Object.keys(authorsLinesChanged).length;
 
-      var authorBlames = [];
+      var blamedReviewers = [];
 
       Object.keys(authorsLinesChanged || {}).forEach(function(author) {
-        authorBlames.push({
+        blamedReviewers.push({
           login: author,
           count: authorsLinesChanged[author] || 0,
           source: 'blame'
         });
       });
 
-      authorBlames.sort(function(a, b) {
+      blamedReviewers.sort(function(a, b) {
         return b.count - a.count;
       });
 
-      return authorBlames.slice(0, maxReviewersAssignable);
+      return assignedReviewers.concat(blamedReviewers).slice(0, maxReviewersAssignable);
     })
     .then(function(reviewers) {
       var fallbackReviewers = [];
@@ -199,7 +236,7 @@ module.exports = function getReviewers(options) {
       });
 
       if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
-        Object.keys(config.reviewPathFallbacks || {})
+        Object.keys(reviewPathFallbacks || {})
           .sort(function(a, b) {
             return b.length - a.length;
           })
@@ -212,7 +249,7 @@ module.exports = function getReviewers(options) {
             });
 
             matchingFiles.forEach(function(file) {
-              var fallbackAuthors = config.reviewPathFallbacks[pattern] || [];
+              var fallbackAuthors = reviewPathFallbacks[pattern] || [];
 
               fallbackAuthors.forEach(function(author) {
                 if (!isEligibleReviewer(author)) {

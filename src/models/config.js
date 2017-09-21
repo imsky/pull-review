@@ -33,6 +33,7 @@ module.exports = function PullReviewConfig(input) {
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);
   var requireNotification = get(input.require_notification, true);
   var fileBlacklist = get(input.file_blacklist, []);
+  var reviewPathAssignments = get(input.review_path_assignments, null);
 
   if (minReviewers < 1) {
     throw Error('Invalid number of minimum reviewers');
@@ -67,6 +68,7 @@ module.exports = function PullReviewConfig(input) {
     minAuthorsOfChangedFiles: minAuthorsOfChangedFiles,
     reviewers: reviewers,
     reviewBlacklist: reviewBlacklist,
+    reviewPathAssignments: reviewPathAssignments,
     reviewPathFallbacks: reviewPathFallbacks,
     requireNotification: requireNotification,
     assignMinReviewersRandomly: assignMinReviewersRandomly,
