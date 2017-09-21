@@ -178,7 +178,7 @@ review_path_assignments:
   - bob
 ```
 
-When Pull Review encounters a file whose path begins with `web/server`, `bob` will be assigned ahead of other reviewers.
+When a file whose path begins with `web/server` is found, `bob` will be assigned ahead of other reviewers.
 
 #### review_path_fallbacks
 
@@ -190,7 +190,7 @@ review_path_fallbacks:
   - alice
 ```
 
-When Pull Review encounters a file whose path begins with `web/ui`, `alice` will be assigned if more reviewers are required.
+When a file whose path begins with `web/ui` is found, `alice` will be assigned if more reviewers are required.
 
 #### file_blacklist
 
@@ -215,7 +215,8 @@ Pull Review was partly inspired by [mention-bot](https://github.com/facebook/men
 * Get all modified files for a pull request and take the [top 5 files](#max_files) with most changes
 * Get information on which author changed what lines in these files using [Git blame](https://git-scm.com/docs/git-blame) data, filtering out older data
 * Add up the lines written per individual author for the top modified files, and sort the authors by lines written
-* Assign the authors with most lines written for the top modified files as the reviewers
+* Assign [authors who have precedence for particular paths](#review_path_assignments)
+* Assign authors with most lines written for the top modified files as the reviewers
 * If there are [not enough reviewers](#min_reviewers), add more reviewers from [path fallback rules](review_path_fallbacks) and, if there are still not enough, from a [pool of all reviewers](#reviewers)
 
 If more reviewers are necessary, limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of code per reviewer](#max_lines_per_reviewer).

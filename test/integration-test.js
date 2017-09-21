@@ -1,8 +1,10 @@
 var nock = require('nock');
 var Helper = require('hubot-test-helper');
+var request = require('supertest');
 
 var pullReview = require('../index');
 var cli = require('../src/cli');
+var server = require('../src/server');
 
 var driver = require('./driver');
 var githubMock = driver.githubMock;
@@ -126,7 +128,8 @@ describe('pull-review', function () {
       });
 
       room = helper.createRoom({
-        'name': 'test'
+        'name': 'test',
+        'httpd': false
       });
     });
 
@@ -178,8 +181,6 @@ describe('pull-review', function () {
   });
 
   describe('using CLI', function () {
-    this.timeout(30 * 1000);
-
     it('works', function () {
       githubMock({
         'config': config
@@ -191,6 +192,61 @@ describe('pull-review', function () {
           actions.should.have.lengthOf(2);
           actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
         });
+    });
+  });
+
+  describe('in server mode', function () {
+    it('works with valid GitHub webhook payload', function () {
+      githubMock({
+        'config': config
+      });
+
+      return request(server)
+        .post('/')
+        .set('Content-Type', 'application/json')
+        .send({
+          action: 'created',
+          pull_request: {
+            html_url: 'https://github.com/OWNER/REPO/pull/1'
+          },
+          comment: {
+            body: '/review'
+          }
+        })
+        .expect(201)
+        .then(function (response) {
+          response.body.should.have.lengthOf(2);
+          response.body[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
+          response.body[1].type.should.equal('NOTIFY');
+        });
+    });
+
+    it('redirects on root route', function () {
+      return request(server)
+        .get('/')
+        .expect(302);
+    });
+
+    it('does nothing without a valid GitHub webhook payload', function () {
+      return request(server)
+        .post('/')
+        .expect(200);
+    });
+
+    it('fails with invalid GitHub webhook payload', function () {
+      return request(server)
+        .post('/')
+        .set('Content-Type', 'application/json')
+        .send({
+          action: 'created',
+          pull_request: {
+            html_url: ''
+          },
+          comment: {
+            body: '/review'
+          }
+        })
+        .expect(400);
     });
   });
 });

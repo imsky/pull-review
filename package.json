@@ -29,13 +29,15 @@
   },
   "homepage": "https://github.com/imsky/pull-review#readme",
   "dependencies": {
-    "commander": "^2.11.0",
-    "debug": "^3.0.1",
+    "body-parser": "~1.18",
+    "commander": "~2.11",
+    "debug": "~3.0",
+    "express": "~4.15",
     "github": "~10.0",
     "github-graphql-client": "~1.0",
     "js-yaml": "~3.8",
     "knuth-shuffle": "~1.0",
-    "minimatch": "^3.0.4",
+    "minimatch": "~3.0",
     "native-promise-only": "~0.8",
     "normalize-url": "~1.9",
     "url-regex": "~3.2"
@@ -50,7 +52,8 @@
     "hubot-test-helper": "~1.7",
     "mocha": "~3.2",
     "nock": "~9.0",
-    "nyc": "~10.3"
+    "nyc": "~10.3",
+    "supertest": "~3.0"
   },
   "nyc": {
     "check-coverage": true,
