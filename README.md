@@ -64,7 +64,7 @@ Afterwards, you can request review assignments like this:
 review https://github.com/imsky/pull-review/pull/1 please
 ```
 
-If you've already requested review and the reviewers are not responding, you can try again with:
+You can re-run Pull Review on a pull request like this:
 
 ```
 review https://github.com/imsky/pull-review/pull/1 again please
@@ -74,19 +74,20 @@ review https://github.com/imsky/pull-review/pull/1 again please
 
 ### CLI
 
-Run `npm install -g pull-review` to install the global `pull-review` binary. You can then use Pull Review like so:
-
 ```bash
-# execute a regular reviewer assignment for a PR
+# install Pull Review globally
+npm install --global pull-review
+
+# run Pull Review on a pull request
 pull-review https://github.com/imsky/pull-review/pull/1
 
-# don't assign/notify reviewers, print out what Pull Review will do instead
+# run Pull Review on a pull request, but do not assign or notify reviewers
 pull-review --dry-run https://github.com/imsky/pull-review/pull/1
 
-# re-run review of a PR in case the currently assigned reviewers are unavailable
+# run Pull Review on a pull request, unassigning current reviewers first
 pull-review --retry-review https://github.com/imsky/pull-review/pull/1
 
-# provide a specific GitHub token in case PULL_REVIEW_GITHUB_TOKEN isn't set
+# run Pull Review with a specific GitHub token
 pull-review --github-token YOUR_GITHUB_TOKEN https://github.com/imsky/pull-review/pull/1
 ```
 ### API
@@ -97,33 +98,30 @@ var PullReview = require('pull-review');
 PullReview({
   pullRequestURL: 'https://github.com/imsky/pull-review/pull/1',
 
-  // if retryReview is set to true, any current assignees
-  // will be unassigned and new reviewers will be assigned
-  retryReview: false,
+  // run Pull Review on a pull request, unassigning current reviewers first
+  retryReview: true,
 
-  // if dryRun is set to true, Pull Review will not
-  // assign or notify reviewers, but will instead
-  // provide a list of reviewers and the notification
-  // channels it plans to use
-  dryRun: false,
+  // run Pull Review on a pull request, but do not assign or notify reviewers
+  dryRun: true,
 
-  // custom Pull Review configuration, overriding any
-  // configuration that already exists in the repo
-  config: {version: 1},
+  // run Pull Review with a specific GitHub token
+  githubToken: 'YOUR_GITHUB_TOKEN'
 
-  // you can provide a GitHub token here instead of
-  // using the PULL_REVIEW_GITHUB_TOKEN environment variable
-  githubToken: null
+  // run Pull Review with a custom Pull Review configuration
+  config: {version: 1}
 });
 ```
 
 ### Docker
 
 ```bash
-# run Pull Review using GitHub token set in PULL_REVIEW_GITHUB_TOKEN env var on host
+# get the Pull Review image
+docker pull imsky/pull-review
+
+# run Pull Review on a pull request
 docker run -it -e PULL_REVIEW_GITHUB_TOKEN imsky/pull-review https://github.com/imsky/pull-review/pull/1
 
-# run Pull Review using GitHub token provided via CLI flag
+# run Pull Review with a specific GitHub token
 docker run -it imsky/pull-review https://github.com/imsky/pull-review/pull/1 --github-token YOUR_GITHUB_TOKEN
 ```
 
@@ -223,10 +221,10 @@ file_blacklist:
 
 ### Environment variables
 
-* `PULL_REVIEW_GITHUB_TOKEN`: the GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes. This environment variable is **required** when using Pull Review as a Hubot plugin.
+* `PULL_REVIEW_GITHUB_TOKEN`: the GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes. This environment variable is **required** when using Pull Review as a Hubot plugin or when running Pull Review in server mode.
 * `PULL_REVIEW_CONFIG_PATH`: the location of the Pull Review config file in the pull request repo (default is `.pull-review`).
-* `PULL_REVIEW_REQUIRED_ROOMS`: a comma-separated list of chat rooms where a review request may be made, for example: `dev,ops`.
 * `PULL_REVIEW_CONFIG`: a JSON/YAML Pull Review configuration, which will override any configuration in the repository
+* `PULL_REVIEW_REQUIRED_ROOMS`: a comma-separated list of chat rooms where a review request may be made, for example: `dev,ops`.
 
 ## Algorithm
 
@@ -237,7 +235,8 @@ Pull Review was partly inspired by [mention-bot](https://github.com/facebook/men
 * Add up the lines written per individual author for the top modified files, and sort the authors by lines written
 * Assign [authors who have precedence for particular paths](#review_path_assignments)
 * Assign authors with most lines written for the top modified files as the reviewers
-* If there are [not enough reviewers](#min_reviewers), add more reviewers from [path fallback rules](review_path_fallbacks) and, if there are still not enough, from a [pool of all reviewers](#reviewers)
+* If there are [not enough reviewers](#min_reviewers), add more reviewers from [path fallback rules](review_path_fallbacks)
+* If there are still not enough reviewers, add reviewers randomly from a [pool of all reviewers](#reviewers)
 
 If more reviewers are necessary, limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of code per reviewer](#max_lines_per_reviewer).
 
