@@ -10,6 +10,8 @@ var PullReview = require('./index');
 var log = debug('pull-review');
 var app = express();
 
+var port = process.env.PORT || 8080;
+
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
@@ -20,7 +22,7 @@ app.post('/', function (req, res) {
   Promise.resolve(req.body || {})
     .then(function (payload) {
       if (payload.action === 'created' && payload.comment && payload.comment.body.indexOf('/review') === 0) {
-        var pullRequestURL = payload.pull_request.html_url;
+        var pullRequestURL = (payload.pull_request || payload.issue).html_url;
         var retryReview = payload.comment.body.indexOf('/review again') === 0;
 
         return PullReview({
@@ -42,8 +44,8 @@ app.post('/', function (req, res) {
     });
 });
 
-app.listen(8080, function () {
-  log('started server on 8080');
+app.listen(port, function () {
+  log('started server on port ' + port);
 });
 
 module.exports = app;
