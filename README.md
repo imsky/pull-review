@@ -36,6 +36,8 @@ For details on configuration options, check out the [configuration](#configurati
 * In your GitHub repository, go to **Settings**→**Webhooks**
 * Click **Add webhook**
 * Set **Payload URL** to the Pull Review server URL (<https://pull-review.herokuapp.com/>)
+  * The public Pull Review server does not allow [random assignment](#assign_min_reviewers_randomly).
+  * However, you can easily [run your own Pull Review server](#server).
 * Set **Content type** to `application/json`
 * Choose **Let me select individual events**
 * Pick the **Issue comment** event
