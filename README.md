@@ -35,7 +35,7 @@ For details on configuration options, check out the [configuration](#configurati
 
 * In your GitHub repository, go to **Settings**→**Webhooks**
 * Click **Add webhook**
-* Set **Payload URL** to the Pull Review server URL
+* Set **Payload URL** to the Pull Review server URL (<https://pull-review.herokuapp.com/>)
 * Set **Content type** to `application/json`
 * Choose **Let me select individual events**
 * Pick the **Issue comment** event
@@ -124,6 +124,10 @@ docker run -it -e PULL_REVIEW_GITHUB_TOKEN imsky/pull-review https://github.com/
 # run Pull Review using GitHub token provided via CLI flag
 docker run -it imsky/pull-review https://github.com/imsky/pull-review/pull/1 --github-token YOUR_GITHUB_TOKEN
 ```
+
+### Server
+
+You can run your own Pull Review server [on Heroku](https://heroku.com/deploy?template=https://github.com/imsky/pull-review) or another host. You can start the server by running `npm start`.
 
 ## Configuration
 
