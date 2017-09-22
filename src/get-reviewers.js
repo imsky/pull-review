@@ -34,7 +34,8 @@ module.exports = function getReviewers(options) {
   var maxFilesPerReviewer = config.maxFilesPerReviewer;
   var maxLinesPerReviewer = config.maxLinesPerReviewer;
   var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
-  var maxReviewersAssignedDynamically = maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
+  var maxReviewersAssignedDynamically =
+    maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
   var fileBlacklist = config.fileBlacklist;
   var reviewPathFallbacks = config.reviewPathFallbacks;
   var reviewPathAssignments = config.reviewPathAssignments;
@@ -42,8 +43,8 @@ module.exports = function getReviewers(options) {
   files = files.map(PullRequestFile);
 
   if (fileBlacklist.length) {
-    fileBlacklist.forEach(function (pattern) {
-      files = files.filter(function (file) {
+    fileBlacklist.forEach(function(pattern) {
+      files = files.filter(function(file) {
         return !minimatch(file.filename, pattern, {
           dot: true,
           matchBase: true
@@ -70,7 +71,10 @@ module.exports = function getReviewers(options) {
     return b.changes - a.changes;
   });
 
-  var topModifiedFiles = config.maxFiles > 0 ? modifiedFiles.slice(0, config.maxFiles) : modifiedFiles;
+  var topModifiedFiles =
+    config.maxFiles > 0
+      ? modifiedFiles.slice(0, config.maxFiles)
+      : modifiedFiles;
 
   var selectedReviewers = {};
   var excludedReviewers = {};
@@ -104,8 +108,10 @@ module.exports = function getReviewers(options) {
   var unassignedReviewers = maxReviewers - assignees.length;
   var maxNeededReviewers = unassignedReviewers;
 
-  var maxReviewersUsingLines = maxLinesPerReviewer > 0 ? Math.ceil(changedLines / maxLinesPerReviewer) : 0;
-  var maxReviewersUsingFiles = maxFilesPerReviewer > 0 ? Math.ceil(files.length / maxFilesPerReviewer) : 0;
+  var maxReviewersUsingLines =
+    maxLinesPerReviewer > 0 ? Math.ceil(changedLines / maxLinesPerReviewer) : 0;
+  var maxReviewersUsingFiles =
+    maxFilesPerReviewer > 0 ? Math.ceil(files.length / maxFilesPerReviewer) : 0;
 
   if (maxReviewersAssignedDynamically) {
     if (!maxFilesPerReviewer && maxLinesPerReviewer) {
@@ -113,21 +119,32 @@ module.exports = function getReviewers(options) {
     } else if (!maxLinesPerReviewer && maxFilesPerReviewer) {
       maxNeededReviewers = maxReviewersUsingFiles;
     } else {
-      maxNeededReviewers = Math.min(maxReviewersUsingLines, maxReviewersUsingFiles);
+      maxNeededReviewers = Math.min(
+        maxReviewersUsingLines,
+        maxReviewersUsingFiles
+      );
     }
 
     maxNeededReviewers = Math.max(minReviewers, maxNeededReviewers);
   }
 
-  var maxReviewersAssignable = Math.min(unassignedReviewers, maxNeededReviewers);
-  var minReviewersAssignable = maxReviewersAssignedDynamically ? maxReviewersAssignable : minReviewers;
+  var maxReviewersAssignable = Math.min(
+    unassignedReviewers,
+    maxNeededReviewers
+  );
+  var minReviewersAssignable = maxReviewersAssignedDynamically
+    ? maxReviewersAssignable
+    : minReviewers;
 
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = selectedReviewers[reviewer];
     var isReviewerCurrentCommitter = currentCommitters[reviewer];
     var isReviewerAuthor = reviewer === authorLogin;
-    var isReviewerUnreachable = config.requireNotification ? !config.reviewers[reviewer] : false;
-    var isReviewerBlacklisted = config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
+    var isReviewerUnreachable = config.requireNotification
+      ? !config.reviewers[reviewer]
+      : false;
+    var isReviewerBlacklisted =
+      config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
     var isReviewerExcluded = excludedReviewers[reviewer];
     return (
       !isReviewerCurrentCommitter &&
@@ -146,14 +163,14 @@ module.exports = function getReviewers(options) {
       return b.length - a.length;
     })
     .forEach(function(pattern) {
-      var matchingFiles = files.filter(function (file) {
+      var matchingFiles = files.filter(function(file) {
         return minimatch(file.filename, pattern, {
           dot: true,
           matchBase: true
         });
       });
 
-      matchingFiles.forEach(function(file) {
+      matchingFiles.forEach(function() {
         var assignedAuthors = reviewPathAssignments[pattern] || [];
 
         assignedAuthors.forEach(function(author) {
@@ -193,7 +210,10 @@ module.exports = function getReviewers(options) {
           return isEligibleReviewer(range.login);
         });
 
-        var recentBlames = usableBlames.slice(0, Math.ceil(usableBlames.length * 0.75));
+        var recentBlames = usableBlames.slice(
+          0,
+          Math.ceil(usableBlames.length * 0.75)
+        );
 
         recentBlames.forEach(function(range) {
           var linesChanged = range.count;
@@ -223,7 +243,9 @@ module.exports = function getReviewers(options) {
         return b.count - a.count;
       });
 
-      return assignedReviewers.concat(blamedReviewers).slice(0, maxReviewersAssignable);
+      return assignedReviewers
+        .concat(blamedReviewers)
+        .slice(0, maxReviewersAssignable);
     })
     .then(function(reviewers) {
       var fallbackReviewers = [];
@@ -233,10 +255,16 @@ module.exports = function getReviewers(options) {
         return reviewers;
       }
 
-      if (uniqueAuthors < minAuthorsOfChangedFiles && reviewers.length >= minReviewersAssignable && reviewers.length) {
+      if (
+        uniqueAuthors < minAuthorsOfChangedFiles &&
+        reviewers.length >= minReviewersAssignable &&
+        reviewers.length
+      ) {
         //unassign one random reviewer if there are already enough reviewers
         reviewers = reviewers.slice(0, maxReviewersAssignable);
-        var excludedReviewerIndex = Math.floor(Math.random() * reviewers.length);
+        var excludedReviewerIndex = Math.floor(
+          Math.random() * reviewers.length
+        );
         excludedReviewers[reviewers[excludedReviewerIndex].login] = true;
         reviewers[excludedReviewerIndex] = null;
         reviewers = reviewers.filter(Boolean);
@@ -246,20 +274,23 @@ module.exports = function getReviewers(options) {
         selectedReviewers[reviewer.login] = true;
       });
 
-      if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
+      if (
+        reviewers.length < minReviewersAssignable &&
+        config.assignMinReviewersRandomly
+      ) {
         Object.keys(reviewPathFallbacks || {})
           .sort(function(a, b) {
             return b.length - a.length;
           })
           .forEach(function(pattern) {
-            var matchingFiles = files.filter(function (file) {
+            var matchingFiles = files.filter(function(file) {
               return minimatch(file.filename, pattern, {
                 dot: true,
                 matchBase: true
               });
             });
 
-            matchingFiles.forEach(function(file) {
+            matchingFiles.forEach(function() {
               var fallbackAuthors = reviewPathFallbacks[pattern] || [];
 
               fallbackAuthors.forEach(function(author) {
@@ -279,10 +310,15 @@ module.exports = function getReviewers(options) {
           });
 
         shuffle.knuthShuffle(fallbackReviewers);
-        reviewers = reviewers.concat(fallbackReviewers.slice(0, minReviewersAssignable - reviewers.length));
+        reviewers = reviewers.concat(
+          fallbackReviewers.slice(0, minReviewersAssignable - reviewers.length)
+        );
       }
 
-      if (reviewers.length < minReviewersAssignable && config.assignMinReviewersRandomly) {
+      if (
+        reviewers.length < minReviewersAssignable &&
+        config.assignMinReviewersRandomly
+      ) {
         Object.keys(config.reviewers || {}).forEach(function(author) {
           if (!isEligibleReviewer(author)) {
             return;
@@ -298,7 +334,9 @@ module.exports = function getReviewers(options) {
         });
 
         shuffle.knuthShuffle(randomReviewers);
-        reviewers = reviewers.concat(randomReviewers.slice(0, minReviewersAssignable - reviewers.length));
+        reviewers = reviewers.concat(
+          randomReviewers.slice(0, minReviewersAssignable - reviewers.length)
+        );
       }
 
       return reviewers;

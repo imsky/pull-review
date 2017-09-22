@@ -1,4 +1,4 @@
-module.exports = function (input) {
+module.exports = function(input) {
   input = input || {};
   var users = input.users;
 
@@ -6,9 +6,12 @@ module.exports = function (input) {
     throw Error('Missing users');
   }
 
-  users = users.map(function (user) {
+  users = users.map(function(user) {
     return '@' + user;
   });
 
-  return users.join(', ') + ': please review this pull request.\n\n> Powered by [pull-review](https://github.com/imsky/pull-review)';
+  return (
+    users.join(', ') +
+    ': please review this pull request.\n\n> Powered by [pull-review](https://github.com/imsky/pull-review)'
+  );
 };

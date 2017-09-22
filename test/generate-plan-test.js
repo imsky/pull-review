@@ -6,109 +6,111 @@ var driver = require('./driver');
 var githubMock = driver.githubMock;
 var config = driver.config;
 
-describe('#generatePlan', function () {
-  afterEach(function () {
+describe('#generatePlan', function() {
+  afterEach(function() {
     process.env.PULL_REVIEW_REQUIRED_ROOMS = '';
     nock.cleanAll();
   });
 
-  it('works without blame', function () {
+  it('works without blame', function() {
     githubMock({
-      'noBlame': true
+      noBlame: true
     });
 
     return generatePlan({
-      'config': config,
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
-    })
-      .then(function (actions) {
-        actions.should.have.lengthOf(2);
-        actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
-        actions[0].payload.assignees[0].should.not.equal('alice');
-        actions[0].payload.reviewers[0].source.should.equal('random');
-        actions[1].type.should.equal('NOTIFY');
-        actions[1].payload.channel.should.equal('github');
-      });
+      config: config,
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
+    }).then(function(actions) {
+      actions.should.have.lengthOf(2);
+      actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
+      actions[0].payload.assignees[0].should.not.equal('alice');
+      actions[0].payload.reviewers[0].source.should.equal('random');
+      actions[1].type.should.equal('NOTIFY');
+      actions[1].payload.channel.should.equal('github');
+    });
   });
 
-  it('works with blame', function () {
+  it('works with blame', function() {
     githubMock();
 
     return generatePlan({
-      'config': config,
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
-    })
-      .then(function (actions) {
-        actions.should.have.lengthOf(2);
-        actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
-        actions[0].payload.assignees[0].should.equal('bob');
-        actions[0].payload.reviewers[0].source.should.equal('blame');
-      });
+      config: config,
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
+    }).then(function(actions) {
+      actions.should.have.lengthOf(2);
+      actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
+      actions[0].payload.assignees[0].should.equal('bob');
+      actions[0].payload.reviewers[0].source.should.equal('blame');
+    });
   });
 
-  it('reassigns reviewers', function () {
+  it('reassigns reviewers', function() {
     githubMock({
-      'assignees': [{ 'login': 'charlie' }]
+      assignees: [{login: 'charlie'}]
     });
 
     return generatePlan({
-      'config': config,
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
-      'retryReview': true
-    })
-      .then(function (actions) {
-        actions.should.have.lengthOf(3);
-        actions[0].type.should.equal('UNASSIGN_USERS_FROM_PULL_REQUEST');
-        actions[0].payload.assignees[0].should.equal('charlie');
-      });
+      config: config,
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+      retryReview: true
+    }).then(function(actions) {
+      actions.should.have.lengthOf(3);
+      actions[0].type.should.equal('UNASSIGN_USERS_FROM_PULL_REQUEST');
+      actions[0].payload.assignees[0].should.equal('charlie');
+    });
   });
 
-  it('fails without a pull request URL', function () {
-    return (function () { generatePlan(); }).should.throw('Missing pull request URL');
+  it('fails without a pull request URL', function() {
+    return function() {
+      generatePlan();
+    }.should.throw('Missing pull request URL');
   });
 
-  it('fails with an invalid pull request URL', function () {
-    return (function () {
+  it('fails with an invalid pull request URL', function() {
+    return function() {
       generatePlan({
-        'pullRequestURL': 'http://example.com'
+        pullRequestURL: 'http://example.com'
       });
-    }).should.throw('Invalid pull request URL');
+    }.should.throw('Invalid pull request URL');
   });
 
-  it('fails without config', function () {
+  it('fails without config', function() {
     githubMock();
 
     return generatePlan({
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
     }).should.eventually.be.rejectedWith(Error, 'Missing configuration');
   });
 
-  it('fails with the wrong chat room', function () {
+  it('fails with the wrong chat room', function() {
     githubMock({
-      'config': config
+      config: config
     });
 
     process.env.PULL_REVIEW_REQUIRED_ROOMS = 'not-test';
 
-    (function () {
+    (function() {
       generatePlan({
-        'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
-        'chatRoom': 'test',
-        'isChat': true
-      })
-    }).should.throw('Review requests are disabled from room test');
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+        chatRoom: 'test',
+        isChat: true
+      });
+    }.should.throw('Review requests are disabled from room test'));
   });
 
-  it('fails with closed pull requests', function () {
+  it('fails with closed pull requests', function() {
     githubMock({
-      'config': config,
-      'state': 'closed'
+      config: config,
+      state: 'closed'
     });
 
     return generatePlan({
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
-      'chatRoom': 'test',
-      'isChat': true
-    }).should.eventually.be.rejectedWith(Error, 'Pull request is not open: https://github.com/OWNER/REPO/pull/1');
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+      chatRoom: 'test',
+      isChat: true
+    }).should.eventually.be.rejectedWith(
+      Error,
+      'Pull request is not open: https://github.com/OWNER/REPO/pull/1'
+    );
   });
 });

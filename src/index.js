@@ -45,40 +45,53 @@ module.exports = function PullReview(options) {
       actions = actions.map(Action);
       actions.forEach(function(action) {
         switch (action.type) {
-        case 'ASSIGN_USERS_TO_PULL_REQUEST':
-          transaction.push(function () {
-            return github.assignUsersToPullRequest(action.payload.pullRequest, action.payload.assignees)
-          });
-          loggedEvents.push('assigned ' + action.payload.assignees.join(', '));
-          break;
-        case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
-          transaction.push(function () {
-            return github.unassignUsersFromPullRequest(action.payload.pullRequest, action.payload.assignees)
-          });
-          loggedEvents.push('unassigned ' + action.payload.assignees.join(', '))
-          break;
-        case 'NOTIFY':
-          if (action.payload.channel === 'github') {
-            transaction.push(function () {
-              return github.postPullRequestComment(action.payload.pullRequest, GithubMessage(action.payload))
+          case 'ASSIGN_USERS_TO_PULL_REQUEST':
+            transaction.push(function() {
+              return github.assignUsersToPullRequest(
+                action.payload.pullRequest,
+                action.payload.assignees
+              );
             });
-            loggedEvents.push('posted GitHub comment');
-          } else {
-            transaction.push(function () {
-              return new Promise(function(resolve, reject) {
-                try {
-                  var notification = generateNotification(action.payload);
-                  resolve(notifyFn(notification));
-                } catch (e) {
-                  console.error(e);
-                  reject(Error('Failed to notify'));
-                }
+            loggedEvents.push(
+              'assigned ' + action.payload.assignees.join(', ')
+            );
+            break;
+          case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
+            transaction.push(function() {
+              return github.unassignUsersFromPullRequest(
+                action.payload.pullRequest,
+                action.payload.assignees
+              );
+            });
+            loggedEvents.push(
+              'unassigned ' + action.payload.assignees.join(', ')
+            );
+            break;
+          case 'NOTIFY':
+            if (action.payload.channel === 'github') {
+              transaction.push(function() {
+                return github.postPullRequestComment(
+                  action.payload.pullRequest,
+                  GithubMessage(action.payload)
+                );
               });
-            });
-          }
-          break;
-        default:
-          throw Error('Unhandled action: ' + action.type);
+              loggedEvents.push('posted GitHub comment');
+            } else {
+              transaction.push(function() {
+                return new Promise(function(resolve, reject) {
+                  try {
+                    var notification = generateNotification(action.payload);
+                    resolve(notifyFn(notification));
+                  } catch (e) {
+                    console.error(e);
+                    reject(Error('Failed to notify'));
+                  }
+                });
+              });
+            }
+            break;
+          default:
+            throw Error('Unhandled action: ' + action.type);
         }
       });
 
@@ -90,7 +103,12 @@ module.exports = function PullReview(options) {
     })
     .then(function() {
       if (loggedEvents.length) {
-        log((dryRun ? 'would have ' : '') + loggedEvents.join(', ') + ' on ' + options.pullRequestURL);
+        log(
+          (dryRun ? 'would have ' : '') +
+            loggedEvents.join(', ') +
+            ' on ' +
+            options.pullRequestURL
+        );
       }
 
       return actions;

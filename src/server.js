@@ -24,14 +24,18 @@ app.use(limiter);
 
 app.use(bodyParser.json());
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   res.redirect(npmPackage.homepage);
 });
 
-app.post('/', function (req, res) {
+app.post('/', function(req, res) {
   Promise.resolve(req.body || {})
-    .then(function (payload) {
-      if (payload.action === 'created' && payload.comment && payload.comment.body.indexOf('/review') === 0) {
+    .then(function(payload) {
+      if (
+        payload.action === 'created' &&
+        payload.comment &&
+        payload.comment.body.indexOf('/review') === 0
+      ) {
         var pullRequestURL = (payload.pull_request || payload.issue).html_url;
         var retryReview = payload.comment.body.indexOf('/review again') === 0;
 
@@ -41,20 +45,20 @@ app.post('/', function (req, res) {
         });
       }
     })
-    .then(function (actions) {
+    .then(function(actions) {
       if (actions) {
         res.status(201).json(actions);
       } else {
         res.status(200).end();
       }
     })
-    .catch(function (err) {
+    .catch(function(err) {
       log(err);
       res.status(400).send('Failed to parse request');
     });
 });
 
-app.listen(port, function () {
+app.listen(port, function() {
   log('started server on port ' + port);
 });
 

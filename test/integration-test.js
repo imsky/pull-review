@@ -11,105 +11,113 @@ var githubMock = driver.githubMock;
 var config = driver.config;
 var helper = new Helper('../index.js');
 
-describe('pull-review', function () {
-  afterEach(function () {
+describe('pull-review', function() {
+  afterEach(function() {
     nock.cleanAll();
   });
 
-  it('works in dry run mode', function () {
+  it('works in dry run mode', function() {
     githubMock({
-      'config': config
+      config: config
     });
 
     return pullReview({
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
-      'dryRun': true
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+      dryRun: true
     });
   });
 
-  it('works with no assignees', function () {
+  it('works with no assignees', function() {
     githubMock({
-      'config': config
+      config: config
     });
     return pullReview({
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
     });
   });
 
-  it('works with an assignee', function () {
+  it('works with an assignee', function() {
     githubMock({
-      'assignee': { 'login': 'charlie' },
-      'config': config
+      assignee: {login: 'charlie'},
+      config: config
     });
     return pullReview({
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
-      'retryReview': true
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+      retryReview: true
     });
   });
 
-  it('filters out committers', function () {
+  it('filters out committers', function() {
     githubMock({
-      'config': config,
-      'commits': [
+      config: config,
+      commits: [
         {
-          'author': {
-            'login': 'bob'
+          author: {
+            login: 'bob'
           }
         }
       ]
     });
     return pullReview({
-      'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1'
-    })
-      .then(function (actions) {
-        actions.should.have.lengthOf(2);
-        actions[0].payload.assignees.should.not.include('bob');
-      });
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
+    }).then(function(actions) {
+      actions.should.have.lengthOf(2);
+      actions[0].payload.assignees.should.not.include('bob');
+    });
   });
 
-  it('fails with invalid arguments', function () {
-    (function () { pullReview(); }).should.throw('Invalid input: either a review request or a Hubot reference must be provided');
+  it('fails with invalid arguments', function() {
+    (function() {
+      pullReview();
+    }.should.throw(
+      'Invalid input: either a review request or a Hubot reference must be provided'
+    ));
   });
 
-  describe('with Slack notifications', function () {
-    it('works with Markdown', function () {
+  describe('with Slack notifications', function() {
+    it('works with Markdown', function() {
       githubMock({
-        'config': config
+        config: config
       });
 
       var message;
 
       return pullReview({
-        'pullRequestURL': 'https://github.com/OWNER/REPO/pull/1',
-        'chatRoom': 'test',
-        'chatChannel': 'hubot:slack',
-        'isChat': true,
-        'notifyFn': function (m) {
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+        chatRoom: 'test',
+        chatChannel: 'hubot:slack',
+        isChat: true,
+        notifyFn: function(m) {
           message = m;
         }
-      })
-        .then(function () {
-          message.text.should.equal('@bsmith: please review this pull request');
-          message.attachments.should.have.lengthOf(1);
-          var attachment = message.attachments[0];
-          attachment.title.should.equal('OWNER/REPO: Hello world');
-          attachment.title_link.should.equal('https://github.com/OWNER/REPO/pull/1');
-          attachment.text.should.equal('*Description*\n\n The quick brown fox jumps over the lazy dog. Check out <https://github.com|GitHub.com>');
-          attachment.fallback.should.equal('Hello world by alice: https://github.com/OWNER/REPO/pull/1');
-        });
+      }).then(function() {
+        message.text.should.equal('@bsmith: please review this pull request');
+        message.attachments.should.have.lengthOf(1);
+        var attachment = message.attachments[0];
+        attachment.title.should.equal('OWNER/REPO: Hello world');
+        attachment.title_link.should.equal(
+          'https://github.com/OWNER/REPO/pull/1'
+        );
+        attachment.text.should.equal(
+          '*Description*\n\n The quick brown fox jumps over the lazy dog. Check out <https://github.com|GitHub.com>'
+        );
+        attachment.fallback.should.equal(
+          'Hello world by alice: https://github.com/OWNER/REPO/pull/1'
+        );
+      });
     });
 
-    it('works with images', function (done) {
+    it('works with images', function(done) {
       githubMock({
-        'config': config
+        config: config
       });
 
       pullReview({
-        'pullRequestURL': 'https://github.com/OWNER/REPO/pull/2',
-        'chatRoom': 'test',
-        'chatChannel': 'hubot:slack',
-        'isChat': true,
-        'notifyFn': function (message) {
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/2',
+        chatRoom: 'test',
+        chatChannel: 'hubot:slack',
+        isChat: true,
+        notifyFn: function(message) {
           message.attachments.should.have.lengthOf(1);
           var attachment = message.attachments[0];
           attachment.image_url.should.equal('https://example.com/image.png');
@@ -119,86 +127,94 @@ describe('pull-review', function () {
     });
   });
 
-  describe('using Hubot', function () {
+  describe('using Hubot', function() {
     var room;
 
-    beforeEach(function () {
+    beforeEach(function() {
       githubMock({
-        'config': config
+        config: config
       });
 
       room = helper.createRoom({
-        'name': 'test',
-        'httpd': false
+        name: 'test',
+        httpd: false
       });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       nock.cleanAll();
       return room.destroy();
     });
 
-    it('works', function (done) {
-      room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
-        .then(function () {
-          setTimeout(function () {
+    it('works', function(done) {
+      room.user
+        .say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
+        .then(function() {
+          setTimeout(function() {
             room.messages.should.have.lengthOf(2);
             room.messages[1][0].should.equal('hubot');
-            room.messages[1][1].should.equal('@bob: please review this pull request - https://github.com/OWNER/REPO/pull/1');
+            room.messages[1][1].should.equal(
+              '@bob: please review this pull request - https://github.com/OWNER/REPO/pull/1'
+            );
             done();
           }, 100);
         });
     });
 
-    it('does nothing without a pull request URL', function (done) {
-      room.user.say('alice', 'github.com/imsky/pull-review')
-        .then(function () {
-          setTimeout(function () {
-            room.messages.should.have.lengthOf(1);
-            done();
-          }, 100);
-        });
+    it('does nothing without a pull request URL', function(done) {
+      room.user.say('alice', 'github.com/imsky/pull-review').then(function() {
+        setTimeout(function() {
+          room.messages.should.have.lengthOf(1);
+          done();
+        }, 100);
+      });
     });
 
-    it('fails when no reviewers are found', function (done) {
+    it('fails when no reviewers are found', function(done) {
       nock.cleanAll();
       githubMock({
-        'config': JSON.stringify({
+        config: JSON.stringify({
           version: 1,
           reviewers: {}
         })
       });
 
-      room.user.say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
-        .then(function () {
-          setTimeout(function () {
+      room.user
+        .say('alice', 'review https://github.com/OWNER/REPO/pull/1 please')
+        .then(function() {
+          setTimeout(function() {
             room.messages.should.have.lengthOf(2);
-            room.messages[1][1].should.equal('[pull-review] Error: No reviewers found: https://github.com/OWNER/REPO/pull/1');
+            room.messages[1][1].should.equal(
+              '[pull-review] Error: No reviewers found: https://github.com/OWNER/REPO/pull/1'
+            );
             done();
           }, 100);
-        });
-    })
-  });
-
-  describe('using CLI', function () {
-    it('works', function () {
-      githubMock({
-        'config': config
-      });
-
-      cli.parse(['node', 'pull-review', 'https://github.com/OWNER/REPO/pull/1']);
-      return cli.cliPromise
-        .then(function (actions) {
-          actions.should.have.lengthOf(2);
-          actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
         });
     });
   });
 
-  describe('in server mode', function () {
-    it('works with valid GitHub webhook payload', function () {
+  describe('using CLI', function() {
+    it('works', function() {
       githubMock({
-        'config': config
+        config: config
+      });
+
+      cli.parse([
+        'node',
+        'pull-review',
+        'https://github.com/OWNER/REPO/pull/1'
+      ]);
+      return cli.cliPromise.then(function(actions) {
+        actions.should.have.lengthOf(2);
+        actions[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
+      });
+    });
+  });
+
+  describe('in server mode', function() {
+    it('works with valid GitHub webhook payload', function() {
+      githubMock({
+        config: config
       });
 
       return request(server)
@@ -214,26 +230,26 @@ describe('pull-review', function () {
           }
         })
         .expect(201)
-        .then(function (response) {
+        .then(function(response) {
           response.body.should.have.lengthOf(2);
           response.body[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
           response.body[1].type.should.equal('NOTIFY');
         });
     });
 
-    it('redirects on root route', function () {
+    it('redirects on root route', function() {
       return request(server)
         .get('/')
         .expect(302);
     });
 
-    it('does nothing without a valid GitHub webhook payload', function () {
+    it('does nothing without a valid GitHub webhook payload', function() {
       return request(server)
         .post('/')
         .expect(200);
     });
 
-    it('fails with invalid GitHub webhook payload', function () {
+    it('fails with invalid GitHub webhook payload', function() {
       return request(server)
         .post('/')
         .set('Content-Type', 'application/json')

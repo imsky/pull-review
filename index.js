@@ -45,7 +45,9 @@ module.exports = function(input) {
       }
 
       if (adapter === 'slack') {
-        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(chatRoom);
+        var slackRoom = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(
+          chatRoom
+        );
         chatRoom = slackRoom.name;
       }
 
@@ -53,9 +55,11 @@ module.exports = function(input) {
       var retryReview;
 
       var urls = url.extractURLs(chatText);
-      var processedText = chatText.replace(/\s+/g, ' ').replace(/(\breview | again\b)/gi, function(m) {
-        return m.toLowerCase();
-      });
+      var processedText = chatText
+        .replace(/\s+/g, ' ')
+        .replace(/(\breview | again\b)/gi, function(m) {
+          return m.toLowerCase();
+        });
 
       if (Array.isArray(urls)) {
         for (var i = 0; i < urls.length; i++) {
@@ -65,7 +69,8 @@ module.exports = function(input) {
           if (uo.hostname === 'github.com') {
             var reviewIndex = processedText.indexOf('review ' + u);
             if (reviewIndex !== -1) {
-              retryReview = processedText.indexOf('review ' + u + ' again') === reviewIndex;
+              retryReview =
+                processedText.indexOf('review ' + u + ' again') === reviewIndex;
               pullRequestURL = u;
               break;
             }
@@ -89,16 +94,16 @@ module.exports = function(input) {
             res.send(message);
           }
         })
-        .then(function(response) {
-          try {
-            if (response instanceof Error) {
-              logError(response);
+          .then(function(response) {
+            try {
+              if (response instanceof Error) {
+                logError(response);
+              }
+            } catch (err) {
+              logError(err);
             }
-          } catch (err) {
-            logError(err);
-          }
-        })
-        .catch(logError);
+          })
+          .catch(logError);
       } catch (err) {
         logError(err);
       }
@@ -106,6 +111,8 @@ module.exports = function(input) {
   } else if (isAPI) {
     return PullReview(input);
   } else {
-    throw Error('Invalid input: either a review request or a Hubot reference must be provided');
+    throw Error(
+      'Invalid input: either a review request or a Hubot reference must be provided'
+    );
   }
 };

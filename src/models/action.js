@@ -1,4 +1,8 @@
-var SUPPORTED_ACTIONS = ['NOTIFY', 'ASSIGN_USERS_TO_PULL_REQUEST', 'UNASSIGN_USERS_FROM_PULL_REQUEST'];
+var SUPPORTED_ACTIONS = [
+  'NOTIFY',
+  'ASSIGN_USERS_TO_PULL_REQUEST',
+  'UNASSIGN_USERS_FROM_PULL_REQUEST'
+];
 
 module.exports = function Action(input) {
   input = input || {};

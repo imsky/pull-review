@@ -5,10 +5,13 @@ var chai = require('chai');
 chai.use(require('chai-as-promised'));
 chai.should();
 
-var config = fs.readFileSync(path.join(__dirname, '..', '.pull-review'), 'utf8');
+var config = fs.readFileSync(
+  path.join(__dirname, '..', '.pull-review'),
+  'utf8'
+);
 var githubMock = require('./mocks/github');
 
 module.exports = {
-  'config': config,
-  'githubMock': githubMock
+  config: config,
+  githubMock: githubMock
 };

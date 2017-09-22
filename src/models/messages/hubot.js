@@ -2,7 +2,7 @@ var url = require('../../url');
 
 var GITHUB_ICON_URL = 'https://assets-cdn.github.com/pinned-octocat.svg';
 
-module.exports = function (input) {
+module.exports = function(input) {
   input = input || {};
   var users = input.users;
   var channel = input.channel;
@@ -17,7 +17,7 @@ module.exports = function (input) {
     throw Error('Missing pull request record');
   }
 
-  users = users.map(function (user) {
+  users = users.map(function(user) {
     return '@' + user;
   });
 
@@ -55,7 +55,8 @@ module.exports = function (input) {
       text: imagesInBody ? '' : bodyToSlackMarkdown,
       author_name: authorName,
       author_link: pullRequestRecord.data.user.html_url,
-      fallback: title + ' by ' + authorName + ': ' + pullRequestRecord.data.html_url,
+      fallback:
+        title + ' by ' + authorName + ': ' + pullRequestRecord.data.html_url,
       mrkdwn_in: ['text', 'pretext', 'fields'],
       color: '#24292e',
       footer: 'GitHub',

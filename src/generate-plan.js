@@ -12,7 +12,10 @@ module.exports = function generatePlan(options) {
   //todo: consider getting rid of the fallback Github client
   var github = options.github || Github(options.githubToken);
   var config = process.env.PULL_REVIEW_CONFIG || options.config;
-  var pullReviewConfigPath = process.env.PULL_REVIEW_CONFIG_PATH || options.pullReviewConfigPath || '.pull-review';
+  var pullReviewConfigPath =
+    process.env.PULL_REVIEW_CONFIG_PATH ||
+    options.pullReviewConfigPath ||
+    '.pull-review';
   var pullRequestURL = options.pullRequestURL;
   var retryReview = Boolean(options.retryReview);
   var isChat = Boolean(options.isChat);
@@ -36,7 +39,12 @@ module.exports = function generatePlan(options) {
 
   if (!pullRequest) {
     throw Error('Invalid pull request URL');
-  } else if (isChat && chatRoom && requiredChatRooms.length && requiredChatRooms.indexOf(chatRoom) === -1) {
+  } else if (
+    isChat &&
+    chatRoom &&
+    requiredChatRooms.length &&
+    requiredChatRooms.indexOf(chatRoom) === -1
+  ) {
     throw Error('Review requests are disabled from room ' + chatRoom);
   }
 
@@ -81,9 +89,11 @@ module.exports = function generatePlan(options) {
         github.getPullRequestCommits(pullRequest),
         config
           ? null
-          : github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8').catch(function() {
-            return null;
-          })
+          : github
+              .getRepoFile(pullRequest, pullReviewConfigPath, 'utf8')
+              .catch(function() {
+                return null;
+              })
       ]);
     })
     .then(function(res) {

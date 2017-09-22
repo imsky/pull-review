@@ -11,9 +11,13 @@ module.exports = function PullReviewConfig(input) {
     throw Error('Invalid config');
   }
 
-  if (!input.version || SUPPORTED_CONFIG_VERSIONS.indexOf(input.version) === -1) {
+  if (
+    !input.version ||
+    SUPPORTED_CONFIG_VERSIONS.indexOf(input.version) === -1
+  ) {
     throw Error(
-      'Missing or unsupported config version. Supported versions include: ' + SUPPORTED_CONFIG_VERSIONS.join(', ')
+      'Missing or unsupported config version. Supported versions include: ' +
+        SUPPORTED_CONFIG_VERSIONS.join(', ')
     );
   }
 
@@ -26,7 +30,10 @@ module.exports = function PullReviewConfig(input) {
   var maxFiles = get(input.max_files, 5);
   var maxFilesPerReviewer = get(input.max_files_per_reviewer, 0);
   var maxLinesPerReviewer = get(input.max_lines_per_reviewer, 0);
-  var assignMinReviewersRandomly = get(input.assign_min_reviewers_randomly, true);
+  var assignMinReviewersRandomly = get(
+    input.assign_min_reviewers_randomly,
+    true
+  );
   var minAuthorsOfChangedFiles = get(input.min_authors_of_changed_files, 0);
   var reviewers = get(input.reviewers, {});
   var reviewBlacklist = get(input.review_blacklist, []);
@@ -44,11 +51,13 @@ module.exports = function PullReviewConfig(input) {
   } else if (maxFiles < 0) {
     throw Error('Invalid number of maximum files');
   } else if (
-    maxFilesPerReviewer < 0 || (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)
+    maxFilesPerReviewer < 0 ||
+    (maxFilesPerReviewer > 0 && maxFilesPerReviewer < 1)
   ) {
     throw Error('Invalid number of maximum files per reviewer');
   } else if (
-    maxLinesPerReviewer < 0 || (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)
+    maxLinesPerReviewer < 0 ||
+    (maxLinesPerReviewer > 0 && maxLinesPerReviewer < 1)
   ) {
     throw Error('Invalid number of maximum lines per reviewer');
   } else if (minAuthorsOfChangedFiles < 0) {

@@ -9,7 +9,10 @@ var BlameRange = require('../models/blame-range');
 
 var GraphQLRequest = require('./graphql');
 
-var blameQuery = fs.readFileSync(path.join(__dirname, 'git-blame.graphql'), 'utf8');
+var blameQuery = fs.readFileSync(
+  path.join(__dirname, 'git-blame.graphql'),
+  'utf8'
+);
 
 var github;
 var token;
@@ -18,12 +21,14 @@ function BlameRangeList(blame) {
   var ranges = blame.ranges;
 
   return ranges
-    .filter(function (range) {
-      return  range &&
-              range.commit &&
-              range.commit.author &&
-              range.commit.author.user &&
-              range.commit.author.user.login;
+    .filter(function(range) {
+      return (
+        range &&
+        range.commit &&
+        range.commit.author &&
+        range.commit.author.user &&
+        range.commit.author.user.login
+      );
     })
     .map(function(range) {
       return BlameRange({
@@ -143,8 +148,11 @@ function getPullRequestCommits(resource) {
     });
 }
 
-module.exports = function (githubToken) {
-  token = process.env.NODE_ENV === 'test' ? 'test' : process.env.PULL_REVIEW_GITHUB_TOKEN || githubToken;
+module.exports = function(githubToken) {
+  token =
+    process.env.NODE_ENV === 'test'
+      ? 'test'
+      : process.env.PULL_REVIEW_GITHUB_TOKEN || githubToken;
 
   github = new Github({
     protocol: 'https'
@@ -166,5 +174,5 @@ module.exports = function (githubToken) {
     postPullRequestComment: postPullRequestComment,
     unassignUsersFromPullRequest: unassignUsersFromPullRequest,
     parseGithubURL: parseGithubURL
-  }
+  };
 };
