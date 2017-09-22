@@ -1,7 +1,7 @@
 {
   "name": "pull-review",
   "version": "2.0.0-rc.5",
-  "description": "",
+  "description": "Assign pull request reviewers intelligently",
   "main": "index.js",
   "bin": {
     "pull-review": "./bin/pull-review.js"
@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/imsky/pull-review/issues"
   },
-  "homepage": "https://github.com/imsky/pull-review#readme",
+  "homepage": "https://github.com/imsky/pull-review",
   "dependencies": {
     "body-parser": "~1.18",
     "commander": "~2.11",

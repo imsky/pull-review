@@ -8,7 +8,7 @@
 
 Using [Git data](https://git-scm.com/docs/git-blame), Pull Review looks through the files changed by a pull request and assigns the most relevant users as reviewers. The most relevant users are calculated as those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other parameters, can be easily configured.
 
-You can use Pull Review through [GitHub comments](#github), from chat rooms in Slack/HipChat/etc. using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker](#docker) image.
+You can use Pull Review through [GitHub comments](#github), from chat rooms in Slack/HipChat/etc. using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker image](#docker).
 
 ## Installation
 
@@ -38,6 +38,8 @@ For details on configuration options, check out the [configuration](#configurati
 * Choose **Let me select individual events**
 * Pick the **Issue comment** event
 * Click **Add webhook**
+
+To assign reviewers on a pull request, post `/review`. To re-assign reviewers post `/review again`.
 
 ### Hubot
 
