@@ -16,7 +16,7 @@ You can use Pull Review through [GitHub comments](#github), from chat rooms in S
 npm install pull-review
 ```
 
-[![Deploy Pull Review to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/imsky/pull-review/tree/heroku)
+[![Deploy Pull Review to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/imsky/pull-review)
 
 ## Usage
 
