@@ -1,4 +1,5 @@
 var express = require('express');
+var RateLimit = require('express-rate-limit');
 var bodyParser = require('body-parser');
 var Promise = require('native-promise-only');
 
@@ -11,6 +12,15 @@ var log = debug('pull-review');
 var app = express();
 
 var port = process.env.PORT || 8080;
+
+var limiter = new RateLimit({
+  windowMs: 1000 * 60 * 2,
+  delayAfter: 100,
+  delayMs: 1000 * 30,
+  max: 500
+});
+
+app.use(limiter);
 
 app.use(bodyParser.json());
 

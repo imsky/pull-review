@@ -35,6 +35,10 @@ var DEFAULT_FILES = [
 ];
 
 describe('#getReviewers', function () {
+  afterEach(function () {
+    process.env.DISABLE_RANDOM_ASSIGNMENT = '';
+  });
+
   it('fails without required parameters', function () {
     (function () {
       getReviewers()
@@ -564,4 +568,14 @@ describe('#getReviewers', function () {
   });
 
   it('works even if there are not enough reviewers to meet min reviewers specified');
+
+  it('works with DISABLE_RANDOM_ASSIGNMENT', function () {
+    process.env.DISABLE_RANDOM_ASSIGNMENT = 'true';
+    return getReviewers({
+      'config': config,
+      'files': [],
+      'authorLogin': 'alice',
+      'getBlameForFile': function () {}
+    });
+  });
 });

@@ -7,6 +7,9 @@ var PullRequestFile = require('./models/pull-request-file');
 var Config = require('./models/config');
 
 module.exports = function getReviewers(options) {
+  // disable non-blame assignment for public deployments
+  var DISABLE_RANDOM_ASSIGNMENT = process.env.DISABLE_RANDOM_ASSIGNMENT;
+
   options = options || {};
   var config = options.config || {
     version: 1
@@ -171,6 +174,10 @@ module.exports = function getReviewers(options) {
 
   shuffle.knuthShuffle(assignedReviewers);
 
+  if (DISABLE_RANDOM_ASSIGNMENT) {
+    assignedReviewers = [];
+  }
+
   return Promise.all(topModifiedFiles.map(getBlameForFile))
     .then(function(blames) {
       var authorsLinesChanged = {};
@@ -221,6 +228,10 @@ module.exports = function getReviewers(options) {
     .then(function(reviewers) {
       var fallbackReviewers = [];
       var randomReviewers = [];
+
+      if (DISABLE_RANDOM_ASSIGNMENT) {
+        return reviewers;
+      }
 
       if (uniqueAuthors < minAuthorsOfChangedFiles && reviewers.length >= minReviewersAssignable && reviewers.length) {
         //unassign one random reviewer if there are already enough reviewers
