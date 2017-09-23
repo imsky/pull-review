@@ -45,7 +45,7 @@ For details on configuration options, check out the [configuration](#configurati
 
 To assign reviewers on a pull request, post `/review`. To re-assign reviewers post `/review again`.
 
-> The public Pull Review server does not allow [random assignment](#assign_min_reviewers_randomly). However, you can easily [run your own Pull Review server](#server).
+> The public Pull Review server disables certain configuration options. However, you can [run your own Pull Review server](#server).
 
 ### Hubot
 

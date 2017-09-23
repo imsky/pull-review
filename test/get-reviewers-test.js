@@ -36,7 +36,7 @@ var DEFAULT_FILES = [
 
 describe('#getReviewers', function() {
   afterEach(function() {
-    process.env.DISABLE_RANDOM_ASSIGNMENT = '';
+    process.env.PUBLIC_MODE = '';
   });
 
   it('fails without required parameters', function() {
@@ -560,17 +560,19 @@ describe('#getReviewers', function() {
     });
   });
 
+  describe('in public mode', function () {
+    it('works', function () {
+      process.env.PUBLIC_MODE = 'true';
+      return getReviewers({
+        config: config,
+        files: [],
+        authorLogin: 'alice',
+        getBlameForFile: function() {}
+      });
+    });
+  });
+
   it(
     'works even if there are not enough reviewers to meet min reviewers specified'
   );
-
-  it('works with DISABLE_RANDOM_ASSIGNMENT', function() {
-    process.env.DISABLE_RANDOM_ASSIGNMENT = 'true';
-    return getReviewers({
-      config: config,
-      files: [],
-      authorLogin: 'alice',
-      getBlameForFile: function() {}
-    });
-  });
 });
