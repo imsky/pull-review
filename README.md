@@ -2,11 +2,11 @@
 
 [![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
-<!-- todo: screenshot -->
+<p align="center"><img src="https://imsky.github.io/pull-review/pull-review-github-header.png"></p>
 
 **Pull Review** assigns pull request reviewers intelligently.
 
-Using [Git data](https://git-scm.com/docs/git-blame), Pull Review looks through the files changed by a pull request and assigns the most relevant users as reviewers. The most relevant users are calculated as those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other parameters, can be easily configured.
+Using [Git data](https://git-scm.com/docs/git-blame), Pull Review looks through the files changed by a pull request and assigns the most relevant authors as reviewers. The most relevant authors picked by Pull Review are those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other parameters, can be easily configured.
 
 You can use Pull Review through [GitHub comments](#github), from chat rooms in Slack/HipChat/etc. using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker image](#docker).
 
@@ -33,11 +33,11 @@ For details on configuration options, check out the [configuration](#configurati
 
 ### GitHub
 
+<img src="https://imsky.github.io/pull-review/pull-review-github.png">
+
 * In your GitHub repository, go to **Settings**→**Webhooks**
 * Click **Add webhook**
 * Set **Payload URL** to the Pull Review server URL (<https://pull-review.herokuapp.com/>)
-  * The public Pull Review server does not allow [random assignment](#assign_min_reviewers_randomly).
-  * However, you can easily [run your own Pull Review server](#server).
 * Set **Content type** to `application/json`
 * Choose **Let me select individual events**
 * Pick the **Issue comment** event
@@ -45,7 +45,11 @@ For details on configuration options, check out the [configuration](#configurati
 
 To assign reviewers on a pull request, post `/review`. To re-assign reviewers post `/review again`.
 
+> The public Pull Review server does not allow [random assignment](#assign_min_reviewers_randomly). However, you can easily [run your own Pull Review server](#server).
+
 ### Hubot
+
+<img src="https://imsky.github.io/pull-review/pull-review-hubot.png">
 
 
 Make sure `pull-review` is listed in `external-scripts.json`:
@@ -230,7 +234,7 @@ file_blacklist:
 
 Pull Review was partly inspired by [mention-bot](https://github.com/facebook/mention-bot), however its algorithm is a bit different.
 
-* Get all modified files for a pull request and take the [top 5 files](#max_files) with most changes
+* Get all modified files for a pull request and take the [top files](#max_files) with most changes
 * Get information on which author changed what lines in these files using [Git blame](https://git-scm.com/docs/git-blame) data, filtering out older data
 * Add up the lines written per individual author for the top modified files, and sort the authors by lines written
 * Assign [authors who have precedence for particular paths](#review_path_assignments)
