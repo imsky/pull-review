@@ -3,6 +3,8 @@ var yaml = require('js-yaml');
 var SUPPORTED_CONFIG_VERSIONS = [1];
 
 module.exports = function PullReviewConfig(input) {
+  var PUBLIC_MODE = process.env.PUBLIC_MODE;
+
   if (typeof input === 'string') {
     input = yaml.safeLoad(input);
   }
@@ -66,6 +68,24 @@ module.exports = function PullReviewConfig(input) {
     throw Error('Review blacklist must be an array');
   } else if (!Array.isArray(fileBlacklist)) {
     throw Error('File blacklist must be an array');
+  }
+
+  if (PUBLIC_MODE) {
+    return Object.freeze({
+      minReviewers: Math.min(minReviewers, 3),
+      maxReviewers: Math.min(maxReviewers, 5),
+      maxFiles: Math.min(maxFiles, 10),
+      maxFilesPerReviewer: Math.max(maxFilesPerReviewer, 10),
+      maxLinesPerReviewer: Math.max(maxLinesPerReviewer, 500),
+      minAuthorsOfChangedFiles: 0,
+      reviewers: reviewers,
+      reviewBlacklist: reviewBlacklist,
+      reviewPathAssignments: [],
+      reviewPathFallbacks: [],
+      requireNotification: requireNotification,
+      assignMinReviewersRandomly: false,
+      fileBlacklist: fileBlacklist
+    });
   }
 
   return Object.freeze({

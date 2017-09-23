@@ -1,6 +1,6 @@
 # Pull Review
 
-[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![Package Quality](http://npm.packagequality.com/shield/pull-review.svg)](http://packagequality.com/#?package=pull-review) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
 ![Pull Review](https://imsky.github.io/pull-review/pull-review-github-header.png)
 
@@ -45,7 +45,7 @@ For details on configuration options, check out the [configuration](#configurati
 
 To assign reviewers on a pull request, post `/review`. To re-assign reviewers post `/review again`.
 
-> The public Pull Review server does not allow [random assignment](#assign_min_reviewers_randomly). However, you can easily [run your own Pull Review server](#server).
+> The public Pull Review server disables certain configuration options. However, you can [run your own Pull Review server](#server).
 
 ### Hubot
 
