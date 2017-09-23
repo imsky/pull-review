@@ -1,12 +1,12 @@
 # Pull Review
 
-[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![Package Quality](http://npm.packagequality.com/shield/pull-review.svg)](http://packagequality.com/#?package=pull-review) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
-<p align="center"><img src="https://imsky.github.io/pull-review/pull-review-github-header.png"></p>
+![Pull Review](https://imsky.github.io/pull-review/pull-review-github-header.png)
 
 **Pull Review** assigns pull request reviewers intelligently.
 
-Using [Git data](https://git-scm.com/docs/git-blame), Pull Review looks through the files changed by a pull request and assigns the most relevant authors as reviewers. The most relevant authors picked by Pull Review are those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other parameters, can be easily configured.
+UPull Review looks through the changes in a pull request and assigns the most relevant reviewers. The most relevant reviewers picked by Pull Review are those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other things, [can be configured](#configuration).
 
 You can use Pull Review through [GitHub comments](#github), from chat rooms in Slack/HipChat/etc. using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker image](#docker).
 
@@ -33,7 +33,7 @@ For details on configuration options, check out the [configuration](#configurati
 
 ### GitHub
 
-<img src="https://imsky.github.io/pull-review/pull-review-github.png">
+![Pull Review used with GitHub](https://imsky.github.io/pull-review/pull-review-github.png)
 
 * In your GitHub repository, go to **Settings**→**Webhooks**
 * Click **Add webhook**
@@ -49,8 +49,7 @@ To assign reviewers on a pull request, post `/review`. To re-assign reviewers po
 
 ### Hubot
 
-<img src="https://imsky.github.io/pull-review/pull-review-hubot.png">
-
+![Pull Review used with Hubot](https://imsky.github.io/pull-review/pull-review-hubot.png)
 
 Make sure `pull-review` is listed in `external-scripts.json`:
 
@@ -141,35 +140,51 @@ Check out [.pull-review](.pull-review) for a documented example of a config file
 
 #### max_files
 
-Maximum number of files to evaluate in order to assign reviewers. Default is 5. Set to 0 for no maximum.
+Maximum number of files to evaluate in order to assign reviewers. Set to 0 for no maximum.
+
+Default: 5
 
 #### min_reviewers
 
-Minimum number of reviewers to assign to a pull request. Default is 1.
+Minimum number of reviewers to assign to a pull request.
+
+Default: 1
 
 #### max_reviewers
 
-Maximum number of reviewers to assign to a pull request. Default is 2.
+Maximum number of reviewers to assign to a pull request.
+
+Default: 2
 
 #### max_files_per_reviewer
 
-Maximum number of files per reviewer. If the number of files is over this limit, more reviewers will be assigned up to the [maximum number of reviewers](#max_reviewers). Default is 0. Set to 0 for no maximum.
+Maximum number of files per reviewer. If the number of files is over this limit, more reviewers will be assigned up to the [maximum number of reviewers](#max_reviewers). Set to 0 for no maximum.
+
+Default: 0
 
 #### max_lines_per_reviewer
 
-Maximum number of lines changed across added and modified files per reviewer. If the number of lines is over this limit, more reviewers will be assigned up to the [maximum number of reviewers](#max_reviewers). If both `max_files_per_reviewer` and `max_lines_per_reviewer` are defined, the assignment with the fewest reviewers will be used. Default is 0. Set to 0 for no maximum.
+Maximum number of lines changed across added and modified files per reviewer. If the number of lines is over this limit, more reviewers will be assigned up to the [maximum number of reviewers](#max_reviewers). If both `max_files_per_reviewer` and `max_lines_per_reviewer` are defined, the assignment with the fewest reviewers will be used. Set to 0 for no maximum.
+
+Default: 0
 
 #### assign_min_reviewers_randomly
 
-If the [minimum number of reviewers](#min_reviewers) isn't found, assign reviewers using [path fallbacks](review_path_fallbacks) and/or at random. Default is true.
+If the [minimum number of reviewers](#min_reviewers) isn't found, assign reviewers using [path fallbacks](review_path_fallbacks) and/or at random.
+
+Default: true
 
 #### min_authors_of_changed_files
 
-If the pull request changes code with fewer authors than this minimum, replace any already assigned reviewers with a random reviewer. This option is useful in preventing "review loops" where the same people are reviewing the same area of code. Default is 0.
+If the pull request changes code with fewer authors than this minimum, replace any already assigned reviewers with a random reviewer. This option is useful in preventing "review loops" where the same people are reviewing the same area of code.
+
+Default: 0
 
 #### require_notification
 
-Require a user to be listed in the [reviewers](#reviewers) section in order to be assigned as a reviewer. Default is true.
+Require a user to be listed in the [reviewers](#reviewers) section in order to be assigned as a reviewer. 
+
+Default: true
 
 #### reviewers
 
@@ -183,7 +198,7 @@ reviewers:
 
 When Pull Review sends its notification, it will notify `@alice` on GitHub and `@alice_slack` on Slack.
 
-Currently only Slack is supported.
+Currently only Slack user mapping is supported - for other chat networks like HipChat or IRC, Pull Review will mention the GitHub usernames instead.
 
 #### review_blacklist
 
