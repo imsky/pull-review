@@ -4,9 +4,9 @@
 
 ![Pull Review](https://imsky.github.io/pull-review/pull-review-github-header.png)
 
-**Pull Review** assigns pull request reviewers intelligently.
+**Pull Review** assigns pull request reviewers [intelligently](#algorithm).
 
-UPull Review looks through the changes in a pull request and assigns the most relevant reviewers. The most relevant reviewers picked by Pull Review are those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other things, [can be configured](#configuration).
+Pull Review looks through the changes in a pull request and assigns the most relevant reviewers, those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other things, [can be configured](#configuration).
 
 You can use Pull Review through [GitHub comments](#github), from chat rooms in Slack/HipChat/etc. using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker image](#docker).
 
@@ -20,7 +20,7 @@ npm install pull-review
 
 ## Usage
 
-First, add a `.pull-review` configuration file in your repository. Here is a minimal `.pull-review` file:
+First, add a `.pull-review` configuration file in your repository:
 
 ```yaml
 version: 1
@@ -37,7 +37,7 @@ For details on configuration options, check out the [configuration](#configurati
 
 * In your GitHub repository, go to **Settings**→**Webhooks**
 * Click **Add webhook**
-* Set **Payload URL** to the Pull Review server URL (<https://pull-review.herokuapp.com/>)
+* Set **Payload URL** to the Pull Review server URL (<https://pull-review.herokuapp.com>)
 * Set **Content type** to `application/json`
 * Choose **Let me select individual events**
 * Pick the **Issue comment** event
@@ -45,13 +45,13 @@ For details on configuration options, check out the [configuration](#configurati
 
 To assign reviewers on a pull request, post `/review`. To re-assign reviewers post `/review again`.
 
-> The public Pull Review server disables certain configuration options. However, you can [run your own Pull Review server](#server).
+> The public Pull Review server limits some configuration options. However, you can [run your own server](#server).
 
 ### Hubot
 
 ![Pull Review used with Hubot](https://imsky.github.io/pull-review/pull-review-hubot.png)
 
-Make sure `pull-review` is listed in `external-scripts.json`:
+Add `pull-review` to your `external-scripts.json`:
 
 ```json
 [
@@ -59,40 +59,48 @@ Make sure `pull-review` is listed in `external-scripts.json`:
 ]
 ```
 
-Make sure the `PULL_REVIEW_GITHUB_TOKEN` environment variable is set to the GitHub token you'd like to use.
+Ensure [environment variables](#environment-variables) are set correctly.
 
-Afterwards, you can request review assignments like this:
+You can request review assignments like this:
 
-```
-review https://github.com/imsky/pull-review/pull/1 please
+```text
+review https://github.com/imsky/pull-review/pull/1
 ```
 
 You can re-run Pull Review on a pull request like this:
 
-```
-review https://github.com/imsky/pull-review/pull/1 again please
+```text
+review https://github.com/imsky/pull-review/pull/1 again
 ```
 
 `"review...again"` is equivalent to using the `--retry-review` flag with the CLI or the `retryReview` API option.
 
+To notify users on Slack, configuration must include a [reviewers](#reviewers) section.
+
+Pull Review also adds a pull request preview, for private and public repos.
+
 ### CLI
 
 ```bash
-# install Pull Review globally
 npm install --global pull-review
 
-# run Pull Review on a pull request
 pull-review https://github.com/imsky/pull-review/pull/1
 
-# run Pull Review on a pull request, but do not assign or notify reviewers
-pull-review --dry-run https://github.com/imsky/pull-review/pull/1
+pull-review --help
 
-# run Pull Review on a pull request, unassigning current reviewers first
-pull-review --retry-review https://github.com/imsky/pull-review/pull/1
+  Usage: pull-review [options] <pull request URL>
 
-# run Pull Review with a specific GitHub token
-pull-review --github-token YOUR_GITHUB_TOKEN https://github.com/imsky/pull-review/pull/1
+
+  Options:
+
+    -V, --version                     output the version number
+    -r, --retry-review                Retry review
+    -d, --dry-run                     Do not assign or notify reviewers
+    -t, --github-token <githubToken>  GitHub token to use
+    -c, --config-path <configPath>    Pull Review configuration path
+    -h, --help                        output usage information
 ```
+
 ### API
 
 ```js
@@ -108,14 +116,19 @@ PullReview({
   dryRun: true,
 
   // run Pull Review with a specific GitHub token
-  githubToken: 'YOUR_GITHUB_TOKEN'
+  githubToken: 'PULL_REVIEW_GITHUB_TOKEN'
 
   // run Pull Review with a custom Pull Review configuration
-  config: {version: 1}
+  config: {version: 1},
+
+  // specify a different repo location for the Pull Review configuration
+  pullReviewConfigPath: 'config/.pull-review'
 });
 ```
 
 ### Docker
+
+The Docker image can be used in [CLI](#cli) mode or in [server](#server) mode.
 
 ```bash
 # get the Pull Review image
@@ -125,16 +138,22 @@ docker pull imsky/pull-review
 docker run -it -e PULL_REVIEW_GITHUB_TOKEN imsky/pull-review https://github.com/imsky/pull-review/pull/1
 
 # run Pull Review with a specific GitHub token
-docker run -it imsky/pull-review https://github.com/imsky/pull-review/pull/1 --github-token YOUR_GITHUB_TOKEN
+docker run -it imsky/pull-review https://github.com/imsky/pull-review/pull/1 --github-token PULL_REVIEW_GITHUB_TOKEN
 ```
 
 ### Server
 
-You can run your own Pull Review server [on Heroku](https://heroku.com/deploy?template=https://github.com/imsky/pull-review) or another host. You can start the server by running `npm start`.
+You can run your own Pull Review server [on Heroku](https://heroku.com/deploy?template=https://github.com/imsky/pull-review) or another host.
+
+Ensure [environment variables](#environment-variables) are set correctly.
+
+Start the server with `npm start` or by [running `pull-review`](#cli) with no arguments.
+
+The port is 8080 by default, but can be changed using the `PORT` environment variable.
 
 ## Configuration
 
-Configuration for Pull Review is conventionally assumed to be a YAML/JSON file named `.pull-review` at the root of the repository.
+Configuration for Pull Review is a YAML/JSON file named `.pull-review` at the root of the repo.
 
 Check out [.pull-review](.pull-review) for a documented example of a config file.
 
@@ -146,13 +165,13 @@ Default: 5
 
 #### min_reviewers
 
-Minimum number of reviewers to assign to a pull request.
+Minimum number of reviewers to assign.
 
 Default: 1
 
 #### max_reviewers
 
-Maximum number of reviewers to assign to a pull request.
+Maximum number of reviewers to assign.
 
 Default: 2
 
@@ -164,7 +183,7 @@ Default: 0
 
 #### max_lines_per_reviewer
 
-Maximum number of lines changed across added and modified files per reviewer. If the number of lines is over this limit, more reviewers will be assigned up to the [maximum number of reviewers](#max_reviewers). If both `max_files_per_reviewer` and `max_lines_per_reviewer` are defined, the assignment with the fewest reviewers will be used. Set to 0 for no maximum.
+Maximum number of lines changed across added and modified files per reviewer. If the number of lines is over this limit, more reviewers will be assigned up to the [maximum number of reviewers](#max_reviewers). If `max_files_per_reviewer` and `max_lines_per_reviewer` are set, the assignment with the fewest reviewers will be used. Set to 0 for no maximum.
 
 Default: 0
 
@@ -176,7 +195,7 @@ Default: true
 
 #### min_authors_of_changed_files
 
-If the pull request changes code with fewer authors than this minimum, replace any already assigned reviewers with a random reviewer. This option is useful in preventing "review loops" where the same people are reviewing the same area of code.
+If the pull request changes code with fewer authors than this minimum, replace already assigned reviewers with a random reviewer. This option helps prevent "review loops" where only a few authors review an area of code.
 
 Default: 0
 
@@ -193,10 +212,13 @@ A map of maps, with the main keys being the GitHub usernames of users, and the c
 ```yaml
 reviewers:
   alice:
-    slack: alice_slack
+    slack: ajones
+  bob: {}
 ```
 
-When Pull Review sends its notification, it will notify `@alice` on GitHub and `@alice_slack` on Slack.
+When Pull Review sends its notification, it'll notify `@alice` on GitHub and `@ajones` on Slack.
+
+If non-GitHub notification handles are not available/required, an empty object can be specified (as it is for `bob` in the example above). This will notify `@bob` on GitHub, and will work with the [`require_notification`](#require_notification) configuration option.
 
 Currently only Slack user mapping is supported - for other chat networks like HipChat or IRC, Pull Review will mention the GitHub usernames instead.
 
@@ -215,7 +237,7 @@ review_path_assignments:
   - bob
 ```
 
-When a file whose path begins with `web/server` is found, `bob` will be assigned ahead of other reviewers.
+When a file in `web/server` is found, `bob` will be assigned before other reviewers.
 
 #### review_path_fallbacks
 
@@ -240,10 +262,10 @@ file_blacklist:
 
 ### Environment variables
 
-* `PULL_REVIEW_GITHUB_TOKEN`: the GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes. This environment variable is **required** when using Pull Review as a Hubot plugin or when running Pull Review in server mode.
-* `PULL_REVIEW_CONFIG_PATH`: the location of the Pull Review config file in the pull request repo (default is `.pull-review`).
-* `PULL_REVIEW_CONFIG`: a JSON/YAML Pull Review configuration, which will override any configuration in the repository
-* `PULL_REVIEW_REQUIRED_ROOMS`: a comma-separated list of chat rooms where a review request may be made, for example: `dev,ops`.
+* `PULL_REVIEW_GITHUB_TOKEN`: GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes. **Required** when using Pull Review as a Hubot plugin or when running in server mode.
+* `PULL_REVIEW_CONFIG_PATH`: location of the config file in the pull request repo (default is `.pull-review`).
+* `PULL_REVIEW_CONFIG`: Pull Review configuration override in JSON/YAML format.
+* `PULL_REVIEW_REQUIRED_ROOMS`: whitelist of Hubot chat rooms for Pull Review requests (e.g. `dev,ops`).
 
 ## Algorithm
 
@@ -251,17 +273,16 @@ Pull Review was partly inspired by [mention-bot](https://github.com/facebook/men
 
 * Get all modified files for a pull request and take the [top files](#max_files) with most changes
 * Get information on which author changed what lines in these files using [Git blame](https://git-scm.com/docs/git-blame) data, filtering out older data
-* Add up the lines written per individual author for the top modified files, and sort the authors by lines written
 * Assign [authors who have precedence for particular paths](#review_path_assignments)
-* Assign authors with most lines written for the top modified files as the reviewers
-* If there are [not enough reviewers](#min_reviewers), add more reviewers from [path fallback rules](review_path_fallbacks)
-* If there are still not enough reviewers, add reviewers randomly from a [pool of all reviewers](#reviewers)
+* Assign authors who have made the most changes in the top modified files
+* If there are [not enough reviewers](#min_reviewers), assign more reviewers from [path fallback rules](#review_path_fallbacks)
+* If there are still not enough reviewers, assign at random from a list of [all reviewers](#reviewers)
 
-If more reviewers are necessary, limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of code per reviewer](#max_lines_per_reviewer).
+Limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of code per reviewer](#max_lines_per_reviewer). This helps by adding reviewers as needed.
 
 ## Support
 
-Pull Review supports Node 0.10+.
+Pull Review supports Node.js 0.10+.
 
 ## License
 
