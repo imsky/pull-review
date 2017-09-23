@@ -21,14 +21,12 @@ program
   .option('-c, --config-path <configPath>', 'Pull Review configuration path')
   .command('*', null, {noHelp: true, isDefault: true})
   .action(function(pullRequestURL) {
-    console.log(program);
     return PullReview({
       pullRequestURL: pullRequestURL,
       retryReview: program.retryReview,
       dryRun: program.dryRun,
       githubToken: program.githubToken,
       pullReviewConfigPath: program.configPath
-
     }).then(function(actions) {
       resolveCliPromise(actions);
       return cliPromise;

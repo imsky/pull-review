@@ -70,7 +70,7 @@ describe('pull-review', function() {
     (function() {
       pullReview();
     }.should.throw(
-      'Invalid input: either a review request or a Hubot reference must be provided'
+      'Missing pull request URL'
     ));
   });
 
