@@ -73,6 +73,19 @@ describe('pull-review', function() {
   });
 
   describe('with Slack notifications', function() {
+    it('works with default notifyFn', function () {
+      githubMock({
+        config: config
+      });
+
+      return pullReview({
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+        chatRoom: 'test',
+        chatChannel: 'hubot:slack',
+        isChat: true
+      });
+    });
+
     it('works with Markdown', function() {
       githubMock({
         config: config
@@ -123,6 +136,22 @@ describe('pull-review', function() {
         }
       });
     });
+
+    it('does not crash due to notification errors', function() {
+      githubMock({
+        config: config
+      });
+
+      return pullReview({
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/2',
+        chatRoom: 'test',
+        chatChannel: 'hubot:slack',
+        isChat: true,
+        notifyFn: function(message) {
+          throw Error()
+        }
+      });
+    });
   });
 
   describe('using Hubot', function() {
@@ -160,7 +189,7 @@ describe('pull-review', function() {
     });
 
     it('does nothing without a pull request URL', function(done) {
-      room.user.say('alice', 'github.com/imsky/pull-review').then(function() {
+      room.user.say('alice', 'https://github.com/imsky/pull-review https://google.com').then(function() {
         setTimeout(function() {
           room.messages.should.have.lengthOf(1);
           done();

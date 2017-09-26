@@ -82,18 +82,18 @@ module.exports = function generatePlan(options) {
         pullRequestAssignees = pullRequestAssignees.map(function(assignee) {
           return assignee.login;
         });
+      }
 
-        if (retryReview) {
-          actions.push(
-            Action({
-              type: 'UNASSIGN_USERS_FROM_PULL_REQUEST',
-              payload: {
-                pullRequest: pullRequest,
-                assignees: pullRequestAssignees
-              }
-            })
-          );
-        }
+      if (retryReview) {
+        actions.push(
+          Action({
+            type: 'UNASSIGN_USERS_FROM_PULL_REQUEST',
+            payload: {
+              pullRequest: pullRequest,
+              assignees: pullRequestAssignees
+            }
+          })
+        );
       }
 
       return Promise.all([

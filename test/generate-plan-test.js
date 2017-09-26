@@ -12,6 +12,13 @@ describe('#generatePlan', function() {
     nock.cleanAll();
   });
 
+  it('fails if pull request is not found', function() {
+    return generatePlan({
+      config: config,
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
+    }).should.eventually.be.rejectedWith(Error, 'Failed to get pull request: https://github.com/OWNER/REPO/pull/1');
+  });
+
   it('works without blame', function() {
     githubMock({
       noBlame: true

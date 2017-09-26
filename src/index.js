@@ -15,16 +15,6 @@ var defaultNotifyFn = function defaultNotifyFn(message) {
   log(message);
 };
 
-var generateNotification = function generateNotification(input) {
-  input = input || {};
-  var channel = input.channel.split(':');
-  var source = channel[0];
-
-  if (source === 'hubot') {
-    return HubotMessage(input);
-  }
-};
-
 /**
  * Generate a plan of actions and execute it
  * @param  {Object} options
@@ -34,7 +24,6 @@ var generateNotification = function generateNotification(input) {
  * @return {[type]}
  */
 module.exports = function PullReview(options) {
-  options = options || {};
   var actions;
   var loggedEvents = [];
   var dryRun = Boolean(options.dryRun);
@@ -88,7 +77,7 @@ module.exports = function PullReview(options) {
             transaction.push(function() {
               return new Promise(function(resolve, reject) {
                 try {
-                  var notification = generateNotification(action.payload);
+                  var notification = HubotMessage(action.payload);
                   resolve(notifyFn(notification));
                 } catch (e) {
                   log(e);
@@ -98,8 +87,6 @@ module.exports = function PullReview(options) {
             });
           }
           break;
-        default:
-          throw Error('Unhandled action: ' + action.type);
         }
       });
 
@@ -110,14 +97,12 @@ module.exports = function PullReview(options) {
       });
     })
     .then(function() {
-      if (loggedEvents.length) {
-        log(
-          (dryRun ? 'would have ' : '') +
-            loggedEvents.join(', ') +
-            ' on ' +
-            options.pullRequestURL
-        );
-      }
+      log(
+        (dryRun ? 'would have ' : '') +
+          loggedEvents.join(', ') +
+          ' on ' +
+          options.pullRequestURL
+      );
 
       return actions;
     });

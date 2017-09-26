@@ -29,14 +29,14 @@ app.get('/', function(req, res) {
 });
 
 app.post('/', function(req, res) {
-  Promise.resolve(req.body || {})
+  Promise.resolve(req.body)
     .then(function(payload) {
       if (
         payload.action === 'created' &&
         payload.comment &&
         payload.comment.body.indexOf('/review') === 0
       ) {
-        var pullRequestURL = (payload.pull_request || payload.issue).html_url;
+        var pullRequestURL = (payload.pull_request).html_url;
         var retryReview = payload.comment.body.indexOf('/review again') === 0;
 
         return PullReview({

@@ -80,10 +80,7 @@ module.exports = function getReviewers(options) {
     return b.changes - a.changes;
   });
 
-  var topModifiedFiles =
-    config.maxFiles > 0
-      ? modifiedFiles.slice(0, config.maxFiles)
-      : modifiedFiles;
+  var topModifiedFiles = modifiedFiles.slice(0, config.maxFiles);
 
   var selectedReviewers = {};
   var excludedReviewers = {};
@@ -153,9 +150,7 @@ module.exports = function getReviewers(options) {
     var isReviewerSelected = selectedReviewers[reviewer];
     var isReviewerCurrentCommitter = currentCommitters[reviewer];
     var isReviewerAuthor = reviewer === authorLogin;
-    var isReviewerUnreachable = config.requireNotification
-      ? !config.reviewers[reviewer]
-      : false;
+    var isReviewerUnreachable = (config.requireNotification && !config.reviewers[reviewer]);
     var isReviewerBlacklisted =
       config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
     var isReviewerExcluded = excludedReviewers[reviewer];
@@ -240,10 +235,10 @@ module.exports = function getReviewers(options) {
 
       var blamedReviewers = [];
 
-      Object.keys(authorsLinesChanged || {}).forEach(function(author) {
+      Object.keys(authorsLinesChanged).forEach(function(author) {
         blamedReviewers.push({
           login: author,
-          count: authorsLinesChanged[author] || 0,
+          count: authorsLinesChanged[author],
           source: 'blame'
         });
       });
@@ -296,7 +291,7 @@ module.exports = function getReviewers(options) {
             });
 
             matchingFiles.forEach(function() {
-              var fallbackAuthors = reviewPathFallbacks[pattern] || [];
+              var fallbackAuthors = reviewPathFallbacks[pattern];
 
               fallbackAuthors.forEach(function(author) {
                 if (!isEligibleReviewer(author)) {
@@ -324,7 +319,7 @@ module.exports = function getReviewers(options) {
         reviewers.length < minReviewersAssignable &&
         config.assignMinReviewersRandomly
       ) {
-        Object.keys(config.reviewers || {}).forEach(function(author) {
+        Object.keys(config.reviewers).forEach(function(author) {
           if (!isEligibleReviewer(author)) {
             return;
           }

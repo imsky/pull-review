@@ -14,9 +14,7 @@
 // Author:
 //   Ivan Malopinsky
 
-if (process.env.NODE_ENV !== 'test') {
-  process.env.DEBUG = 'pull-review';
-}
+process.env.DEBUG = 'pull-review';
 
 var PullReview = require('./src/index');
 var hubot = require('./src/hubot');

@@ -45,6 +45,8 @@ review_blacklist:
 review_path_assignments:
   "*.py":
   - bob
+  "*.js":
+  - alice
 
 # if more reviewers are required, assign the following users based on minimatch (glob) patterns 
 review_path_fallbacks:
