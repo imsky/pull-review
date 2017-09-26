@@ -4,10 +4,13 @@ var path = require('path');
 var Promise = require('native-promise-only');
 var Github = require('github');
 Github.Promise = Github.Promise || Promise;
+var debug = require('debug');
 
 var BlameRange = require('../models/blame-range');
 
 var GraphQLRequest = require('./graphql');
+
+var log = debug('pull-review');
 
 var blameQuery = fs.readFileSync(
   path.join(__dirname, 'git-blame.graphql'),
@@ -17,6 +20,11 @@ var blameQuery = fs.readFileSync(
 var github;
 var token;
 
+/**
+ * Convert raw blame data into BlameRanges
+ * @param {Object} blame - GitHub blame data
+ * @returns {Array} list of BlameRanges
+ */
 function BlameRangeList(blame) {
   var ranges = blame.ranges;
 
@@ -40,6 +48,12 @@ function BlameRangeList(blame) {
     .filter(Boolean);
 }
 
+/**
+ * Helper that converts URLs into GitHub resource objects
+ * compatible with node-github
+ * @param  {String} url - A GitHub resource URL
+ * @return {Object} GitHub resource parsed from URL
+ */
 function parseGithubURL(url) {
   var githubUrlRe = /github\.com\/([^/]+)\/([^/]+)\/pull\/([0-9]+)/;
   var match = url.match(githubUrlRe);
@@ -55,7 +69,11 @@ function parseGithubURL(url) {
   };
 }
 
-//NB: files are either added, modified, or removed
+/**
+ * NB: files are either added, modified, or removed
+ * @param  {Object} resource - A GitHub resource
+ * @return {Array} An array of pull request files
+ */
 function getPullRequestFiles(resource) {
   return github.pullRequests
     .getFiles({
@@ -69,6 +87,10 @@ function getPullRequestFiles(resource) {
     });
 }
 
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @return {BlameRangeList} list of Git blames in a file
+ */
 function getBlameForCommitFile(resource) {
   return GraphQLRequest({
     token: token,
@@ -84,11 +106,15 @@ function getBlameForCommitFile(resource) {
       return BlameRangeList(res.data.repository.object.blame);
     })
     .catch(function(e) {
-      console.error('[pull-review] getBlameForCommitFile', e);
+      log('[pull-review] getBlameForCommitFile', e);
       return null;
     });
 }
 
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @param  {Array} assignees - An array of usernames to assign
+ */
 function assignUsersToPullRequest(resource, assignees) {
   return github.issues.addAssigneesToIssue({
     owner: resource.owner,
@@ -98,6 +124,10 @@ function assignUsersToPullRequest(resource, assignees) {
   });
 }
 
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @param  {Array} assignees - An array of usernames to unassign
+ */
 function unassignUsersFromPullRequest(resource, assignees) {
   return github.issues.removeAssigneesFromIssue({
     owner: resource.owner,
@@ -109,6 +139,10 @@ function unassignUsersFromPullRequest(resource, assignees) {
   });
 }
 
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @param  {String} body - Comment body
+ */
 function postPullRequestComment(resource, body) {
   return github.issues.createComment({
     owner: resource.owner,
@@ -118,6 +152,11 @@ function postPullRequestComment(resource, body) {
   });
 }
 
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @param  {String} path - A repo-root-relative file path
+ * @return {String} UTF-8 encoded representation of the file at <path>
+ */
 function getRepoFile(resource, path) {
   return github.repos
     .getContent({
@@ -131,10 +170,17 @@ function getRepoFile(resource, path) {
     });
 }
 
-function getPullRequest(options) {
-  return github.pullRequests.get(options);
+/**
+ * @param  {Object} resource - A GitHub resource
+ */
+function getPullRequest(resource) {
+  return github.pullRequests.get(resource);
 }
 
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @return {Array} A list of commits in a pull request
+ */
 function getPullRequestCommits(resource) {
   return github.pullRequests
     .getCommits({
@@ -148,6 +194,9 @@ function getPullRequestCommits(resource) {
     });
 }
 
+/**
+ * @param  {String} githubToken - A GitHub token with user and repo scopes
+ */
 module.exports = function(githubToken) {
   token =
     process.env.NODE_ENV === 'test'

@@ -10,11 +10,10 @@
             "error",
             2
         ],
-        "no-console": ["warn"],
+        "no-console": ["error"],
         "eqeqeq": ["error"],
         "no-func-assign": ["off"],
-        "require-jsdoc": ["warn"],
-        "valid-jsdoc": ["error"],
+        "require-jsdoc": ["error"],
         "linebreak-style": [
             "error",
             "unix"

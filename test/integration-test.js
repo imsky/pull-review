@@ -69,9 +69,7 @@ describe('pull-review', function() {
   it('fails with invalid arguments', function() {
     (function() {
       pullReview();
-    }.should.throw(
-      'Missing pull request URL'
-    ));
+    }.should.throw('Missing pull request URL'));
   });
 
   describe('with Slack notifications', function() {

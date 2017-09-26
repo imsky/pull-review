@@ -1,13 +1,20 @@
 var url = require('./url');
 var PullReview = require('./index');
 
-module.exports = function (robot) {
+/**
+ * Set up Hubot listeners for Pull Review
+ * @param  {Object} robot - Hubot reference
+ */
+module.exports = function(robot) {
   robot.hear(/github\.com\//, function(res) {
     var adapter = robot.adapterName;
     var chatText = res.message.text;
     var chatRoom = res.message.room;
     var chatChannel = adapter === 'slack' ? 'hubot:slack' : 'hubot:generic';
 
+    /**
+     * @param  {Error} e - error
+     */
     function logError(e) {
       robot.logger.error('[pull-review]', e);
       res.send('[pull-review] ' + e);
@@ -77,4 +84,4 @@ module.exports = function (robot) {
       logError(err);
     }
   });
-}
+};

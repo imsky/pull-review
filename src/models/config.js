@@ -23,6 +23,10 @@ module.exports = function PullReviewConfig(input) {
     );
   }
 
+  /**
+   * @param  value - config parameter
+   * @param  defaultValue - what to use as a default value for config parameter
+   */
   function get(value, defaultValue) {
     return value !== undefined ? value : defaultValue;
   }

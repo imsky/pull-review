@@ -560,8 +560,8 @@ describe('#getReviewers', function() {
     });
   });
 
-  describe('in public mode', function () {
-    it('works', function () {
+  describe('in public mode', function() {
+    it('works', function() {
       process.env.PUBLIC_MODE = 'true';
       return getReviewers({
         config: config,

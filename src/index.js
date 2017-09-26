@@ -12,7 +12,7 @@ var HubotMessage = require('./models/messages/hubot');
 var log = debug('pull-review');
 
 var defaultNotifyFn = function defaultNotifyFn(message) {
-  console.info(message);
+  log(message);
 };
 
 var generateNotification = function generateNotification(input) {
@@ -25,6 +25,14 @@ var generateNotification = function generateNotification(input) {
   }
 };
 
+/**
+ * Generate a plan of actions and execute it
+ * @param  {Object} options
+ * @param  {Boolean} options.dryRun - do not assign or notify reviewers
+ * @param  {Function} options.notifyFn - custom notifying function
+ * @param  {String} options.githubToken - GitHub token with user and repo scopes
+ * @return {[type]}
+ */
 module.exports = function PullReview(options) {
   options = options || {};
   var actions;
@@ -45,53 +53,53 @@ module.exports = function PullReview(options) {
       actions = actions.map(Action);
       actions.forEach(function(action) {
         switch (action.type) {
-          case 'ASSIGN_USERS_TO_PULL_REQUEST':
-            transaction.push(function() {
-              return github.assignUsersToPullRequest(
+        case 'ASSIGN_USERS_TO_PULL_REQUEST':
+          transaction.push(function() {
+            return github.assignUsersToPullRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
               );
-            });
-            loggedEvents.push(
+          });
+          loggedEvents.push(
               'assigned ' + action.payload.assignees.join(', ')
             );
-            break;
-          case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
-            transaction.push(function() {
-              return github.unassignUsersFromPullRequest(
+          break;
+        case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
+          transaction.push(function() {
+            return github.unassignUsersFromPullRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
               );
-            });
-            loggedEvents.push(
+          });
+          loggedEvents.push(
               'unassigned ' + action.payload.assignees.join(', ')
             );
-            break;
-          case 'NOTIFY':
-            if (action.payload.channel === 'github') {
-              transaction.push(function() {
-                return github.postPullRequestComment(
+          break;
+        case 'NOTIFY':
+          if (action.payload.channel === 'github') {
+            transaction.push(function() {
+              return github.postPullRequestComment(
                   action.payload.pullRequest,
                   GithubMessage(action.payload)
                 );
+            });
+            loggedEvents.push('posted GitHub comment');
+          } else {
+            transaction.push(function() {
+              return new Promise(function(resolve, reject) {
+                try {
+                  var notification = generateNotification(action.payload);
+                  resolve(notifyFn(notification));
+                } catch (e) {
+                  log(e);
+                  reject(Error('Failed to notify'));
+                }
               });
-              loggedEvents.push('posted GitHub comment');
-            } else {
-              transaction.push(function() {
-                return new Promise(function(resolve, reject) {
-                  try {
-                    var notification = generateNotification(action.payload);
-                    resolve(notifyFn(notification));
-                  } catch (e) {
-                    console.error(e);
-                    reject(Error('Failed to notify'));
-                  }
-                });
-              });
-            }
-            break;
-          default:
-            throw Error('Unhandled action: ' + action.type);
+            });
+          }
+          break;
+        default:
+          throw Error('Unhandled action: ' + action.type);
         }
       });
 

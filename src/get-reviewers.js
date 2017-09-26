@@ -6,6 +6,18 @@ var BlameRange = require('./models/blame-range');
 var PullRequestFile = require('./models/pull-request-file');
 var Config = require('./models/config');
 
+/**
+ * Compute the relevant reviewers of a pull request
+ * @param  {Object} options
+ * @param  {Object} options.config - Pull Review configuration object
+ * @param  {Array}  options.files - list of GitHub pull request files
+ * @param  {Array}  options.commits - list of pull request commits
+ * @param  {Array}  options.assignees - list of pull request assignees
+ * @param  {String} options.authorLogin - username of the pull request author
+ * @param  {Function} options.getBlameForFile - function that returns Git blame data for pull request file
+ * @param  {Boolean} options.retryReview - unassign current reviewers and assign new reviewers excluding previous reviewers
+ * @return {Array} list of reviewers
+ */
 module.exports = function getReviewers(options) {
   options = options || {};
   var config = options.config || {
@@ -133,6 +145,10 @@ module.exports = function getReviewers(options) {
     ? maxReviewersAssignable
     : minReviewers;
 
+  /**
+   * @param  {String} reviewer - reviewer username
+   * @return {Boolean} is reviewer eligible for this request?
+   */
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = selectedReviewers[reviewer];
     var isReviewerCurrentCommitter = currentCommitters[reviewer];

@@ -6,6 +6,18 @@ var Github = require('./github');
 var Action = require('./models/action');
 var getReviewers = require('./get-reviewers');
 
+/**
+ * @param  {Object} options
+ * @param  {Object} options.github - GitHub client
+ * @param  {Object} options.config - Pull Review configuration
+ * @param  {String} options.pullReviewConfigPath - Git repo location of Pull Review configuration
+ * @param  {String} options.pullRequestURL - pull request URL
+ * @param  {Boolean} options.retryReview - unassign current reviewers and assign new reviewers excluding previous reviewers
+ * @param  {Boolean} options.isChat - the request is made from a chat context
+ * @param  {String} options.chatRoom - the name of the chat room where the request originated
+ * @param  {String} options.chatChannel - internal identifier of the chat request originator, e.g. hubot:slack
+ * @return {Array} list of actions to take
+ */
 module.exports = function generatePlan(options) {
   options = options || {};
   var actions = [];
