@@ -2,11 +2,9 @@
 
 process.env.DEBUG = 'pull-review';
 
-var cli = require('../src/cli');
-var server = require('../src/server');
-
-if (process.argv.length) {
+if (process.argv.length > 2) {
+  var cli = require('../src/cli');
   cli.parse(process.argv);
 } else {
-  server.start();
+  var server = require('../src/server');
 }

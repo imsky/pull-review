@@ -69,17 +69,7 @@ module.exports = function(robot) {
           robot.logger.info(message);
           res.send(message);
         }
-      })
-        .then(function(response) {
-          try {
-            if (response instanceof Error) {
-              logError(response);
-            }
-          } catch (err) {
-            logError(err);
-          }
-        })
-        .catch(logError);
+      }).catch(logError);
     } catch (err) {
       logError(err);
     }
