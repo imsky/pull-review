@@ -47,7 +47,7 @@ module.exports = function(input) {
       //convert atx headers to bold text
       .replace(/^#{1,6} (.*?)$/gm, '*$1*')
       //convert markdown links with titles to slack links
-      .replace(/\[([^\\]+)\]\((.*?\..*?)\)/gm, '<$2|$1>');
+      .replace(/\[([^\\]+?)\]\((.*?\..*?)\)/gm, '<$2|$1>');
 
     var attachment = {
       title: repoName + ': ' + title,

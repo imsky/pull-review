@@ -27,7 +27,7 @@ module.exports = function(options) {
       title: options.title || 'Hello world',
       body:
         options.body ||
-        '### Description\n\n The quick brown fox jumps over the lazy dog. Check out [GitHub.com](https://github.com)',
+        '### Description\n\n The quick brown fox jumps over the lazy dog. Check out [GitHub.com](https://github.com) and [imsky.co](http://imsky.co)',
       assignee: options.assignee,
       assignees: options.assignees,
       user: options.user || {
