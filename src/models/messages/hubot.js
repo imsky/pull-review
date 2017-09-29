@@ -1,6 +1,6 @@
 var url = require('../../url');
 
-var GITHUB_ICON_URL = 'https://assets-cdn.github.com/pinned-octocat.svg';
+var GITHUB_ICON_URL = 'https://imsky.github.io/pull-review/pull-review-github-icon.png';
 
 module.exports = function(input) {
   input = input || {};
