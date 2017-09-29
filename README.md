@@ -228,7 +228,7 @@ A list of usernames to never notify. This is useful to exclude machine users and
 
 #### review_path_assignments
 
-A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists include the users to assign. Example:
+A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists include the users to assign. **Note:** order is important. Example:
 
 
 ```yaml
@@ -241,7 +241,7 @@ When a file in `web/server` is found, `bob` will be assigned before other review
 
 #### review_path_fallbacks
 
-A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists include the users to assign. Example:
+A map of lists, where the keys are [minimatch](https://github.com/isaacs/minimatch) (glob) patterns, and the lists include the users to assign. **Note:** order is important. Example:
 
 ```yaml
 review_path_fallbacks:

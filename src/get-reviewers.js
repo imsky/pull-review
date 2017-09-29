@@ -167,9 +167,6 @@ module.exports = function getReviewers(options) {
   var assignedReviewers = [];
 
   Object.keys(reviewPathAssignments || {})
-    .sort(function(a, b) {
-      return b.length - a.length;
-    })
     .forEach(function(pattern) {
       var matchingFiles = files.filter(function(file) {
         return minimatch(file.filename, pattern, {
@@ -279,9 +276,6 @@ module.exports = function getReviewers(options) {
         config.assignMinReviewersRandomly
       ) {
         Object.keys(reviewPathFallbacks || {})
-          .sort(function(a, b) {
-            return b.length - a.length;
-          })
           .forEach(function(pattern) {
             var matchingFiles = files.filter(function(file) {
               return minimatch(file.filename, pattern, {
