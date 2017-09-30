@@ -188,7 +188,7 @@ describe('#getReviewers', function() {
     });
   });
 
-  it('works with blame correctly', function() {
+  it('assigns reviewers with most ownership', function () {
     return getReviewers({
       config: {
         version: 1,
@@ -203,12 +203,12 @@ describe('#getReviewers', function() {
         {
           filename: 'foo',
           status: 'modified',
-          changes: 3
+          changes: 100
         },
         {
           filename: 'bar',
           status: 'modified',
-          changes: 2
+          changes: 100
         }
       ],
       getBlameForFile: function(file) {
@@ -216,31 +216,26 @@ describe('#getReviewers', function() {
           return [
             {
               login: 'bob',
-              count: 5,
+              count: 70,
               age: 1
             },
             {
               login: 'charlie',
-              count: 10,
-              age: 10
-            },
-            {
-              login: 'bob',
-              count: 7,
-              age: 3
+              count: 1,
+              age: 1
             }
           ];
         } else if (file.filename === 'bar') {
           return [
             {
               login: 'charlie',
-              count: 1,
+              count: 100,
               age: 1
             },
             {
               login: 'bob',
-              count: 1,
-              age: 10
+              count: 29,
+              age: 1
             }
           ];
         }
@@ -248,9 +243,8 @@ describe('#getReviewers', function() {
     }).then(function(reviewers) {
       reviewers.should.have.lengthOf(2);
       reviewers[0].login.should.equal('bob');
-      reviewers[0].count.should.equal(13);
       reviewers[1].login.should.equal('charlie');
-      reviewers[1].count.should.equal(11);
+      reviewers[0].ownership.should.be.above(reviewers[1].ownership);
     });
   });
 

@@ -144,7 +144,7 @@ module.exports = function getReviewers(options) {
 
   /**
    * @param  {String} reviewer - reviewer username
-   * @return {Boolean} is reviewer eligible for this request?
+   * @return {Boolean} is reviewer eligible for this review request?
    */
   function isEligibleReviewer(reviewer) {
     var isReviewerSelected = selectedReviewers[reviewer];
@@ -197,24 +197,31 @@ module.exports = function getReviewers(options) {
   shuffle.knuthShuffle(assignedReviewers);
 
   return Promise.all(topModifiedFiles.map(getBlameForFile))
-    .then(function(blames) {
+    .then(function(fileBlames) {
       var authorsLinesChanged = {};
+      var filesWithOwnership = [];
+      var authorOwnership = {};
 
-      for (var i = 0; i < blames.length; i++) {
-        var ranges = (blames[i] || []).map(BlameRange);
+      for (var i = 0; i < fileBlames.length; i++) {
+        var ranges = (fileBlames[i] || []).map(BlameRange);
 
         ranges.sort(function(a, b) {
           return a.age - b.age;
         });
 
-        var usableBlames = ranges.filter(function(range) {
+        var eligibleBlames = ranges.filter(function(range) {
           return isEligibleReviewer(range.login);
         });
 
-        var recentBlames = usableBlames.slice(
+        var recentBlames = eligibleBlames.slice(
           0,
-          Math.ceil(usableBlames.length * 0.75)
+          Math.ceil(eligibleBlames.length * 0.75)
         );
+
+        var file = {
+          authors: {},
+          lines: 0
+        };
 
         recentBlames.forEach(function(range) {
           var linesChanged = range.count;
@@ -224,28 +231,52 @@ module.exports = function getReviewers(options) {
             authorsLinesChanged[author] = 0;
           }
 
+          if (!file.authors[author]) {
+            file.authors[author] = 0;
+          }
+
           authorsLinesChanged[author] += linesChanged;
+          file.authors[author] += linesChanged;
+          file.lines += linesChanged;
         });
+
+        filesWithOwnership.push(file);
       }
 
-      uniqueAuthors = Object.keys(authorsLinesChanged).length;
+      var reviewersByOwnership = [];
 
-      var blamedReviewers = [];
+      filesWithOwnership.forEach(function (file) {
+        Object.keys(file.authors).forEach(function (author) {
+          if (!authorOwnership[author]) {
+            authorOwnership[author] = [];
+          }
 
-      Object.keys(authorsLinesChanged).forEach(function(author) {
-        blamedReviewers.push({
-          login: author,
-          count: authorsLinesChanged[author],
-          source: 'blame'
+          authorOwnership[author].push(Number((file.authors[author] / file.lines).toFixed(3)));
         });
       });
 
-      blamedReviewers.sort(function(a, b) {
-        return b.count - a.count;
+      uniqueAuthors = Object.keys(authorOwnership).length;
+
+      Object.keys(authorOwnership).forEach(function (author) {
+        var ownershipPercentages = authorOwnership[author];
+        var averageOwnership = ownershipPercentages.reduce(function (sum, ownership) {
+          return sum + ownership;
+        }, 0) / ownershipPercentages.length;
+
+        reviewersByOwnership.push({
+          login: author,
+          count: authorsLinesChanged[author],
+          source: 'blame',
+          ownership: Number(averageOwnership.toFixed(3))
+        })
+      });
+
+      reviewersByOwnership.sort(function(a, b) {
+        return b.ownership - a.ownership;
       });
 
       return assignedReviewers
-        .concat(blamedReviewers)
+        .concat(reviewersByOwnership)
         .slice(0, maxReviewersAssignable);
     })
     .then(function(reviewers) {
