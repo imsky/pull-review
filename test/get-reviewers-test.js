@@ -381,6 +381,84 @@ describe('#getReviewers', function() {
     });
   });
 
+  describe('using label filter', function () {
+    it('works with a whitelist when a required label is missing', function () {
+      (function () {
+        getReviewers({
+          config: {
+            version: 1,
+            reviewers: {
+              alice: {}
+            },
+            label_whitelist: ['review']
+          },
+          labels: [{name: '?'}],
+          authorLogin: 'bob',
+          getBlameForFile: function () {
+            return [];
+          }
+        });
+      }).should.throw(Error, 'Label ? is not allowed');
+    });
+
+    it('works with a whitelist when a required label is present', function () {
+      (function () {
+        getReviewers({
+          config: {
+            version: 1,
+            reviewers: {
+              alice: {}
+            },
+            label_whitelist: ['?']
+          },
+          labels: [{name: '?'}],
+          authorLogin: 'bob',
+          getBlameForFile: function () {
+            return [];
+          }
+        });
+      }).should.not.throw(Error, 'Label ? is not allowed');
+    });
+
+    it('works with a blacklist when a forbidden label is present', function () {
+      (function () {
+        getReviewers({
+          config: {
+            version: 1,
+            reviewers: {
+              alice: {}
+            },
+            label_blacklist: ['?']
+          },
+          labels: [{name: '?'}],
+          authorLogin: 'bob',
+          getBlameForFile: function () {
+            return [];
+          }
+        });
+      }).should.throw(Error, 'Label ? is not allowed');
+    });
+
+    it('works with a blacklist when a forbidden label is missing', function () {
+      (function () {
+        getReviewers({
+          config: {
+            version: 1,
+            reviewers: {
+              alice: {}
+            },
+            label_blacklist: ['review']
+          },
+          labels: [{name: '?'}],
+          authorLogin: 'bob',
+          getBlameForFile: function () {
+            return [];
+          }
+        });
+      }).should.not.throw(Error, 'Label ? is not allowed');
+    });
+  });
+
   describe('using max files per reviewer', function() {
     var options = {
       config: config,

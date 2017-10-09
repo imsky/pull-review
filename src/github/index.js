@@ -195,6 +195,21 @@ function getPullRequestCommits(resource) {
 }
 
 /**
+ * @param  {Object} resource - A GitHub resource
+ * @return {Array} A list of pull request labels
+ */
+function getPullRequestLabels(resource) {
+  return github.issues.getIssueLabels({
+    owner: resource.owner,
+    repo: resource.repo,
+    number: resource.number
+  })
+    .then(function (res) {
+      return res.data;
+    });
+}
+
+/**
  * @param  {String} githubToken - A GitHub token with user and repo scopes
  */
 module.exports = function(githubToken) {
@@ -222,6 +237,7 @@ module.exports = function(githubToken) {
     assignUsersToPullRequest: assignUsersToPullRequest,
     postPullRequestComment: postPullRequestComment,
     unassignUsersFromPullRequest: unassignUsersFromPullRequest,
-    parseGithubURL: parseGithubURL
+    parseGithubURL: parseGithubURL,
+    getPullRequestLabels: getPullRequestLabels
   };
 };

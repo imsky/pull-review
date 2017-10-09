@@ -38,6 +38,12 @@ module.exports = function(options) {
         sha: 'c0ded0c'
       }
     });
+
+    api.get('/repos/OWNER/REPO/issues/' + number + '/labels').reply(200, options.labels || [
+      {
+       name: 'review'
+      }
+    ]);
   }
 
   function mockPullRequestFiles(options) {

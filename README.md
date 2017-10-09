@@ -260,6 +260,14 @@ file_blacklist:
   - web/ui/*.js
 ```
 
+#### label_whitelist
+
+An array of pull request labels that are required for pull request review.
+
+#### label_blacklist
+
+An array of pull request labels that are forbidden from pull request review.
+
 ### Environment variables
 
 * `PULL_REVIEW_GITHUB_TOKEN`: GitHub token used to fetch pull request information. The token must have `repo` and `user` scopes. **Required** when using Pull Review as a Hubot plugin or when running in server mode.

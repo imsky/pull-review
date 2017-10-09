@@ -26,6 +26,7 @@ module.exports = function getReviewers(options) {
   var files = options.files || [];
   var commits = options.commits || [];
   var assignees = options.assignees || [];
+  var labels = options.labels || [];
   var authorLogin = options.authorLogin;
   var getBlameForFile = options.getBlameForFile;
   var retryReview = Boolean(options.retryReview);
@@ -48,6 +49,18 @@ module.exports = function getReviewers(options) {
   var fileBlacklist = config.fileBlacklist;
   var reviewPathFallbacks = config.reviewPathFallbacks;
   var reviewPathAssignments = config.reviewPathAssignments;
+  var labelWhitelist = config.labelWhitelist;
+  var labelBlacklist = config.labelBlacklist;
+
+  if (labels.length) {
+    for(var i = 0; i < labels.length; i++) {
+      var label = labels[i].name;
+      if (labelBlacklist.length && labelBlacklist.indexOf(label) !== -1 ||
+          labelWhitelist.length && labelWhitelist.indexOf(label) === -1) {
+        throw Error('Label ' + label + ' is not allowed');
+      }
+    }
+  }
 
   files = files.map(PullRequestFile);
 
@@ -92,11 +105,9 @@ module.exports = function getReviewers(options) {
   });
 
   if (retryReview) {
-    if (assignees.length) {
-      assignees.forEach(function(assignee) {
-        excludedReviewers[assignee] = true;
-      });
-    }
+    assignees.forEach(function(assignee) {
+      excludedReviewers[assignee] = true;
+    });
 
     assignees = [];
   }
@@ -231,10 +242,7 @@ module.exports = function getReviewers(options) {
             authorsLinesChanged[author] = 0;
           }
 
-          if (!file.authors[author]) {
-            file.authors[author] = 0;
-          }
-
+          file.authors[author] = file.authors[author] || 0;
           authorsLinesChanged[author] += linesChanged;
           file.authors[author] += linesChanged;
           file.lines += linesChanged;

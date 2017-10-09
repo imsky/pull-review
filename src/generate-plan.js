@@ -42,6 +42,7 @@ module.exports = function generatePlan(options) {
   var pullRequestAssignees;
   var newPullRequestAssignees;
   var repoPullReviewConfig;
+  var pullRequestLabels;
 
   if (!pullRequestURL) {
     throw Error('Missing pull request URL');
@@ -99,6 +100,7 @@ module.exports = function generatePlan(options) {
       return Promise.all([
         github.getPullRequestFiles(pullRequest),
         github.getPullRequestCommits(pullRequest),
+        github.getPullRequestLabels(pullRequest),
         config
           ? null
           : github
@@ -111,7 +113,8 @@ module.exports = function generatePlan(options) {
     .then(function(res) {
       pullRequestFiles = res[0];
       pullRequestCommits = res[1];
-      repoPullReviewConfig = res[2];
+      pullRequestLabels = res[2];
+      repoPullReviewConfig = res[3];
       config = config || repoPullReviewConfig;
 
       if (!config) {
@@ -122,6 +125,7 @@ module.exports = function generatePlan(options) {
         config: config,
         files: pullRequestFiles,
         commits: pullRequestCommits,
+        labels: pullRequestLabels,
         authorLogin: pullRequestRecord.data.user.login,
         assignees: pullRequestAssignees,
         retryReview: retryReview,

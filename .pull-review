@@ -61,3 +61,7 @@ review_path_fallbacks:
 # list of minimatch (glob) patterns to ignore when getting files from a pull request
 file_blacklist:
   - app/ignored_*.*
+
+# list of PR labels to either require (whitelist) or forbid (blacklist) in reviews
+label_whitelist: []
+label_blacklist: ['WIP']

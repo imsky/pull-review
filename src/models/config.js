@@ -47,6 +47,8 @@ module.exports = function PullReviewConfig(input) {
   var requireNotification = get(input.require_notification, true);
   var fileBlacklist = get(input.file_blacklist, []);
   var reviewPathAssignments = get(input.review_path_assignments, null);
+  var labelWhitelist = get(input.label_whitelist, []);
+  var labelBlacklist = get(input.label_blacklist, []);
 
   if (minReviewers < 1) {
     throw Error('Invalid number of minimum reviewers');
@@ -88,7 +90,9 @@ module.exports = function PullReviewConfig(input) {
       reviewPathFallbacks: [],
       requireNotification: requireNotification,
       assignMinReviewersRandomly: false,
-      fileBlacklist: fileBlacklist
+      fileBlacklist: fileBlacklist,
+      labelWhitelist: labelWhitelist,
+      labelBlacklist: labelBlacklist
     });
   }
 
@@ -105,6 +109,8 @@ module.exports = function PullReviewConfig(input) {
     reviewPathFallbacks: reviewPathFallbacks,
     requireNotification: requireNotification,
     assignMinReviewersRandomly: assignMinReviewersRandomly,
-    fileBlacklist: fileBlacklist
+    fileBlacklist: fileBlacklist,
+    labelWhitelist: labelWhitelist,
+    labelBlacklist: labelBlacklist
   });
 };
