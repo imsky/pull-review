@@ -100,9 +100,12 @@ describe('pull-review', function() {
         isChat: true,
         notifyFn: function(m) {
           message = m;
+        },
+        userMappingFn: function (user) {
+          return '<@U123>';
         }
       }).then(function() {
-        message.text.should.equal('@bsmith: please review this pull request');
+        message.text.should.equal('<@U123>: please review this pull request');
         message.attachments.should.have.lengthOf(1);
         var attachment = message.attachments[0];
         attachment.title.should.equal('OWNER/REPO: Hello world');
@@ -110,7 +113,7 @@ describe('pull-review', function() {
           'https://github.com/OWNER/REPO/pull/1'
         );
         attachment.text.should.equal(
-          '*Description*\n\n The quick brown fox jumps over the lazy dog. Check out <https://github.com|GitHub.com> and <http://imsky.co|imsky.co>'
+          '*Description*\n\nThe quick brown fox jumps over the lazy dog.\n\n• Feature X\n• Feature Y\n• Bug Z\n\nCheck out <https://github.com|GitHub.com> and <http://imsky.co|imsky.co>'
         );
         attachment.fallback.should.equal(
           'Hello world by alice: https://github.com/OWNER/REPO/pull/1'

@@ -36,6 +36,8 @@ module.exports = function generatePlan(options) {
     ? process.env.PULL_REVIEW_REQUIRED_ROOMS.split(',')
     : [];
   var chatChannel = options.chatChannel;
+  //todo: document
+  var userMappingFn = options.userMappingFn;
   var pullRequestRecord;
   var pullRequestFiles;
   var pullRequestCommits;
@@ -171,7 +173,8 @@ module.exports = function generatePlan(options) {
       channels.forEach(function(channel) {
         var channelUsers = reviewers.map(function(reviewer) {
           if (channel === 'hubot:slack') {
-            return reviewer.notify.slack;
+            var slackUser = reviewer.notify.slack;
+            return userMappingFn ? userMappingFn(slackUser) : slackUser;
           }
 
           return reviewer.login;

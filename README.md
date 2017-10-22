@@ -13,7 +13,7 @@ You can use Pull Review through [GitHub comments](#github), from chat rooms in S
 ## Installation
 
 ```
-npm install pull-review@2.0
+npm install pull-review@2.1
 ```
 
 [![Deploy Pull Review to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/imsky/pull-review)

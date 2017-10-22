@@ -17,9 +17,19 @@ module.exports = function(input) {
     throw Error('Missing pull request record');
   }
 
-  users = users.map(function(user) {
-    return '@' + user;
-  });
+  if (channel === 'hubot:generic') {
+    users = users.map(function(user) {
+      return '@' + user;
+    });
+  } else if (channel === 'hubot:slack') {
+    users = users.map(function (user) {
+      if (user.indexOf('<') !== 0 && user.indexOf('@') !== 0) {
+        return '@' + user;
+      }
+
+      return user;
+    });
+  }
 
   var message = users.join(', ') + ': please review this pull request';
 
@@ -47,7 +57,9 @@ module.exports = function(input) {
       //convert atx headers to bold text
       .replace(/^#{1,6} (.*?)$/gm, '*$1*')
       //convert markdown links with titles to slack links
-      .replace(/\[([^\\]+?)\]\((.*?\..*?)\)/gm, '<$2|$1>');
+      .replace(/\[([^\\]+?)\]\((.*?\..*?)\)/gm, '<$2|$1>')
+      //convert asterisk-led lists to use bullet points
+      .replace(/^\* /gm, '• ');
 
     var attachment = {
       title: repoName + ': ' + title,
