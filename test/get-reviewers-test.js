@@ -188,7 +188,7 @@ describe('#getReviewers', function() {
     });
   });
 
-  it('assigns reviewers with most ownership', function () {
+  it('assigns reviewers with most ownership', function() {
     return getReviewers({
       config: {
         version: 1,
@@ -381,9 +381,9 @@ describe('#getReviewers', function() {
     });
   });
 
-  describe('using label filter', function () {
-    it('works with a whitelist when a required label is missing', function () {
-      (function () {
+  describe('using label filter', function() {
+    it('works with a whitelist when a required label is missing', function() {
+      (function() {
         getReviewers({
           config: {
             version: 1,
@@ -394,15 +394,15 @@ describe('#getReviewers', function() {
           },
           labels: [{name: '?'}],
           authorLogin: 'bob',
-          getBlameForFile: function () {
+          getBlameForFile: function() {
             return [];
           }
         });
-      }).should.throw(Error, 'Label ? is not allowed');
+      }.should.throw(Error, 'Label ? is not allowed'));
     });
 
-    it('works with a whitelist when a required label is present', function () {
-      (function () {
+    it('works with a whitelist when a required label is present', function() {
+      (function() {
         getReviewers({
           config: {
             version: 1,
@@ -413,15 +413,15 @@ describe('#getReviewers', function() {
           },
           labels: [{name: '?'}],
           authorLogin: 'bob',
-          getBlameForFile: function () {
+          getBlameForFile: function() {
             return [];
           }
         });
-      }).should.not.throw(Error, 'Label ? is not allowed');
+      }.should.not.throw(Error, 'Label ? is not allowed'));
     });
 
-    it('works with a blacklist when a forbidden label is present', function () {
-      (function () {
+    it('works with a blacklist when a forbidden label is present', function() {
+      (function() {
         getReviewers({
           config: {
             version: 1,
@@ -432,15 +432,15 @@ describe('#getReviewers', function() {
           },
           labels: [{name: '?'}],
           authorLogin: 'bob',
-          getBlameForFile: function () {
+          getBlameForFile: function() {
             return [];
           }
         });
-      }).should.throw(Error, 'Label ? is not allowed');
+      }.should.throw(Error, 'Label ? is not allowed'));
     });
 
-    it('works with a blacklist when a forbidden label is missing', function () {
-      (function () {
+    it('works with a blacklist when a forbidden label is missing', function() {
+      (function() {
         getReviewers({
           config: {
             version: 1,
@@ -451,11 +451,11 @@ describe('#getReviewers', function() {
           },
           labels: [{name: '?'}],
           authorLogin: 'bob',
-          getBlameForFile: function () {
+          getBlameForFile: function() {
             return [];
           }
         });
-      }).should.not.throw(Error, 'Label ? is not allowed');
+      }.should.not.throw(Error, 'Label ? is not allowed'));
     });
   });
 

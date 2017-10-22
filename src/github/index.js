@@ -199,12 +199,13 @@ function getPullRequestCommits(resource) {
  * @return {Array} A list of pull request labels
  */
 function getPullRequestLabels(resource) {
-  return github.issues.getIssueLabels({
-    owner: resource.owner,
-    repo: resource.repo,
-    number: resource.number
-  })
-    .then(function (res) {
+  return github.issues
+    .getIssueLabels({
+      owner: resource.owner,
+      repo: resource.repo,
+      number: resource.number
+    })
+    .then(function(res) {
       return res.data;
     });
 }

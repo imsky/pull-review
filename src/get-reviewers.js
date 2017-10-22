@@ -53,10 +53,12 @@ module.exports = function getReviewers(options) {
   var labelBlacklist = config.labelBlacklist;
 
   if (labels.length) {
-    for(var i = 0; i < labels.length; i++) {
+    for (var i = 0; i < labels.length; i++) {
       var label = labels[i].name;
-      if (labelBlacklist.length && labelBlacklist.indexOf(label) !== -1 ||
-          labelWhitelist.length && labelWhitelist.indexOf(label) === -1) {
+      if (
+        (labelBlacklist.length && labelBlacklist.indexOf(label) !== -1) ||
+        (labelWhitelist.length && labelWhitelist.indexOf(label) === -1)
+      ) {
         throw Error('Label ' + label + ' is not allowed');
       }
     }
@@ -161,7 +163,8 @@ module.exports = function getReviewers(options) {
     var isReviewerSelected = selectedReviewers[reviewer];
     var isReviewerCurrentCommitter = currentCommitters[reviewer];
     var isReviewerAuthor = reviewer === authorLogin;
-    var isReviewerUnreachable = (config.requireNotification && !config.reviewers[reviewer]);
+    var isReviewerUnreachable =
+      config.requireNotification && !config.reviewers[reviewer];
     var isReviewerBlacklisted =
       config.reviewBlacklist && config.reviewBlacklist.indexOf(reviewer) !== -1;
     var isReviewerExcluded = excludedReviewers[reviewer];
@@ -177,33 +180,32 @@ module.exports = function getReviewers(options) {
 
   var assignedReviewers = [];
 
-  Object.keys(reviewPathAssignments || {})
-    .forEach(function(pattern) {
-      var matchingFiles = files.filter(function(file) {
-        return minimatch(file.filename, pattern, {
-          dot: true,
-          matchBase: true
-        });
-      });
-
-      matchingFiles.forEach(function() {
-        var assignedAuthors = reviewPathAssignments[pattern] || [];
-
-        assignedAuthors.forEach(function(author) {
-          if (!isEligibleReviewer(author)) {
-            return;
-          }
-
-          assignedReviewers.push({
-            login: author,
-            count: 0,
-            source: 'assignment'
-          });
-
-          selectedReviewers[author] = true;
-        });
+  Object.keys(reviewPathAssignments || {}).forEach(function(pattern) {
+    var matchingFiles = files.filter(function(file) {
+      return minimatch(file.filename, pattern, {
+        dot: true,
+        matchBase: true
       });
     });
+
+    matchingFiles.forEach(function() {
+      var assignedAuthors = reviewPathAssignments[pattern] || [];
+
+      assignedAuthors.forEach(function(author) {
+        if (!isEligibleReviewer(author)) {
+          return;
+        }
+
+        assignedReviewers.push({
+          login: author,
+          count: 0,
+          source: 'assignment'
+        });
+
+        selectedReviewers[author] = true;
+      });
+    });
+  });
 
   shuffle.knuthShuffle(assignedReviewers);
 
@@ -253,30 +255,33 @@ module.exports = function getReviewers(options) {
 
       var reviewersByOwnership = [];
 
-      filesWithOwnership.forEach(function (file) {
-        Object.keys(file.authors).forEach(function (author) {
+      filesWithOwnership.forEach(function(file) {
+        Object.keys(file.authors).forEach(function(author) {
           if (!authorOwnership[author]) {
             authorOwnership[author] = [];
           }
 
-          authorOwnership[author].push(Number((file.authors[author] / file.lines).toFixed(3)));
+          authorOwnership[author].push(
+            Number((file.authors[author] / file.lines).toFixed(3))
+          );
         });
       });
 
       uniqueAuthors = Object.keys(authorOwnership).length;
 
-      Object.keys(authorOwnership).forEach(function (author) {
+      Object.keys(authorOwnership).forEach(function(author) {
         var ownershipPercentages = authorOwnership[author];
-        var averageOwnership = ownershipPercentages.reduce(function (sum, ownership) {
-          return sum + ownership;
-        }, 0) / ownershipPercentages.length;
+        var averageOwnership =
+          ownershipPercentages.reduce(function(sum, ownership) {
+            return sum + ownership;
+          }, 0) / ownershipPercentages.length;
 
         reviewersByOwnership.push({
           login: author,
           count: authorsLinesChanged[author],
           source: 'blame',
           ownership: Number(averageOwnership.toFixed(3))
-        })
+        });
       });
 
       reviewersByOwnership.sort(function(a, b) {
@@ -314,33 +319,32 @@ module.exports = function getReviewers(options) {
         reviewers.length < minReviewersAssignable &&
         config.assignMinReviewersRandomly
       ) {
-        Object.keys(reviewPathFallbacks || {})
-          .forEach(function(pattern) {
-            var matchingFiles = files.filter(function(file) {
-              return minimatch(file.filename, pattern, {
-                dot: true,
-                matchBase: true
-              });
-            });
-
-            matchingFiles.forEach(function() {
-              var fallbackAuthors = reviewPathFallbacks[pattern];
-
-              fallbackAuthors.forEach(function(author) {
-                if (!isEligibleReviewer(author)) {
-                  return;
-                }
-
-                fallbackReviewers.push({
-                  login: author,
-                  count: 0,
-                  source: 'fallback'
-                });
-
-                selectedReviewers[author] = true;
-              });
+        Object.keys(reviewPathFallbacks || {}).forEach(function(pattern) {
+          var matchingFiles = files.filter(function(file) {
+            return minimatch(file.filename, pattern, {
+              dot: true,
+              matchBase: true
             });
           });
+
+          matchingFiles.forEach(function() {
+            var fallbackAuthors = reviewPathFallbacks[pattern];
+
+            fallbackAuthors.forEach(function(author) {
+              if (!isEligibleReviewer(author)) {
+                return;
+              }
+
+              fallbackReviewers.push({
+                login: author,
+                count: 0,
+                source: 'fallback'
+              });
+
+              selectedReviewers[author] = true;
+            });
+          });
+        });
 
         shuffle.knuthShuffle(fallbackReviewers);
         reviewers = reviewers.concat(

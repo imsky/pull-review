@@ -1,6 +1,7 @@
 var url = require('../../url');
 
-var GITHUB_ICON_URL = 'https://imsky.github.io/pull-review/pull-review-github-icon.png';
+var GITHUB_ICON_URL =
+  'https://imsky.github.io/pull-review/pull-review-github-icon.png';
 
 module.exports = function(input) {
   input = input || {};
@@ -22,7 +23,7 @@ module.exports = function(input) {
       return '@' + user;
     });
   } else if (channel === 'hubot:slack') {
-    users = users.map(function (user) {
+    users = users.map(function(user) {
       if (user.indexOf('<') !== 0 && user.indexOf('@') !== 0) {
         return '@' + user;
       }

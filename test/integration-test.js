@@ -73,7 +73,7 @@ describe('pull-review', function() {
   });
 
   describe('with Slack notifications', function() {
-    it('works with default notifyFn', function () {
+    it('works with default notifyFn', function() {
       githubMock({
         config: config
       });
@@ -101,7 +101,7 @@ describe('pull-review', function() {
         notifyFn: function(m) {
           message = m;
         },
-        userMappingFn: function (user) {
+        userMappingFn: function(user) {
           return '<@U123>';
         }
       }).then(function() {
@@ -151,7 +151,7 @@ describe('pull-review', function() {
         chatChannel: 'hubot:slack',
         isChat: true,
         notifyFn: function(message) {
-          throw Error()
+          throw Error();
         }
       });
     });
@@ -192,12 +192,14 @@ describe('pull-review', function() {
     });
 
     it('does nothing without a pull request URL', function(done) {
-      room.user.say('alice', 'https://github.com/imsky/pull-review https://google.com').then(function() {
-        setTimeout(function() {
-          room.messages.should.have.lengthOf(1);
-          done();
-        }, 100);
-      });
+      room.user
+        .say('alice', 'https://github.com/imsky/pull-review https://google.com')
+        .then(function() {
+          setTimeout(function() {
+            room.messages.should.have.lengthOf(1);
+            done();
+          }, 100);
+        });
     });
 
     it('fails when no reviewers are found', function(done) {

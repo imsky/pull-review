@@ -14,7 +14,7 @@ module.exports = function(robot) {
     rawUsers = robot.adapter.client.rtm.dataStore.users;
   }
 
-  Object.keys(rawUsers).forEach(function (userId) {
+  Object.keys(rawUsers).forEach(function(userId) {
     var user = rawUsers[userId];
     var key = user.real_name || user.name;
     if (key !== undefined) {
@@ -82,7 +82,7 @@ module.exports = function(robot) {
           robot.logger.info(message);
           res.send(message);
         },
-        userMappingFn: function (user) {
+        userMappingFn: function(user) {
           if (adapter !== 'slack') {
             return user;
           }

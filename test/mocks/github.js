@@ -39,11 +39,14 @@ module.exports = function(options) {
       }
     });
 
-    api.get('/repos/OWNER/REPO/issues/' + number + '/labels').reply(200, options.labels || [
-      {
-       name: 'review'
-      }
-    ]);
+    api.get('/repos/OWNER/REPO/issues/' + number + '/labels').reply(
+      200,
+      options.labels || [
+        {
+          name: 'review'
+        }
+      ]
+    );
   }
 
   function mockPullRequestFiles(options) {

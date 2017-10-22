@@ -13,7 +13,7 @@ You can use Pull Review through [GitHub comments](#github), from chat rooms in S
 ## Installation
 
 ```
-npm install pull-review@2.1
+npm install pull-review@2.2
 ```
 
 [![Deploy Pull Review to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/imsky/pull-review)
@@ -214,9 +214,12 @@ reviewers:
   alice:
     slack: ajones
   bob: {}
+  charlie: "Charlie Smith"
 ```
 
 When Pull Review sends its notification, it'll notify `@alice` on GitHub and `@ajones` on Slack.
+
+Specifically for Slack, using real names instead of usernames (as in the example above for `charlie`) is recommended since Slack is [phasing out support for `@username` mentions](https://api.slack.com/changelog/2017-09-the-one-about-usernames).
 
 If non-GitHub notification handles are not available/required, an empty object can be specified (as it is for `bob` in the example above). This will notify `@bob` on GitHub, and will work with the [`require_notification`](#require_notification) configuration option.
 
