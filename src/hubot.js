@@ -16,9 +16,21 @@ module.exports = function(robot) {
 
   Object.keys(rawUsers).forEach(function(userId) {
     var user = rawUsers[userId];
-    var key = user.real_name || user.name;
-    if (key !== undefined) {
-      chatUserMap[key] = userId;
+
+    if (user.real_name) {
+      if (chatUserMap[user.real_name]) {
+        robot.logger.error('User mapping already exists for ' + user.real_name);
+      } else {
+        chatUserMap[user.real_name] = userId;
+      }
+    }
+
+    if (user.name) {
+      if (chatUserMap[user.name]) {
+        robot.logger.error('User mapping already exists for ' + user.name);
+      } else {
+        chatUserMap[user.name] = userId;
+      }
     }
   });
 
