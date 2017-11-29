@@ -103,7 +103,9 @@ module.exports = function getReviewers(options) {
   var uniqueAuthors = 0;
 
   commits.forEach(function(commit) {
-    currentCommitters[commit.author.login] = true;
+    if (commit.author && commit.author.login) {
+      currentCommitters[commit.author.login] = true;
+    }
   });
 
   if (retryReview) {

@@ -163,6 +163,10 @@ describe('#getReviewers', function() {
           author: {
             login: 'charlie'
           }
+        },
+        {},
+        {
+          author: {}
         }
       ],
       getBlameForFile: function() {
