@@ -1,6 +1,6 @@
 {
   "name": "pull-review",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Assign pull request reviewers intelligently",
   "main": "index.js",
   "bin": {
