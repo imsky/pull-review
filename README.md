@@ -43,7 +43,7 @@ For details on configuration options, check out the [configuration](#configurati
 * Pick the **Issue comment** event
 * Click **Add webhook**
 
-To assign reviewers on a pull request, post `/review`. To re-assign reviewers post `/review again`.
+To assign reviewers on a pull request, post `/review`. To [run Pull Review again](#reviewing-again) post `/review again`.
 
 > The public Pull Review server limits some configuration options. However, you can [run your own server](#server).
 
@@ -67,13 +67,11 @@ You can request review assignments like this:
 review https://github.com/imsky/pull-review/pull/1
 ```
 
-You can re-run Pull Review on a pull request like this:
+You can [run Pull Review again](#reviewing-again) on a pull request like this:
 
 ```text
 review https://github.com/imsky/pull-review/pull/1 again
 ```
-
-`"review...again"` is equivalent to using the `--retry-review` flag with the CLI or the `retryReview` API option.
 
 To notify users on Slack, configuration must include a [reviewers](#reviewers) section.
 
@@ -277,6 +275,17 @@ An array of pull request labels that are forbidden from pull request review.
 * `PULL_REVIEW_CONFIG_PATH`: location of the config file in the pull request repo (default is `.pull-review`).
 * `PULL_REVIEW_CONFIG`: Pull Review configuration override in JSON/YAML format.
 * `PULL_REVIEW_REQUIRED_ROOMS`: whitelist of Hubot chat rooms for Pull Review requests (e.g. `dev,ops`).
+
+## Reviewing again
+
+Sometimes it may be useful to run Pull Review again on a pull request, whether it's because the assigned reviewers are not available to review the PR or because another set of reviewers is necessary. You can run Pull Review again in the following ways:
+
+* [GitHub](#github): `/review again`
+* [Hubot](#hubot): `review ... again`
+* [CLI](#cli): `--retry-review` or `-r`
+* [API](#api): `retryReview: true`
+
+When running Pull Review again, current reviewers are un-assigned, and the next best set of reviewers is assigned instead. Keep in mind that if Pull Review runs twice on a pull request, the original reviewers will be assigned again.
 
 ## Algorithm
 
