@@ -180,6 +180,61 @@ module.exports = function getReviewers(options) {
     );
   }
 
+  function getFallbackReviewers() {
+    var fallbackReviewers = [];
+
+    Object.keys(reviewPathFallbacks || {}).forEach(function(pattern) {
+      var matchingFiles = files.filter(function(file) {
+        return minimatch(file.filename, pattern, {
+          dot: true,
+          matchBase: true
+        });
+      });
+
+      matchingFiles.forEach(function() {
+        var fallbackAuthors = reviewPathFallbacks[pattern];
+
+        fallbackAuthors.forEach(function(author) {
+          if (!isEligibleReviewer(author)) {
+            return;
+          }
+
+          fallbackReviewers.push({
+            login: author,
+            count: 0,
+            source: 'fallback'
+          });
+
+          selectedReviewers[author] = true;
+        });
+      });
+    });
+
+    shuffle.knuthShuffle(fallbackReviewers);
+    return fallbackReviewers;
+  }
+
+  function getRandomReviewers() {
+    var randomReviewers = [];
+
+    Object.keys(config.reviewers).forEach(function(author) {
+      if (!isEligibleReviewer(author)) {
+        return;
+      }
+
+      randomReviewers.push({
+        login: author,
+        count: 0,
+        source: 'random'
+      });
+
+      selectedReviewers[author] = true;
+    });
+
+    shuffle.knuthShuffle(randomReviewers);
+    return randomReviewers;
+  }
+
   var assignedReviewers = [];
 
   Object.keys(reviewPathAssignments || {}).forEach(function(pattern) {
@@ -295,86 +350,34 @@ module.exports = function getReviewers(options) {
         .slice(0, maxReviewersAssignable);
     })
     .then(function(reviewers) {
-      var fallbackReviewers = [];
-      var randomReviewers = [];
-
-      if (
-        uniqueAuthors < minAuthorsOfChangedFiles &&
-        reviewers.length >= minReviewersAssignable &&
-        reviewers.length
-      ) {
-        //unassign one random reviewer if there are already enough reviewers
-        reviewers = reviewers.slice(0, maxReviewersAssignable);
-        var excludedReviewerIndex = Math.floor(
-          Math.random() * reviewers.length
-        );
-        excludedReviewers[reviewers[excludedReviewerIndex].login] = true;
-        reviewers[excludedReviewerIndex] = null;
-        reviewers = reviewers.filter(Boolean);
-      }
+      var notEnoughAuthorDiversity = uniqueAuthors < minAuthorsOfChangedFiles;
 
       reviewers.forEach(function(reviewer) {
         selectedReviewers[reviewer.login] = true;
       });
 
-      if (
-        reviewers.length < minReviewersAssignable &&
-        config.assignMinReviewersRandomly
-      ) {
-        Object.keys(reviewPathFallbacks || {}).forEach(function(pattern) {
-          var matchingFiles = files.filter(function(file) {
-            return minimatch(file.filename, pattern, {
-              dot: true,
-              matchBase: true
-            });
-          });
+      var fallbackReviewers = getFallbackReviewers();
+      var randomReviewers = getRandomReviewers();
+      var extraReviewers = fallbackReviewers.concat(randomReviewers);
 
-          matchingFiles.forEach(function() {
-            var fallbackAuthors = reviewPathFallbacks[pattern];
+      if (notEnoughAuthorDiversity && maxReviewers > 1) {
+        var extraReviewer = extraReviewers.shift();
 
-            fallbackAuthors.forEach(function(author) {
-              if (!isEligibleReviewer(author)) {
-                return;
-              }
+        if (reviewers.length < maxReviewers) {
+          reviewers.push(extraReviewer);
+        } else if (reviewers.length === maxReviewers) {
+          reviewers = reviewers.slice(0, -1).concat(extraReviewer);
+        }
 
-              fallbackReviewers.push({
-                login: author,
-                count: 0,
-                source: 'fallback'
-              });
-
-              selectedReviewers[author] = true;
-            });
-          });
-        });
-
-        shuffle.knuthShuffle(fallbackReviewers);
-        reviewers = reviewers.concat(
-          fallbackReviewers.slice(0, minReviewersAssignable - reviewers.length)
-        );
+        excludedReviewers[extraReviewer.login] = true;
       }
 
       if (
         reviewers.length < minReviewersAssignable &&
         config.assignMinReviewersRandomly
       ) {
-        Object.keys(config.reviewers).forEach(function(author) {
-          if (!isEligibleReviewer(author)) {
-            return;
-          }
-
-          randomReviewers.push({
-            login: author,
-            count: 0,
-            source: 'random'
-          });
-
-          selectedReviewers[author] = true;
-        });
-
-        shuffle.knuthShuffle(randomReviewers);
         reviewers = reviewers.concat(
-          randomReviewers.slice(0, minReviewersAssignable - reviewers.length)
+          extraReviewers.slice(0, minReviewersAssignable - reviewers.length)
         );
       }
 

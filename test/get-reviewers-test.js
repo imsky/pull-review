@@ -595,7 +595,7 @@ describe('#getReviewers', function() {
   });
 
   describe('using minimum authors of changed files', function() {
-    it('unassigns existing reviewers if the minimum of distinct authors is not met', function() {
+    it('assigns an additional reviewer if the minimum of distinct authors is not met', function() {
       return getReviewers({
         config: {
           version: 1,
@@ -629,9 +629,59 @@ describe('#getReviewers', function() {
         var reviewerLogins = reviewers.map(function(r) {
           return r.login;
         });
-        reviewerLogins.should.not.include('bob');
-        reviewers.should.have.lengthOf(1);
-        reviewers[0].source.should.equal('random');
+        reviewerLogins.should.include('bob');
+        reviewerLogins.should.include('charlie');
+        reviewers.should.have.lengthOf(2);
+        reviewers[0].source.should.equal('blame');
+        reviewers[1].source.should.equal('random');
+      });
+    });
+
+    it('unassigns an existing reviewer if there are already max reviewers', function() {
+      return getReviewers({
+        config: {
+          version: 1,
+          reviewers: {
+            alice: {},
+            bob: {},
+            charlie: {},
+            dee: {}
+          },
+          min_authors_of_changed_files: 3,
+          max_lines_per_reviewer: 1,
+          max_reviewers: 2
+        },
+        files: [
+          {
+            filename: 'TEST',
+            status: 'modified',
+            changes: 100,
+            additions: 100,
+            deletions: 0
+          }
+        ],
+        authorLogin: 'alice',
+        getBlameForFile: function() {
+          return [
+            {
+              login: 'bob',
+              count: 100,
+              age: 1
+            },
+            {
+              login: 'charlie',
+              count: 100,
+              age: 1
+            }
+          ];
+        }
+      }).then(function(reviewers) {
+        var reviewerLogins = reviewers.map(function(r) {
+          return r.login;
+        });
+        reviewerLogins.should.include('bob');
+        reviewerLogins.should.not.include('charlie');
+        reviewerLogins.should.include('dee');
       });
     });
   });
