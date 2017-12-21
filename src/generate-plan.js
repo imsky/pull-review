@@ -174,7 +174,9 @@ module.exports = function generatePlan(options) {
         var channelUsers = reviewers.map(function(reviewer) {
           if (channel === 'hubot:slack') {
             var slackUser = reviewer.notify.slack;
-            return userMappingFn ? userMappingFn(slackUser) : slackUser;
+            return userMappingFn
+              ? userMappingFn(slackUser, reviewer.login)
+              : slackUser;
           }
 
           return reviewer.login;

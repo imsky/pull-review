@@ -1,38 +1,20 @@
 var url = require('./url');
 var PullReview = require('./index');
+var userMapping = require('./utilities/user-mapping');
 
 /**
  * Set up Hubot listeners for Pull Review
  * @param  {Object} robot - Hubot reference
  */
 module.exports = function(robot) {
-  var rawUsers = {};
-  var chatUserMap = {};
+  var rawUsers;
   var adapter = robot.adapterName;
 
   if (adapter === 'slack') {
     rawUsers = robot.adapter.client.rtm.dataStore.users;
   }
 
-  Object.keys(rawUsers).forEach(function(userId) {
-    var user = rawUsers[userId];
-
-    if (user.real_name) {
-      if (chatUserMap[user.real_name]) {
-        robot.logger.error('User mapping already exists for ' + user.real_name);
-      } else {
-        chatUserMap[user.real_name] = userId;
-      }
-    }
-
-    if (user.name) {
-      if (chatUserMap[user.name]) {
-        robot.logger.error('User mapping already exists for ' + user.name);
-      } else {
-        chatUserMap[user.name] = userId;
-      }
-    }
-  });
+  var chatUserMap = userMapping.generateChatUserMap(rawUsers, adapter);
 
   robot.hear(/github\.com\//, function(res) {
     var chatText = res.message.text;
@@ -94,23 +76,7 @@ module.exports = function(robot) {
           robot.logger.info(message);
           res.send(message);
         },
-        userMappingFn: function(lookupUser, defaultUser) {
-          if (!typeof lookupUser === 'string') {
-            return;
-          } else if (adapter !== 'slack') {
-            return lookupUser;
-          }
-
-          if (lookupUser.indexOf('@') === 0) {
-            return lookupUser;
-          } else if (chatUserMap[lookupUser] !== undefined) {
-            return '<@' + chatUserMap[lookupUser] + '>';
-          } else if (defaultUser !== undefined) {
-            return '@' + defaultUser;
-          } else {
-            throw Error('Could not map user: ' + lookupUser);
-          }
-        }
+        userMappingFn: userMapping.createUserMappingFn(chatUserMap, adapter)
       }).catch(logError);
     } catch (err) {
       logError(err);
