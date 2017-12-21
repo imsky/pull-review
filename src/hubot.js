@@ -94,17 +94,21 @@ module.exports = function(robot) {
           robot.logger.info(message);
           res.send(message);
         },
-        userMappingFn: function(user) {
-          if (adapter !== 'slack') {
-            return user;
+        userMappingFn: function(lookupUser, defaultUser) {
+          if (!typeof lookupUser === 'string') {
+            return;
+          } else if (adapter !== 'slack') {
+            return lookupUser;
           }
 
-          if (!typeof user === 'string') {
-            return;
-          } else if (user.indexOf('@') === 0) {
-            return user;
+          if (lookupUser.indexOf('@') === 0) {
+            return lookupUser;
+          } else if (chatUserMap[lookupUser] !== undefined) {
+            return '<@' + chatUserMap[lookupUser] + '>';
+          } else if (defaultUser !== undefined) {
+            return '@' + defaultUser;
           } else {
-            return '<@' + chatUserMap[user] + '>';
+            throw Error('Could not map user: ' + lookupUser);
           }
         }
       }).catch(logError);
