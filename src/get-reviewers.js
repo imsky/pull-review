@@ -276,7 +276,7 @@ module.exports = function getReviewers(options) {
         var averageOwnership =
           ownershipPercentages.reduce(function(sum, ownership) {
             return sum + ownership;
-          }, 0) / ownershipPercentages.length;
+          }, 0) / filesWithOwnership.length;
 
         reviewersByOwnership.push({
           login: author,
