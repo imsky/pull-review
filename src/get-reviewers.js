@@ -181,6 +181,9 @@ module.exports = function getReviewers(options) {
     );
   }
 
+  /**
+   * @return {Array} reviewers found for fallback paths
+   */
   function getFallbackReviewers() {
     var fallbackReviewers = [];
 
@@ -215,6 +218,9 @@ module.exports = function getReviewers(options) {
     return fallbackReviewers;
   }
 
+  /**
+   * @return {Array} reviewers picked at random
+   */
   function getRandomReviewers() {
     var randomReviewers = [];
 

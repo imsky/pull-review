@@ -19,7 +19,6 @@ var defaultNotifyFn = function defaultNotifyFn(message) {
  * Generate a plan of actions and execute it
  * @param  {Object} options
  * @param  {Boolean} options.dryRun - do not assign or notify reviewers
- * @param  {Boolean} options.isChat - the request is made from a chat context
  * @param  {Function} options.notifyFn - custom notifying function
  * @param  {String} options.githubToken - GitHub token with user and repo scopes
  * @return {[type]}
@@ -28,7 +27,6 @@ module.exports = function PullReview(options) {
   var actions;
   var loggedEvents = [];
   var dryRun = Boolean(options.dryRun);
-  var isChat = Boolean(options.isChat);
   var notifyFn = options.notifyFn || defaultNotifyFn;
   var github = Github(options.githubToken);
   options.github = github;
