@@ -44,6 +44,7 @@ module.exports = function getReviewers(options) {
   var maxFilesPerReviewer = config.maxFilesPerReviewer;
   var maxLinesPerReviewer = config.maxLinesPerReviewer;
   var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
+  var minLinesChangedForExtraReviewer = config.minLinesChangedForExtraReviewer;
   var maxReviewersAssignedDynamically =
     maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
   var fileBlacklist = config.fileBlacklist;
@@ -326,6 +327,10 @@ module.exports = function getReviewers(options) {
 
       uniqueAuthors = Object.keys(authorOwnership).length;
 
+      //todo: consider decoupling author ownership calculation from reviewer eligibility
+      //for example, an un-assigned reviewer has still contributed to author ownership
+      //of the files in a PR, so it would be somewhat inaccurate to assume that author ownership
+      //is less diverse just because a reviewer has been excluded
       Object.keys(authorOwnership).forEach(function(author) {
         var ownershipPercentages = authorOwnership[author];
         var averageOwnership =
@@ -363,7 +368,7 @@ module.exports = function getReviewers(options) {
       if (notEnoughAuthorDiversity && maxReviewers > 1) {
         var extraReviewer = extraReviewers.shift();
 
-        if (reviewers.length < maxReviewers) {
+        if (reviewers.length < maxReviewers && changedLines >= minLinesChangedForExtraReviewer) {
           reviewers.push(extraReviewer);
         } else if (reviewers.length === maxReviewers) {
           reviewers = reviewers.slice(0, -1).concat(extraReviewer);

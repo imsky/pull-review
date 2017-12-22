@@ -197,6 +197,12 @@ If the pull request changes code with fewer authors than this minimum, replace a
 
 Default: 0
 
+#### min_lines_changed_for_extra_reviewer
+
+When using (min_authors_of_changed_files)[#min_authors_of_changed_files], a small pull request can warrant an extra reviewer if there aren't enough authors of the changed code. However, small pull requests usually don't need more than one reviewer. This option can be used to ensure that an extra reviewer is assigned for pull requests that change at least a minimum of lines of code.
+
+Default: 0
+
 #### require_notification
 
 Require a user to be listed in the [reviewers](#reviewers) section in order to be assigned as a reviewer. 

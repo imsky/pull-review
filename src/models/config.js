@@ -41,6 +41,7 @@ module.exports = function PullReviewConfig(input) {
     true
   );
   var minAuthorsOfChangedFiles = get(input.min_authors_of_changed_files, 0);
+  var minLinesChangedForExtraReviewer = get(input.min_lines_changed_for_extra_reviewer, 0);
   var reviewers = get(input.reviewers, {});
   var reviewBlacklist = get(input.review_blacklist, []);
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);
@@ -70,6 +71,8 @@ module.exports = function PullReviewConfig(input) {
     throw Error('Invalid number of maximum lines per reviewer');
   } else if (minAuthorsOfChangedFiles < 0) {
     throw Error('Invalid number of minimum authors of changed files');
+  } else if (minLinesChangedForExtraReviewer < 0) {
+    throw Error('Invalid number of minimum lines changed for extra reviewer');
   } else if (!Array.isArray(reviewBlacklist)) {
     throw Error('Review blacklist must be an array');
   } else if (!Array.isArray(fileBlacklist)) {
@@ -84,6 +87,7 @@ module.exports = function PullReviewConfig(input) {
       maxFilesPerReviewer: Math.max(maxFilesPerReviewer, 10),
       maxLinesPerReviewer: Math.max(maxLinesPerReviewer, 500),
       minAuthorsOfChangedFiles: 0,
+      minLinesChangedForExtraReviewer: 0,
       reviewers: reviewers,
       reviewBlacklist: reviewBlacklist,
       reviewPathAssignments: [],
@@ -103,6 +107,7 @@ module.exports = function PullReviewConfig(input) {
     maxFilesPerReviewer: maxFilesPerReviewer,
     maxLinesPerReviewer: maxLinesPerReviewer,
     minAuthorsOfChangedFiles: minAuthorsOfChangedFiles,
+    minLinesChangedForExtraReviewer: minLinesChangedForExtraReviewer,
     reviewers: reviewers,
     reviewBlacklist: reviewBlacklist,
     reviewPathAssignments: reviewPathAssignments,

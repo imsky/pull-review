@@ -684,6 +684,45 @@ describe('#getReviewers', function() {
         reviewerLogins.should.include('dee');
       });
     });
+
+    it('does not assign an extra reviewer if the changed lines min is not met', function () {
+      return getReviewers({
+        config: {
+          version: 1,
+          reviewers: {
+            alice: {},
+            bob: {},
+            charlie: {},
+            dee: {}
+          },
+          min_authors_of_changed_files: 2,
+          min_lines_changed_for_extra_reviewer: 101
+        },
+        files: [
+          {
+            filename: 'TEST',
+            status: 'modified',
+            changes: 100,
+            additions: 100,
+            deletions: 0
+          }
+        ],
+        authorLogin: 'alice',
+        getBlameForFile: function() {
+          return [
+            {
+              login: 'bob',
+              count: 100,
+              age: 1
+            }
+          ];
+        }
+      })
+        .then(function (reviewers) {
+          reviewers.should.have.lengthOf(1);
+          reviewers[0].login.should.equal('bob');
+        })
+    });
   });
 
   describe('in public mode', function() {
