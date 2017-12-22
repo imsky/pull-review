@@ -314,7 +314,9 @@ module.exports = function getReviewers(options) {
           file.lines += linesChanged;
         });
 
-        filesWithOwnership.push(file);
+        if (file.lines) {
+          filesWithOwnership.push(file);
+        }
       }
 
       var reviewersByOwnership = [];
@@ -353,7 +355,7 @@ module.exports = function getReviewers(options) {
       });
 
       reviewersByOwnership.sort(function(a, b) {
-        return b.ownership - a.ownership;
+        return (b.count * b.ownership) - (a.count * a.ownership);
       });
 
       return assignedReviewers
