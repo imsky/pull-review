@@ -41,7 +41,10 @@ module.exports = function PullReviewConfig(input) {
     true
   );
   var minAuthorsOfChangedFiles = get(input.min_authors_of_changed_files, 0);
-  var minLinesChangedForExtraReviewer = get(input.min_lines_changed_for_extra_reviewer, 0);
+  var minLinesChangedForExtraReviewer = get(
+    input.min_lines_changed_for_extra_reviewer,
+    0
+  );
   var reviewers = get(input.reviewers, {});
   var reviewBlacklist = get(input.review_blacklist, []);
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);

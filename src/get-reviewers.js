@@ -355,7 +355,7 @@ module.exports = function getReviewers(options) {
       });
 
       reviewersByOwnership.sort(function(a, b) {
-        return (b.count * b.ownership) - (a.count * a.ownership);
+        return b.count * b.ownership - a.count * a.ownership;
       });
 
       return assignedReviewers
@@ -376,7 +376,10 @@ module.exports = function getReviewers(options) {
       if (notEnoughAuthorDiversity && maxReviewers > 1) {
         var extraReviewer = extraReviewers.shift();
 
-        if (reviewers.length < maxReviewers && changedLines >= minLinesChangedForExtraReviewer) {
+        if (
+          reviewers.length < maxReviewers &&
+          changedLines >= minLinesChangedForExtraReviewer
+        ) {
           reviewers.push(extraReviewer);
         } else if (reviewers.length === maxReviewers) {
           reviewers = reviewers.slice(0, -1).concat(extraReviewer);

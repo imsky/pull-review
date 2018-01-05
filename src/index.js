@@ -42,51 +42,51 @@ module.exports = function PullReview(options) {
       actions = actions.map(Action);
       actions.forEach(function(action) {
         switch (action.type) {
-        case 'ASSIGN_USERS_TO_PULL_REQUEST':
-          transaction.push(function() {
-            return github.assignUsersToPullRequest(
+          case 'ASSIGN_USERS_TO_PULL_REQUEST':
+            transaction.push(function() {
+              return github.assignUsersToPullRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
               );
-          });
-          loggedEvents.push(
+            });
+            loggedEvents.push(
               'assigned ' + action.payload.assignees.join(', ')
             );
-          break;
-        case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
-          transaction.push(function() {
-            return github.unassignUsersFromPullRequest(
+            break;
+          case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
+            transaction.push(function() {
+              return github.unassignUsersFromPullRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
               );
-          });
-          loggedEvents.push(
+            });
+            loggedEvents.push(
               'unassigned ' + action.payload.assignees.join(', ')
             );
-          break;
-        case 'NOTIFY':
-          if (action.payload.channel === 'github') {
-            transaction.push(function() {
-              return github.postPullRequestComment(
+            break;
+          case 'NOTIFY':
+            if (action.payload.channel === 'github') {
+              transaction.push(function() {
+                return github.postPullRequestComment(
                   action.payload.pullRequest,
                   GithubMessage(action.payload)
                 );
-            });
-            loggedEvents.push('posted GitHub comment');
-          } else {
-            transaction.push(function() {
-              return new Promise(function(resolve, reject) {
-                try {
-                  var notification = HubotMessage(action.payload);
-                  resolve(notifyFn(notification));
-                } catch (e) {
-                  log(e);
-                  reject(Error('Failed to notify'));
-                }
               });
-            });
-          }
-          break;
+              loggedEvents.push('posted GitHub comment');
+            } else {
+              transaction.push(function() {
+                return new Promise(function(resolve, reject) {
+                  try {
+                    var notification = HubotMessage(action.payload);
+                    resolve(notifyFn(notification));
+                  } catch (e) {
+                    log(e);
+                    reject(Error('Failed to notify'));
+                  }
+                });
+              });
+            }
+            break;
         }
       });
 
