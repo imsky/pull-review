@@ -46,33 +46,71 @@ describe('models', function() {
   });
 
   describe('HubotMessage', function() {
-    (function() {
-      HubotMessage();
-    }.should.throw(Error, 'Missing users'));
+    it('works', function () {
+      (function() {
+        HubotMessage();
+      }.should.throw(Error, 'Missing users'));
 
-    (function() {
+      (function() {
+        HubotMessage({
+          users: []
+        });
+      }.should.throw(Error, 'Missing channel'));
+
+      (function() {
+        HubotMessage({
+          users: [],
+          channel: 'test'
+        });
+      }.should.throw(Error, 'Missing pull request record'));
+
       HubotMessage({
-        users: []
-      });
-    }.should.throw(Error, 'Missing channel'));
-
-    (function() {
-      HubotMessage({
-        users: [],
-        channel: 'test'
-      });
-    }.should.throw(Error, 'Missing pull request record'));
-
-    HubotMessage({
-      users: ['alice', 'bob'],
-      channel: 'hubot:generic',
-      pullRequestRecord: {
-        data: {
-          html_url: 'https://github.com/OWNER/REPO/pull/1'
+        users: ['alice', 'bob'],
+        channel: 'hubot:generic',
+        pullRequestRecord: {
+          data: {
+            html_url: 'https://github.com/OWNER/REPO/pull/1'
+          }
         }
-      }
-    }).should.equal(
-      '@alice, @bob: please review this pull request - https://github.com/OWNER/REPO/pull/1'
-    );
+      }).should.equal(
+        '@alice, @bob: please review this pull request - https://github.com/OWNER/REPO/pull/1'
+      );
+
+      HubotMessage({
+        users: ['alice'],
+        channel: 'hubot:slack',
+        pullRequest: {
+          owner: 'OWNER',
+          repo: 'REPO'
+        },
+        pullRequestRecord: {
+          data: {
+            title: 'hello world',
+            html_url: 'https://github.com/OWNER/REPO/pull/1',
+            body: 'hello [world] [link](http://example.com)',
+            user: {
+              login: 'bob',
+              html_url: 'www.bob.com'
+            }
+          }
+        }
+      }).should.deep.equal({
+        text: '@alice: please review this pull request',
+        attachments: [
+          {
+            author_link: 'www.bob.com',
+            author_name: 'bob',
+            color: '#24292e',
+            fallback: 'hello world by bob: https://github.com/OWNER/REPO/pull/1',
+            footer: 'GitHub',
+            footer_icon: 'https://imsky.github.io/pull-review/pull-review-github-icon.png',
+            mrkdwn_in: ['text', 'pretext', 'fields'],
+            text: 'hello [world] <http://example.com|link>',
+            title: 'OWNER/REPO: hello world',
+            title_link: 'https://github.com/OWNER/REPO/pull/1'
+          }
+        ]
+      })
+    });
   });
 });
