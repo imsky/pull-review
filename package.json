@@ -57,7 +57,7 @@
     "mocha": "~3.2",
     "nock": "~9.0",
     "nyc": "~10.3",
-    "supertest": "~3.6"
+    "superagent": "~3.6"
   },
   "nyc": {
     "check-coverage": true,

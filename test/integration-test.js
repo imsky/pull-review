@@ -1,6 +1,6 @@
 var nock = require('nock');
 var Helper = require('hubot-test-helper');
-var request = require('supertest');
+var request = require('superagent');
 
 var pullReview = require('../index');
 var cli = require('../src/cli');
@@ -244,13 +244,21 @@ describe('pull-review', function() {
   });
 
   describe('in server mode', function() {
+    var baseURL = 'http://localhost';
+
+    before(function (done) {
+      var app = server.listen(0, function () {
+        baseURL += ':' + app.address().port;
+        done();
+      });
+    });
+
     it('works with valid GitHub issue_comment payload', function() {
       githubMock({
         config: config
       });
 
-      return request(server)
-        .post('/')
+      return request.post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -263,8 +271,8 @@ describe('pull-review', function() {
             body: '/review'
           }
         })
-        .expect(201)
         .then(function(response) {
+          response.status.should.equal(201);
           response.body.should.have.lengthOf(2);
           response.body[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
           response.body[1].type.should.equal('NOTIFY');
@@ -276,8 +284,7 @@ describe('pull-review', function() {
         config: config
       });
 
-      return request(server)
-        .post('/')
+      return request.post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -288,8 +295,8 @@ describe('pull-review', function() {
             body: '/review'
           }
         })
-        .expect(201)
         .then(function(response) {
+          response.status.should.equal(201);
           response.body.should.have.lengthOf(2);
           response.body[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
           response.body[1].type.should.equal('NOTIFY');
@@ -297,8 +304,7 @@ describe('pull-review', function() {
     });
 
     it('fails if pull request data is missing', function () {
-      return request(server)
-        .post('/')
+      return request.post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -306,24 +312,27 @@ describe('pull-review', function() {
             body: '/review'
           }
         })
-        .expect(400);
+        .catch(function (response) {
+          response.response.badRequest.should.be.true;
+        })
     });
 
     it('redirects on root route', function() {
-      return request(server)
-        .get('/')
-        .expect(302);
+      return request.get(baseURL)
+        .then(function (response) {
+          response.redirects.should.include('https://github.com/imsky/pull-review');
+        })
     });
 
     it('does nothing without a valid GitHub webhook payload', function() {
-      return request(server)
-        .post('/')
-        .expect(200);
+      return request.post(baseURL)
+        .then(function (response) {
+          response.ok.should.be.true;
+        });
     });
 
     it('fails with invalid GitHub webhook payload', function() {
-      return request(server)
-        .post('/')
+      return request.post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -334,7 +343,9 @@ describe('pull-review', function() {
             body: '/review'
           }
         })
-        .expect(400);
+        .catch(function (response) {
+          response.status.should.equal(400);
+        });
     });
   });
 });
