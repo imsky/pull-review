@@ -244,7 +244,34 @@ describe('pull-review', function() {
   });
 
   describe('in server mode', function() {
-    it('works with valid GitHub webhook payload', function() {
+    it('works with valid GitHub issue_comment payload', function() {
+      githubMock({
+        config: config
+      });
+
+      return request(server)
+        .post('/')
+        .set('Content-Type', 'application/json')
+        .send({
+          action: 'created',
+          issue: {
+            pull_request: {
+              html_url: 'https://github.com/OWNER/REPO/pull/1'
+            }
+          },
+          comment: {
+            body: '/review'
+          }
+        })
+        .expect(201)
+        .then(function(response) {
+          response.body.should.have.lengthOf(2);
+          response.body[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
+          response.body[1].type.should.equal('NOTIFY');
+        });
+    });
+
+    it('works with valid GitHub pull_request_review_comment payload', function() {
       githubMock({
         config: config
       });
@@ -267,6 +294,19 @@ describe('pull-review', function() {
           response.body[0].type.should.equal('ASSIGN_USERS_TO_PULL_REQUEST');
           response.body[1].type.should.equal('NOTIFY');
         });
+    });
+
+    it('fails if pull request data is missing', function () {
+      return request(server)
+        .post('/')
+        .set('Content-Type', 'application/json')
+        .send({
+          action: 'created',
+          comment: {
+            body: '/review'
+          }
+        })
+        .expect(400);
     });
 
     it('redirects on root route', function() {
