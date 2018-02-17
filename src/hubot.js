@@ -53,8 +53,8 @@ module.exports = function(robot) {
       if (uo.hostname === 'github.com') {
         var reviewIndex = processedText.indexOf('review ' + u);
         if (reviewIndex !== -1) {
-          retryReview =
-            processedText.indexOf('review ' + u + ' again') === reviewIndex;
+          var m = processedText.match(new RegExp('review ' + u + '/? again'));
+          retryReview = m && m.index === reviewIndex;
           pullRequestURL = u;
           break;
         }
