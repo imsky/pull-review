@@ -7,7 +7,7 @@ var normalizeURL = require('normalize-url');
  * @return {Array} list of URLs
  */
 function extractURLs(string) {
-  var URLs = string.match(URLRegex());
+  var URLs = (string || '').match(URLRegex());
 
   if (URLs) {
     return URLs.map(function(url) {
