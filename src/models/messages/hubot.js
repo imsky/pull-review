@@ -39,7 +39,7 @@ module.exports = function(input) {
   } else if (channel === 'hubot:slack') {
     var repoName = pullRequest.owner + '/' + pullRequest.repo;
     var title = pullRequestRecord.data.title;
-    var body = pullRequestRecord.data.body;
+    var body = pullRequestRecord.data.body || '';
     var authorName = pullRequestRecord.data.user.login;
     var imagesInBody = false;
     var keyImage;
