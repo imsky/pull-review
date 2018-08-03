@@ -7,14 +7,7 @@ var userMapping = require('./utilities/user-mapping');
  * @param  {Object} robot - Hubot reference
  */
 module.exports = function(robot) {
-  var rawUsers;
   var adapter = robot.adapterName;
-
-  if (adapter === 'slack') {
-    rawUsers = robot.adapter.client.rtm.dataStore.users;
-  }
-
-  var chatUserMap = userMapping.generateChatUserMap(rawUsers, adapter);
 
   robot.hear(/github\.com\//, function(res) {
     var chatText = res.message.text;
@@ -65,7 +58,30 @@ module.exports = function(robot) {
       return;
     }
 
+    var chatUserMap = {};
+
+    function updateChatUserMap(skipReconnect) {
+      if (adapter !== 'slack') {
+        return;
+      }
+
+      var rtmClient = robot.adapter.client.rtm;
+
+      if (typeof rtmClient.reconnect === 'function') {
+        if (!skipReconnect) {
+          rtmClient.reconnect();
+        }
+      } else {
+        robot.logger.error('Slack RTM client has no reconnect() function');
+      }
+
+      Object.assign(chatUserMap, userMapping.generateChatUserMap(rtmClient.dataStore.users, adapter));
+    }
+
     try {
+      updateChatUserMap('skip reconnect');
+      setInterval(updateChatUserMap, 60 * 1000);
+
       PullReview({
         pullRequestURL: pullRequestURL,
         retryReview: retryReview,
