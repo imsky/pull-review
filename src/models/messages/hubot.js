@@ -32,10 +32,10 @@ module.exports = function(input) {
     });
   }
 
-  var message = users.join(', ') + ': please review this pull request';
+  var message = users.join(', ') + ': please review ' + pullRequestRecord.data.html_url;
 
   if (channel === 'hubot:generic') {
-    return message + ' - ' + pullRequestRecord.data.html_url;
+    return message;
   } else if (channel === 'hubot:slack') {
     var repoName = pullRequest.owner + '/' + pullRequest.repo;
     var title = pullRequestRecord.data.title;

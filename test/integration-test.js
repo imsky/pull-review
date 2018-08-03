@@ -105,7 +105,7 @@ describe('pull-review', function() {
           return '<@U123>';
         }
       }).then(function() {
-        message.text.should.equal('<@U123>: please review this pull request');
+        message.text.should.equal('<@U123>: please review https://github.com/OWNER/REPO/pull/1');
         message.attachments.should.have.lengthOf(1);
         var attachment = message.attachments[0];
         attachment.title.should.equal('OWNER/REPO: Hello world');
@@ -185,7 +185,7 @@ describe('pull-review', function() {
             room.messages.should.have.lengthOf(2);
             room.messages[1][0].should.equal('hubot');
             room.messages[1][1].should.equal(
-              '@bob: please review this pull request - https://github.com/OWNER/REPO/pull/2'
+              '@bob: please review https://github.com/OWNER/REPO/pull/2'
             );
             done();
           }, 100);
@@ -200,7 +200,7 @@ describe('pull-review', function() {
             room.messages.should.have.lengthOf(2);
             room.messages[1][0].should.equal('hubot');
             room.messages[1][1].should.equal(
-              '@bob: please review this pull request - https://github.com/OWNER/REPO/pull/1'
+              '@bob: please review https://github.com/OWNER/REPO/pull/1'
             );
             done();
           }, 100);

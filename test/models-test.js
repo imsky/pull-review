@@ -73,7 +73,7 @@ describe('models', function() {
           }
         }
       }).should.equal(
-        '@alice, @bob: please review this pull request - https://github.com/OWNER/REPO/pull/1'
+        '@alice, @bob: please review https://github.com/OWNER/REPO/pull/1'
       );
 
       HubotMessage({
@@ -95,7 +95,7 @@ describe('models', function() {
           }
         }
       }).should.deep.equal({
-        text: '@alice: please review this pull request',
+        text: '@alice: please review https://github.com/OWNER/REPO/pull/1',
         attachments: [
           {
             author_link: 'www.bob.com',
