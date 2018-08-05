@@ -67,3 +67,6 @@ file_blacklist:
 # list of PR labels to either require (whitelist) or forbid (blacklist) in reviews
 label_whitelist: []
 label_blacklist: ['WIP']
+
+# use review requests instead of assignees to assign reviewers to pull requests
+use_review_requests: false

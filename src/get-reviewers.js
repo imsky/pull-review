@@ -4,7 +4,6 @@ var minimatch = require('minimatch');
 
 var BlameRange = require('./models/blame-range');
 var PullRequestFile = require('./models/pull-request-file');
-var Config = require('./models/config');
 
 /**
  * Compute the relevant reviewers of a pull request
@@ -20,9 +19,7 @@ var Config = require('./models/config');
  */
 module.exports = function getReviewers(options) {
   options = options || {};
-  var config = options.config || {
-    version: 1
-  };
+  var config = options.config || {};
   var files = options.files || [];
   var commits = options.commits || [];
   var assignees = options.assignees || [];
@@ -36,8 +33,6 @@ module.exports = function getReviewers(options) {
   } else if (!authorLogin) {
     throw Error('No pull request author provided');
   }
-
-  config = Config(config);
 
   var maxReviewers = config.maxReviewers;
   var minReviewers = config.minReviewers;

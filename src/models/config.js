@@ -53,6 +53,7 @@ module.exports = function PullReviewConfig(input) {
   var reviewPathAssignments = get(input.review_path_assignments, null);
   var labelWhitelist = get(input.label_whitelist, []);
   var labelBlacklist = get(input.label_blacklist, []);
+  var useReviewRequests = get(input.use_review_requests, false);
 
   if (minReviewers < 1) {
     throw Error('Invalid number of minimum reviewers');
@@ -99,7 +100,8 @@ module.exports = function PullReviewConfig(input) {
       assignMinReviewersRandomly: false,
       fileBlacklist: fileBlacklist,
       labelWhitelist: labelWhitelist,
-      labelBlacklist: labelBlacklist
+      labelBlacklist: labelBlacklist,
+      useReviewRequests: useReviewRequests
     });
   }
 

@@ -1,4 +1,5 @@
 var getReviewers = require('../src/get-reviewers');
+var Config = require('../src/models/config');
 
 var driver = require('./driver');
 var config = driver.config;
@@ -55,6 +56,7 @@ describe('#getReviewers', function() {
   it('fails with too many assignees', function() {
     (function() {
       getReviewers({
+        config: Config({version: 1}),
         authorLogin: 'mockuser',
         getBlameForFile: function() {},
         assignees: [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -65,6 +67,7 @@ describe('#getReviewers', function() {
   it('does not assign reviewers if minimum is met by assignees', function() {
     (function() {
       getReviewers({
+        config: Config({version: 1}),
         authorLogin: 'mockuser',
         getBlameForFile: function() {},
         assignees: [1]
@@ -75,6 +78,7 @@ describe('#getReviewers', function() {
   it('fails with bad file data', function() {
     (function() {
       getReviewers({
+        config: Config({version: 1}),
         authorLogin: 'mockuser',
         getBlameForFile: function() {},
         files: [1, 2, 3]
@@ -84,6 +88,7 @@ describe('#getReviewers', function() {
 
   it('fails with bad blame data', function() {
     return getReviewers({
+      config: Config({version: 1}),
       authorLogin: 'mockuser',
       files: [
         {
@@ -104,12 +109,12 @@ describe('#getReviewers', function() {
 
   it('filters out unreachable authors', function() {
     return getReviewers({
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           testuser: {}
         }
-      },
+      }),
       authorLogin: 'foo',
       files: [
         {
@@ -143,13 +148,13 @@ describe('#getReviewers', function() {
 
   it('filters out all commit authors', function() {
     return getReviewers({
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           bob: {},
           charlie: {}
         }
-      },
+      }),
       authorLogin: 'alice',
       files: [
         {
@@ -194,14 +199,14 @@ describe('#getReviewers', function() {
 
   it('assigns reviewers with most ownership', function() {
     return getReviewers({
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           alice: {},
           bob: {},
           charlie: {}
         }
-      },
+      }),
       authorLogin: 'alice',
       files: [
         {
@@ -254,14 +259,14 @@ describe('#getReviewers', function() {
 
   it('assigns minimum reviewers randomly', function() {
     return getReviewers({
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           alice: {},
           bob: {},
           charlie: {}
         }
-      },
+      }),
       authorLogin: 'alice',
       files: [],
       getBlameForFile: function() {
@@ -278,7 +283,7 @@ describe('#getReviewers', function() {
 
   it('uses fallback paths when assigning minimum reviewers randomly', function() {
     return getReviewers({
-      config: config,
+      config: Config(config),
       authorLogin: 'alice',
       files: [
         {
@@ -303,7 +308,7 @@ describe('#getReviewers', function() {
 
   it('uses assigned paths when assigning initial reviewers', function() {
     return getReviewers({
-      config: config,
+      config: Config(config),
       authorLogin: 'alice',
       files: [
         {
@@ -336,7 +341,7 @@ describe('#getReviewers', function() {
 
   it('filters out blacklisted files', function() {
     return getReviewers({
-      config: config,
+      config: Config(config),
       authorLogin: 'alice',
       files: [
         {
@@ -363,7 +368,7 @@ describe('#getReviewers', function() {
 
   it('ignores existing reviewers when retrying review', function() {
     return getReviewers({
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           alice: {},
@@ -371,7 +376,7 @@ describe('#getReviewers', function() {
           charlie: {},
           dee: {}
         }
-      },
+      }),
       authorLogin: 'alice',
       assignees: ['bob', 'charlie'],
       getBlameForFile: function() {
@@ -389,13 +394,13 @@ describe('#getReviewers', function() {
     it('works with a whitelist when a required label is missing', function() {
       (function() {
         getReviewers({
-          config: {
+          config: Config({
             version: 1,
             reviewers: {
               alice: {}
             },
             label_whitelist: ['review']
-          },
+          }),
           labels: [{name: '?'}],
           authorLogin: 'bob',
           getBlameForFile: function() {
@@ -408,13 +413,13 @@ describe('#getReviewers', function() {
     it('works with a whitelist when a required label is present', function() {
       (function() {
         getReviewers({
-          config: {
+          config: Config({
             version: 1,
             reviewers: {
               alice: {}
             },
             label_whitelist: ['?']
-          },
+          }),
           labels: [{name: '?'}],
           authorLogin: 'bob',
           getBlameForFile: function() {
@@ -427,13 +432,13 @@ describe('#getReviewers', function() {
     it('works with a blacklist when a forbidden label is present', function() {
       (function() {
         getReviewers({
-          config: {
+          config: Config({
             version: 1,
             reviewers: {
               alice: {}
             },
             label_blacklist: ['?']
-          },
+          }),
           labels: [{name: '?'}],
           authorLogin: 'bob',
           getBlameForFile: function() {
@@ -446,13 +451,13 @@ describe('#getReviewers', function() {
     it('works with a blacklist when a forbidden label is missing', function() {
       (function() {
         getReviewers({
-          config: {
+          config: Config({
             version: 1,
             reviewers: {
               alice: {}
             },
             label_blacklist: ['review']
-          },
+          }),
           labels: [{name: '?'}],
           authorLogin: 'bob',
           getBlameForFile: function() {
@@ -465,7 +470,7 @@ describe('#getReviewers', function() {
 
   describe('using max files per reviewer', function() {
     var options = {
-      config: config,
+      config: Config(config),
       authorLogin: 'charlie',
       getBlameForFile: function() {
         return [];
@@ -506,7 +511,7 @@ describe('#getReviewers', function() {
 
     it('works with max files defined', function() {
       return getReviewers({
-        config: {
+        config: Config({
           version: 1,
           reviewers: {
             alice: {},
@@ -515,7 +520,7 @@ describe('#getReviewers', function() {
             dee: {}
           },
           max_files_per_reviewer: 1
-        },
+        }),
         files: DEFAULT_FILES,
         authorLogin: 'wally',
         getBlameForFile: function() {
@@ -529,7 +534,7 @@ describe('#getReviewers', function() {
 
   describe('using max lines per reviewer', function() {
     var options = {
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           alice: {},
@@ -538,7 +543,7 @@ describe('#getReviewers', function() {
           dee: {}
         },
         max_lines_per_reviewer: 0
-      },
+      }),
       files: DEFAULT_FILES,
       authorLogin: 'wally',
       getBlameForFile: function() {
@@ -553,7 +558,16 @@ describe('#getReviewers', function() {
     });
 
     it('assigns a maximum of reviewers', function() {
-      options.config.max_lines_per_reviewer = 4;
+      options.config = Config({
+        version: 1,
+        reviewers: {
+          alice: {},
+          bob: {},
+          charlie: {},
+          dee: {}
+        },
+        max_lines_per_reviewer: 4
+      });
       return getReviewers(options).then(function(reviewers) {
         reviewers.should.have.lengthOf(2);
       });
@@ -562,7 +576,7 @@ describe('#getReviewers', function() {
 
   describe('using both max files and max lines per reviewer', function() {
     var options = {
-      config: {
+      config: Config({
         version: 1,
         reviewers: {
           alice: {},
@@ -572,7 +586,7 @@ describe('#getReviewers', function() {
         },
         max_lines_per_reviewer: 4,
         max_files_per_reviewer: 4
-      },
+      }),
       files: DEFAULT_FILES,
       authorLogin: 'wally',
       getBlameForFile: function() {
@@ -586,6 +600,7 @@ describe('#getReviewers', function() {
       });
     });
 
+    //todo: improve this test, it passes with any value of max lines per reviewer
     it('does not assign a number below the minimum of reviewers', function() {
       options.config.max_lines_per_reviewer = 1000;
       return getReviewers(options).then(function(reviewers) {
@@ -597,7 +612,7 @@ describe('#getReviewers', function() {
   describe('using minimum authors of changed files', function() {
     it('assigns an additional reviewer if the minimum of distinct authors is not met', function() {
       return getReviewers({
-        config: {
+        config: Config({
           version: 1,
           reviewers: {
             alice: {},
@@ -605,7 +620,7 @@ describe('#getReviewers', function() {
             charlie: {}
           },
           min_authors_of_changed_files: 2
-        },
+        }),
         files: [
           {
             filename: 'TEST',
@@ -639,7 +654,7 @@ describe('#getReviewers', function() {
 
     it('unassigns an existing reviewer if there are already max reviewers', function() {
       return getReviewers({
-        config: {
+        config: Config({
           version: 1,
           reviewers: {
             alice: {},
@@ -650,7 +665,7 @@ describe('#getReviewers', function() {
           min_authors_of_changed_files: 3,
           max_lines_per_reviewer: 1,
           max_reviewers: 2
-        },
+        }),
         files: [
           {
             filename: 'TEST',
@@ -687,7 +702,7 @@ describe('#getReviewers', function() {
 
     it('does not assign an extra reviewer if the changed lines min is not met', function () {
       return getReviewers({
-        config: {
+        config: Config({
           version: 1,
           reviewers: {
             alice: {},
@@ -697,7 +712,7 @@ describe('#getReviewers', function() {
           },
           min_authors_of_changed_files: 2,
           min_lines_changed_for_extra_reviewer: 101
-        },
+        }),
         files: [
           {
             filename: 'TEST',
@@ -729,7 +744,7 @@ describe('#getReviewers', function() {
     it('works', function() {
       process.env.PUBLIC_MODE = 'true';
       return getReviewers({
-        config: config,
+        config: Config(config),
         files: [],
         authorLogin: 'alice',
         getBlameForFile: function() {}

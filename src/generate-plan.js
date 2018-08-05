@@ -4,6 +4,7 @@ var Promise = require('native-promise-only');
 
 var Github = require('./github');
 var Action = require('./models/action');
+var Config = require('./models/config');
 var getReviewers = require('./get-reviewers');
 
 /**
@@ -45,6 +46,7 @@ module.exports = function generatePlan(options) {
   var newPullRequestAssignees;
   var repoPullReviewConfig;
   var pullRequestLabels;
+  var useReviewRequests = false;
 
   if (!pullRequestURL) {
     throw Error('Missing pull request URL');
@@ -87,18 +89,6 @@ module.exports = function generatePlan(options) {
         });
       }
 
-      if (retryReview) {
-        actions.push(
-          Action({
-            type: 'UNASSIGN_USERS_FROM_PULL_REQUEST',
-            payload: {
-              pullRequest: pullRequest,
-              assignees: pullRequestAssignees
-            }
-          })
-        );
-      }
-
       return Promise.all([
         github.getPullRequestFiles(pullRequest),
         github.getPullRequestCommits(pullRequest),
@@ -121,6 +111,22 @@ module.exports = function generatePlan(options) {
 
       if (!config) {
         throw Error('Missing configuration');
+      }
+
+      config = Config(config);
+
+      useReviewRequests = Boolean(config.useReviewRequests);
+
+      if (retryReview) {
+        actions.push(
+          Action({
+            type: useReviewRequests ? 'DELETE_REVIEW_REQUESTS' : 'UNASSIGN_USERS_FROM_PULL_REQUEST',
+            payload: {
+              pullRequest: pullRequest,
+              assignees: pullRequestAssignees
+            }
+          })
+        );
       }
 
       return getReviewers({

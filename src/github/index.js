@@ -210,6 +210,48 @@ function getPullRequestLabels(resource) {
     });
 }
 
+
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @return {Array} A list of pull request review requests
+ */
+function getReviewRequests(resource) {
+  return github.pullRequests.getReviewRequests({
+    owner: resource.owner,
+    repo: resource.repo,
+    number: resource.number
+  });
+}
+
+
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @param  {Array} reviewers - List of GitHub usernames requested to review the resource
+ * @return {Object} Updated GitHub resource
+ */
+function createReviewRequest(resource, reviewers) {
+  return github.pullRequests.createReviewRequest({
+    owner: resource.owner,
+    repo: resource.repo,
+    number: resource.number,
+    reviewers: reviewers
+  });
+}
+
+/**
+ * @param  {Object} resource - A GitHub resource
+ * @param  {Array} reviewers - List of GitHub usernames to remove from reviewing the resource
+ * @return {Object} Updated GitHub resource
+ */
+function deleteReviewRequest(resource, reviewers) {
+  return github.pullRequests.deleteReviewRequest({
+    owner: resource.owner,
+    repo: resource.repo,
+    number: resource.number,
+    reviewers: reviewers
+  });
+}
+
 /**
  * @param  {String} githubToken - A GitHub token with user and repo scopes
  */

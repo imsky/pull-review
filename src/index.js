@@ -64,6 +64,23 @@ module.exports = function PullReview(options) {
               'unassigned ' + action.payload.assignees.join(', ')
             );
             break;
+          case 'CREATE_REVIEW_REQUEST':
+            transaction.push(function () {
+              return github.createReviewRequest(
+                action.payload.pullRequest,
+                action.payload.assignees
+              );
+            });
+            break;
+          case 'DELETE_REVIEW_REQUESTS':
+            transaction.push(function () {
+              //todo: get all review requests
+              return github.deleteReviewRequest(
+                action.payload.pullRequest,
+                action.payload.assignees
+              );
+            });
+            break;
           case 'NOTIFY':
             if (action.payload.channel === 'github') {
               transaction.push(function() {
