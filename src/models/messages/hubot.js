@@ -32,15 +32,15 @@ module.exports = function(input) {
     });
   }
 
-  var message = users.join(', ') + ': please review ' + pullRequestRecord.data.html_url;
+  var message = users.join(', ') + ': please review ' + pullRequestRecord.html_url;
 
   if (channel === 'hubot:generic') {
     return message;
   } else if (channel === 'hubot:slack') {
     var repoName = pullRequest.owner + '/' + pullRequest.repo;
-    var title = pullRequestRecord.data.title;
-    var body = pullRequestRecord.data.body || '';
-    var authorName = pullRequestRecord.data.user.login;
+    var title = pullRequestRecord.title;
+    var body = pullRequestRecord.body || '';
+    var authorName = pullRequestRecord.user.login;
     var imagesInBody = false;
     var keyImage;
 
@@ -64,12 +64,12 @@ module.exports = function(input) {
 
     var attachment = {
       title: repoName + ': ' + title,
-      title_link: pullRequestRecord.data.html_url,
+      title_link: pullRequestRecord.html_url,
       text: imagesInBody ? '' : bodyToSlackMarkdown,
       author_name: authorName,
-      author_link: pullRequestRecord.data.user.html_url,
+      author_link: pullRequestRecord.user.html_url,
       fallback:
-        title + ' by ' + authorName + ': ' + pullRequestRecord.data.html_url,
+        title + ' by ' + authorName + ': ' + pullRequestRecord.html_url,
       mrkdwn_in: ['text', 'pretext', 'fields'],
       color: '#24292e',
       footer: 'GitHub',

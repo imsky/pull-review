@@ -174,7 +174,10 @@ function getRepoFile(resource, path) {
  * @param  {Object} resource - A GitHub resource
  */
 function getPullRequest(resource) {
-  return github.pullRequests.get(resource);
+  return github.pullRequests.get(resource)
+    .then(function (res) {
+      return res.data;
+    });
 }
 
 /**
@@ -220,6 +223,9 @@ function getReviewRequests(resource) {
     owner: resource.owner,
     repo: resource.repo,
     number: resource.number
+  })
+  .then(function (res) {
+    return res.data;
   });
 }
 
@@ -281,6 +287,9 @@ module.exports = function(githubToken) {
     postPullRequestComment: postPullRequestComment,
     unassignUsersFromPullRequest: unassignUsersFromPullRequest,
     parseGithubURL: parseGithubURL,
-    getPullRequestLabels: getPullRequestLabels
+    getPullRequestLabels: getPullRequestLabels,
+    getReviewRequests: getReviewRequests,
+    createReviewRequest: createReviewRequest,
+    deleteReviewRequest: deleteReviewRequest
   };
 };

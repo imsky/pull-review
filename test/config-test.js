@@ -69,6 +69,13 @@ describe('config', function() {
     (function() {
       PullReviewConfig({
         version: 1,
+        min_lines_changed_for_extra_reviewer: -1
+      });
+    }.should.throw(Error, 'Invalid number of minimum lines changed for extra reviewer'));
+
+    (function() {
+      PullReviewConfig({
+        version: 1,
         min_authors_of_changed_files: -1
       });
     }.should.throw(

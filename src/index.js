@@ -74,7 +74,6 @@ module.exports = function PullReview(options) {
             break;
           case 'DELETE_REVIEW_REQUESTS':
             transaction.push(function () {
-              //todo: get all review requests
               return github.deleteReviewRequest(
                 action.payload.pullRequest,
                 action.payload.assignees

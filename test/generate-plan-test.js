@@ -70,6 +70,31 @@ describe('#generatePlan', function() {
     });
   });
 
+  it('reassigns reviewers using review requests', function () {
+    githubMock({
+      reviewRequests: {
+        users: [{login: 'charlie'}]
+      }
+    });
+
+    return generatePlan({
+      config: {
+        version: 1,
+        use_review_requests: true,
+        reviewers: {
+          alice: {},
+          bob: {},
+          charlie: {}
+        }
+      },
+      pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+      retryReview: true
+    }).then(function (actions) {
+      actions.should.have.lengthOf(3);
+      actions[0].type.should.equal('DELETE_REVIEW_REQUESTS');
+    });
+  })
+
   it('fails without a pull request URL', function() {
     return function() {
       generatePlan();

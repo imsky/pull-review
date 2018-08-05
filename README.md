@@ -209,6 +209,12 @@ Require a user to be listed in the [reviewers](#reviewers) section in order to b
 
 Default: true
 
+#### use_review_requests
+
+Use [review requests](https://help.github.com/articles/about-pull-request-reviews/) instead of [assignees](https://help.github.com/articles/assigning-issues-and-pull-requests-to-other-github-users/) to assign reviewers to pull requests.
+
+Default: false
+
 #### reviewers
 
 A map of maps, with the main keys being the GitHub usernames of users, and the child keys providing application-specific contact information. Example:

@@ -121,6 +121,7 @@ module.exports = function PullReviewConfig(input) {
     assignMinReviewersRandomly: assignMinReviewersRandomly,
     fileBlacklist: fileBlacklist,
     labelWhitelist: labelWhitelist,
-    labelBlacklist: labelBlacklist
+    labelBlacklist: labelBlacklist,
+    useReviewRequests: useReviewRequests
   });
 };

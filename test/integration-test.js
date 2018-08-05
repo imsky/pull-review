@@ -66,6 +66,49 @@ describe('pull-review', function() {
     });
   });
 
+  describe('using review requests', function () {
+    var reviewRequestConfig = JSON.stringify({
+      version: 1,
+      use_review_requests: true,
+      reviewers: {
+        alice: {},
+        bob: {},
+        charlie: {}
+      }
+    });
+
+    it('works without a review request', function () {
+      githubMock({
+        config: reviewRequestConfig,
+        reviewRequests: true
+      });
+
+      return pullReview({
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
+      }).then(function (actions) {
+        actions.should.have.lengthOf(2);
+        actions[0].type.should.equal('CREATE_REVIEW_REQUEST');
+      })
+    });
+
+    it('works with a review request', function () {
+      githubMock({
+        config: reviewRequestConfig,
+        assignees: [{login: 'charlie'}]
+      });
+
+      return pullReview({
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
+        retryReview: true
+      }).then(function (actions) {
+        actions.should.have.lengthOf(3);
+        actions[0].type.should.equal('DELETE_REVIEW_REQUESTS');
+        actions[1].type.should.equal('CREATE_REVIEW_REQUEST');
+        actions[1].payload.assignees.should.not.include('charlie');
+      })
+    });
+  });
+
   it('fails with invalid arguments', function() {
     (function() {
       pullReview();

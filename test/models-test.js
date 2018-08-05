@@ -68,9 +68,7 @@ describe('models', function() {
         users: ['alice', 'bob'],
         channel: 'hubot:generic',
         pullRequestRecord: {
-          data: {
-            html_url: 'https://github.com/OWNER/REPO/pull/1'
-          }
+          html_url: 'https://github.com/OWNER/REPO/pull/1'
         }
       }).should.equal(
         '@alice, @bob: please review https://github.com/OWNER/REPO/pull/1'
@@ -84,14 +82,12 @@ describe('models', function() {
           repo: 'REPO'
         },
         pullRequestRecord: {
-          data: {
-            title: 'hello world',
-            html_url: 'https://github.com/OWNER/REPO/pull/1',
-            body: 'hello [world] [link](http://example.com)',
-            user: {
-              login: 'bob',
-              html_url: 'www.bob.com'
-            }
+          title: 'hello world',
+          html_url: 'https://github.com/OWNER/REPO/pull/1',
+          body: 'hello [world] [link](http://example.com)',
+          user: {
+            login: 'bob',
+            html_url: 'www.bob.com'
           }
         }
       }).should.deep.equal({

@@ -46,6 +46,7 @@ module.exports = function generatePlan(options) {
   var newPullRequestAssignees;
   var repoPullReviewConfig;
   var pullRequestLabels;
+  var pullRequestReviewRequests;
   var useReviewRequests = false;
 
   if (!pullRequestURL) {
@@ -73,26 +74,15 @@ module.exports = function generatePlan(options) {
     .then(function(res) {
       pullRequestRecord = res;
 
-      if (pullRequestRecord.data.state !== 'open') {
+      if (pullRequestRecord.state !== 'open') {
         throw Error('Pull request is not open: ' + pullRequestURL);
-      }
-
-      if (pullRequestRecord.data.assignees) {
-        pullRequestAssignees = pullRequestRecord.data.assignees;
-      } else if (pullRequestRecord.data.assignee) {
-        pullRequestAssignees = [pullRequestRecord.data.assignee];
-      }
-
-      if (pullRequestAssignees && pullRequestAssignees.length) {
-        pullRequestAssignees = pullRequestAssignees.map(function(assignee) {
-          return assignee.login;
-        });
       }
 
       return Promise.all([
         github.getPullRequestFiles(pullRequest),
         github.getPullRequestCommits(pullRequest),
         github.getPullRequestLabels(pullRequest),
+        github.getReviewRequests(pullRequest),
         config
           ? null
           : github
@@ -106,7 +96,8 @@ module.exports = function generatePlan(options) {
       pullRequestFiles = res[0];
       pullRequestCommits = res[1];
       pullRequestLabels = res[2];
-      repoPullReviewConfig = res[3];
+      pullRequestReviewRequests = res[3];
+      repoPullReviewConfig = res[4];
       config = config || repoPullReviewConfig;
 
       if (!config) {
@@ -116,6 +107,20 @@ module.exports = function generatePlan(options) {
       config = Config(config);
 
       useReviewRequests = Boolean(config.useReviewRequests);
+
+      if (useReviewRequests) {
+        pullRequestAssignees = pullRequestReviewRequests.users;
+      } else if (pullRequestRecord.assignees) {
+        pullRequestAssignees = pullRequestRecord.assignees;
+      } else if (pullRequestRecord.assignee) {
+        pullRequestAssignees = [pullRequestRecord.assignee];
+      }
+
+      if (Array.isArray(pullRequestAssignees) && pullRequestAssignees.length) {
+        pullRequestAssignees = pullRequestAssignees.map(function(assignee) {
+          return assignee.login;
+        });
+      }
 
       if (retryReview) {
         actions.push(
@@ -134,7 +139,7 @@ module.exports = function generatePlan(options) {
         files: pullRequestFiles,
         commits: pullRequestCommits,
         labels: pullRequestLabels,
-        authorLogin: pullRequestRecord.data.user.login,
+        authorLogin: pullRequestRecord.user.login,
         assignees: pullRequestAssignees,
         retryReview: retryReview,
         getBlameForFile: function(file) {
@@ -144,7 +149,7 @@ module.exports = function generatePlan(options) {
             //since only modified files are analyzed, the blame for those files is looked up on the original branch
             //of course the files could change significantly on the branch, however this at least filters out otherwise
             //unusable blame data that just points to the branch author
-            sha: pullRequestRecord.data.base.sha,
+            sha: pullRequestRecord.base.sha,
             path: file.filename
           });
         }
@@ -167,7 +172,7 @@ module.exports = function generatePlan(options) {
 
       actions.push(
         Action({
-          type: 'ASSIGN_USERS_TO_PULL_REQUEST',
+          type: useReviewRequests ? 'CREATE_REVIEW_REQUEST' : 'ASSIGN_USERS_TO_PULL_REQUEST',
           payload: {
             pullRequest: pullRequest,
             assignees: newPullRequestAssignees,
