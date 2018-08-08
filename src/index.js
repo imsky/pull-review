@@ -97,13 +97,13 @@ module.exports = function PullReview(options) {
               loggedEvents.push('posted GitHub comment');
             } else {
               transaction.push(function() {
-                return new Promise(function(resolve, reject) {
+                return new Promise(function(resolve) {
                   try {
                     var notification = HubotMessage(action.payload);
                     resolve(notifyFn(notification));
                   } catch (e) {
                     log(e);
-                    reject(Error('Failed to notify'));
+                    resolve();
                   }
                 });
               });
