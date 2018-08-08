@@ -71,6 +71,9 @@ module.exports = function PullReview(options) {
                 action.payload.assignees
               );
             });
+            loggedEvents.push(
+              'requested a review from ' + action.payload.assignees.join(', ')
+            );
             break;
           case 'DELETE_REVIEW_REQUESTS':
             transaction.push(function() {
@@ -79,6 +82,9 @@ module.exports = function PullReview(options) {
                 action.payload.assignees
               );
             });
+            loggedEvents.push(
+              'removed review request from ' + action.payload.assignees.join(', ')
+            );
             break;
           case 'NOTIFY':
             if (action.payload.channel === 'github') {
@@ -108,7 +114,9 @@ module.exports = function PullReview(options) {
 
       return Promise.resolve().then(function() {
         return transaction.reduce(function(promise, fn) {
-          return promise.then(dryRun ? null : fn());
+          return promise.then(function () {
+            return dryRun ? null : fn();
+          });
         }, Promise.resolve());
       });
     })
@@ -121,9 +129,5 @@ module.exports = function PullReview(options) {
       );
 
       return actions;
-    })
-    .catch(function(err) {
-      log(err);
-      throw err;
     });
 };
