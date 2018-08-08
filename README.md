@@ -95,7 +95,7 @@ pull-review --help
     -r, --retry-review                Retry review
     -d, --dry-run                     Do not assign or notify reviewers
     -t, --github-token <githubToken>  GitHub token to use
-    -c, --config-path <configPath>    Pull Review configuration path
+    -c, --config-path <configPath>    Pull Review configuration path in repo
     -h, --help                        output usage information
 ```
 

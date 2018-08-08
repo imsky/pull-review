@@ -174,10 +174,9 @@ function getRepoFile(resource, path) {
  * @param  {Object} resource - A GitHub resource
  */
 function getPullRequest(resource) {
-  return github.pullRequests.get(resource)
-    .then(function (res) {
-      return res.data;
-    });
+  return github.pullRequests.get(resource).then(function(res) {
+    return res.data;
+  });
 }
 
 /**
@@ -213,22 +212,21 @@ function getPullRequestLabels(resource) {
     });
 }
 
-
 /**
  * @param  {Object} resource - A GitHub resource
  * @return {Array} A list of pull request review requests
  */
 function getReviewRequests(resource) {
-  return github.pullRequests.getReviewRequests({
-    owner: resource.owner,
-    repo: resource.repo,
-    number: resource.number
-  })
-  .then(function (res) {
-    return res.data;
-  });
+  return github.pullRequests
+    .getReviewRequests({
+      owner: resource.owner,
+      repo: resource.repo,
+      number: resource.number
+    })
+    .then(function(res) {
+      return res.data;
+    });
 }
-
 
 /**
  * @param  {Object} resource - A GitHub resource

@@ -32,7 +32,8 @@ module.exports = function(input) {
     });
   }
 
-  var message = users.join(', ') + ': please review ' + pullRequestRecord.html_url;
+  var message =
+    users.join(', ') + ': please review ' + pullRequestRecord.html_url;
 
   if (channel === 'hubot:generic') {
     return message;
@@ -68,8 +69,7 @@ module.exports = function(input) {
       text: imagesInBody ? '' : bodyToSlackMarkdown,
       author_name: authorName,
       author_link: pullRequestRecord.user.html_url,
-      fallback:
-        title + ' by ' + authorName + ': ' + pullRequestRecord.html_url,
+      fallback: title + ' by ' + authorName + ': ' + pullRequestRecord.html_url,
       mrkdwn_in: ['text', 'pretext', 'fields'],
       color: '#24292e',
       footer: 'GitHub',

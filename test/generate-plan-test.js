@@ -70,7 +70,7 @@ describe('#generatePlan', function() {
     });
   });
 
-  it('reassigns reviewers using review requests', function () {
+  it('reassigns reviewers using review requests', function() {
     githubMock({
       reviewRequests: {
         users: [{login: 'charlie'}]
@@ -89,11 +89,11 @@ describe('#generatePlan', function() {
       },
       pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
       retryReview: true
-    }).then(function (actions) {
+    }).then(function(actions) {
       actions.should.have.lengthOf(3);
       actions[0].type.should.equal('DELETE_REVIEW_REQUESTS');
     });
-  })
+  });
 
   it('fails without a pull request URL', function() {
     return function() {

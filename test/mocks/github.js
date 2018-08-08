@@ -21,11 +21,11 @@ module.exports = function(options) {
   //todo: this is a one-off, refactor
   if (options.reviewRequests) {
     api
-    .post(
-      '/repos/OWNER/REPO/issues/1/comments',
-      '{"body":"@charlie, @bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)"}\n'
-    )
-    .reply(200);
+      .post(
+        '/repos/OWNER/REPO/issues/1/comments',
+        '{"body":"@charlie, @bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)"}\n'
+      )
+      .reply(200);
   }
 
   function mockPullRequest(options) {
@@ -60,13 +60,30 @@ module.exports = function(options) {
 
     var assignees = options.assignees || [options.assignee].filter(Boolean);
 
-    api.get('/repos/OWNER/REPO/pulls/' + number + '/requested_reviewers').reply(200, {
-      users: assignees
-    });
+    api
+      .get('/repos/OWNER/REPO/pulls/' + number + '/requested_reviewers')
+      .reply(200, {
+        users: assignees
+      });
 
-    api.post('/repos/OWNER/REPO/pulls/' + number + '/requested_reviewers').reply(200);
+    api
+      .post('/repos/OWNER/REPO/pulls/' + number + '/requested_reviewers')
+      .reply(200);
 
-    api.delete('/repos/OWNER/REPO/pulls/' + number + '/requested_reviewers?reviewers=' + encodeURIComponent(JSON.stringify(assignees.map(function (a) { return a.login; })))).reply(200);
+    api
+      .delete(
+        '/repos/OWNER/REPO/pulls/' +
+          number +
+          '/requested_reviewers?reviewers=' +
+          encodeURIComponent(
+            JSON.stringify(
+              assignees.map(function(a) {
+                return a.login;
+              })
+            )
+          )
+      )
+      .reply(200);
   }
 
   function mockPullRequestFiles(options) {

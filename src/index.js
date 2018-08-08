@@ -65,20 +65,26 @@ module.exports = function PullReview(options) {
             );
             break;
           case 'CREATE_REVIEW_REQUEST':
-            transaction.push(function () {
+            transaction.push(function() {
               return github.createReviewRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
               );
             });
+            loggedEvents.push(
+              'requested a review from ' + action.payload.assignees.join(', ')
+            );
             break;
           case 'DELETE_REVIEW_REQUESTS':
-            transaction.push(function () {
+            transaction.push(function() {
               return github.deleteReviewRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
               );
             });
+            loggedEvents.push(
+              'removed review request from ' + action.payload.assignees.join(', ')
+            );
             break;
           case 'NOTIFY':
             if (action.payload.channel === 'github') {
@@ -91,13 +97,13 @@ module.exports = function PullReview(options) {
               loggedEvents.push('posted GitHub comment');
             } else {
               transaction.push(function() {
-                return new Promise(function(resolve, reject) {
+                return new Promise(function(resolve) {
                   try {
                     var notification = HubotMessage(action.payload);
                     resolve(notifyFn(notification));
                   } catch (e) {
                     log(e);
-                    reject(Error('Failed to notify'));
+                    resolve();
                   }
                 });
               });
@@ -108,7 +114,9 @@ module.exports = function PullReview(options) {
 
       return Promise.resolve().then(function() {
         return transaction.reduce(function(promise, fn) {
-          return promise.then(dryRun ? null : fn());
+          return promise.then(function () {
+            return dryRun ? null : fn();
+          });
         }, Promise.resolve());
       });
     })
@@ -121,9 +129,5 @@ module.exports = function PullReview(options) {
       );
 
       return actions;
-    })
-    .catch(function(err) {
-      log(err);
-      throw err;
     });
 };
