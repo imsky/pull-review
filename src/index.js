@@ -65,7 +65,7 @@ module.exports = function PullReview(options) {
             );
             break;
           case 'CREATE_REVIEW_REQUEST':
-            transaction.push(function () {
+            transaction.push(function() {
               return github.createReviewRequest(
                 action.payload.pullRequest,
                 action.payload.assignees
@@ -73,7 +73,7 @@ module.exports = function PullReview(options) {
             });
             break;
           case 'DELETE_REVIEW_REQUESTS':
-            transaction.push(function () {
+            transaction.push(function() {
               return github.deleteReviewRequest(
                 action.payload.pullRequest,
                 action.payload.assignees

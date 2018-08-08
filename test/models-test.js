@@ -46,7 +46,7 @@ describe('models', function() {
   });
 
   describe('HubotMessage', function() {
-    it('works', function () {
+    it('works', function() {
       (function() {
         HubotMessage();
       }.should.throw(Error, 'Missing users'));
@@ -97,16 +97,18 @@ describe('models', function() {
             author_link: 'www.bob.com',
             author_name: 'bob',
             color: '#24292e',
-            fallback: 'hello world by bob: https://github.com/OWNER/REPO/pull/1',
+            fallback:
+              'hello world by bob: https://github.com/OWNER/REPO/pull/1',
             footer: 'GitHub',
-            footer_icon: 'https://imsky.github.io/pull-review/pull-review-github-icon.png',
+            footer_icon:
+              'https://imsky.github.io/pull-review/pull-review-github-icon.png',
             mrkdwn_in: ['text', 'pretext', 'fields'],
             text: 'hello [world] <http://example.com|link>',
             title: 'OWNER/REPO: hello world',
             title_link: 'https://github.com/OWNER/REPO/pull/1'
           }
         ]
-      })
+      });
     });
   });
 });

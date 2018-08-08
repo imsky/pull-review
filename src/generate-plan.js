@@ -125,7 +125,9 @@ module.exports = function generatePlan(options) {
       if (retryReview) {
         actions.push(
           Action({
-            type: useReviewRequests ? 'DELETE_REVIEW_REQUESTS' : 'UNASSIGN_USERS_FROM_PULL_REQUEST',
+            type: useReviewRequests
+              ? 'DELETE_REVIEW_REQUESTS'
+              : 'UNASSIGN_USERS_FROM_PULL_REQUEST',
             payload: {
               pullRequest: pullRequest,
               assignees: pullRequestAssignees
@@ -172,7 +174,9 @@ module.exports = function generatePlan(options) {
 
       actions.push(
         Action({
-          type: useReviewRequests ? 'CREATE_REVIEW_REQUEST' : 'ASSIGN_USERS_TO_PULL_REQUEST',
+          type: useReviewRequests
+            ? 'CREATE_REVIEW_REQUEST'
+            : 'ASSIGN_USERS_TO_PULL_REQUEST',
           payload: {
             pullRequest: pullRequest,
             assignees: newPullRequestAssignees,

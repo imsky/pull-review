@@ -37,7 +37,9 @@ app.post('/', function(req, res) {
         payload.comment.body.indexOf('/review') === 0
       ) {
         var issue = payload.issue;
-        var pullRequest = issue ? payload.issue.pull_request : payload.pull_request;
+        var pullRequest = issue
+          ? payload.issue.pull_request
+          : payload.pull_request;
 
         if (!pullRequest) {
           throw Error('Missing pull request data');

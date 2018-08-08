@@ -700,7 +700,7 @@ describe('#getReviewers', function() {
       });
     });
 
-    it('does not assign an extra reviewer if the changed lines min is not met', function () {
+    it('does not assign an extra reviewer if the changed lines min is not met', function() {
       return getReviewers({
         config: Config({
           version: 1,
@@ -732,11 +732,10 @@ describe('#getReviewers', function() {
             }
           ];
         }
-      })
-        .then(function (reviewers) {
-          reviewers.should.have.lengthOf(1);
-          reviewers[0].login.should.equal('bob');
-        })
+      }).then(function(reviewers) {
+        reviewers.should.have.lengthOf(1);
+        reviewers[0].login.should.equal('bob');
+      });
     });
   });
 

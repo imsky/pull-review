@@ -66,7 +66,7 @@ describe('pull-review', function() {
     });
   });
 
-  describe('using review requests', function () {
+  describe('using review requests', function() {
     var reviewRequestConfig = JSON.stringify({
       version: 1,
       use_review_requests: true,
@@ -77,7 +77,7 @@ describe('pull-review', function() {
       }
     });
 
-    it('works without a review request', function () {
+    it('works without a review request', function() {
       githubMock({
         config: reviewRequestConfig,
         reviewRequests: true
@@ -85,13 +85,13 @@ describe('pull-review', function() {
 
       return pullReview({
         pullRequestURL: 'https://github.com/OWNER/REPO/pull/1'
-      }).then(function (actions) {
+      }).then(function(actions) {
         actions.should.have.lengthOf(2);
         actions[0].type.should.equal('CREATE_REVIEW_REQUEST');
-      })
+      });
     });
 
-    it('works with a review request', function () {
+    it('works with a review request', function() {
       githubMock({
         config: reviewRequestConfig,
         assignees: [{login: 'charlie'}]
@@ -100,12 +100,12 @@ describe('pull-review', function() {
       return pullReview({
         pullRequestURL: 'https://github.com/OWNER/REPO/pull/1',
         retryReview: true
-      }).then(function (actions) {
+      }).then(function(actions) {
         actions.should.have.lengthOf(3);
         actions[0].type.should.equal('DELETE_REVIEW_REQUESTS');
         actions[1].type.should.equal('CREATE_REVIEW_REQUEST');
         actions[1].payload.assignees.should.not.include('charlie');
-      })
+      });
     });
   });
 
@@ -148,7 +148,9 @@ describe('pull-review', function() {
           return '<@U123>';
         }
       }).then(function() {
-        message.text.should.equal('<@U123>: please review https://github.com/OWNER/REPO/pull/1');
+        message.text.should.equal(
+          '<@U123>: please review https://github.com/OWNER/REPO/pull/1'
+        );
         message.attachments.should.have.lengthOf(1);
         var attachment = message.attachments[0];
         attachment.title.should.equal('OWNER/REPO: Hello world');
@@ -235,9 +237,12 @@ describe('pull-review', function() {
         });
     });
 
-    it('works for retrying reviews', function (done) {
+    it('works for retrying reviews', function(done) {
       room.user
-        .say('alice', 'review https://github.com/OWNER/REPO/pull/1/ again please')
+        .say(
+          'alice',
+          'review https://github.com/OWNER/REPO/pull/1/ again please'
+        )
         .then(function() {
           setTimeout(function() {
             room.messages.should.have.lengthOf(2);
@@ -248,7 +253,6 @@ describe('pull-review', function() {
             done();
           }, 100);
         });
-
     });
 
     it('does nothing without a pull request URL', function(done) {
@@ -306,8 +310,8 @@ describe('pull-review', function() {
   describe('in server mode', function() {
     var baseURL = 'http://localhost';
 
-    before(function (done) {
-      var app = server.listen(0, function () {
+    before(function(done) {
+      var app = server.listen(0, function() {
         baseURL += ':' + app.address().port;
         done();
       });
@@ -318,7 +322,8 @@ describe('pull-review', function() {
         config: config
       });
 
-      return request.post(baseURL)
+      return request
+        .post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -344,7 +349,8 @@ describe('pull-review', function() {
         config: config
       });
 
-      return request.post(baseURL)
+      return request
+        .post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -363,8 +369,9 @@ describe('pull-review', function() {
         });
     });
 
-    it('fails if pull request data is missing', function () {
-      return request.post(baseURL)
+    it('fails if pull request data is missing', function() {
+      return request
+        .post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -372,27 +379,28 @@ describe('pull-review', function() {
             body: '/review'
           }
         })
-        .catch(function (response) {
+        .catch(function(response) {
           response.response.badRequest.should.be.true;
-        })
-    });
-
-    it('redirects on root route', function() {
-      return request.get(baseURL)
-        .then(function (response) {
-          response.redirects.should.include('https://github.com/imsky/pull-review');
-        })
-    });
-
-    it('does nothing without a valid GitHub webhook payload', function() {
-      return request.post(baseURL)
-        .then(function (response) {
-          response.ok.should.be.true;
         });
     });
 
+    it('redirects on root route', function() {
+      return request.get(baseURL).then(function(response) {
+        response.redirects.should.include(
+          'https://github.com/imsky/pull-review'
+        );
+      });
+    });
+
+    it('does nothing without a valid GitHub webhook payload', function() {
+      return request.post(baseURL).then(function(response) {
+        response.ok.should.be.true;
+      });
+    });
+
     it('fails with invalid GitHub webhook payload', function() {
-      return request.post(baseURL)
+      return request
+        .post(baseURL)
         .set('Content-Type', 'application/json')
         .send({
           action: 'created',
@@ -403,7 +411,7 @@ describe('pull-review', function() {
             body: '/review'
           }
         })
-        .catch(function (response) {
+        .catch(function(response) {
           response.status.should.equal(400);
         });
     });

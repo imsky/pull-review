@@ -75,7 +75,10 @@ module.exports = function(robot) {
         robot.logger.error('Slack RTM client has no reconnect() function');
       }
 
-      Object.assign(chatUserMap, userMapping.generateChatUserMap(rtmClient.dataStore.users, adapter));
+      Object.assign(
+        chatUserMap,
+        userMapping.generateChatUserMap(rtmClient.dataStore.users, adapter)
+      );
     }
 
     try {
