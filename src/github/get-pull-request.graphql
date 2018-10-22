@@ -1,0 +1,7 @@
+query ($owner: String!, $repo: String!, $pull: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pull) {
+      id
+    }
+  }
+}

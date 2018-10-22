@@ -12,10 +12,16 @@ var GraphQLRequest = require('./graphql');
 
 var log = debug('pull-review');
 
-var blameQuery = fs.readFileSync(
-  path.join(__dirname, 'git-blame.graphql'),
-  'utf8'
-);
+var graphQLQueries = ['git-blame', 'get-pull-request', 'get-user', 'get-review-requests', 'request-reviews'].reduce(function (map, file) {
+  map[file] = fs.readFileSync(path.join(__dirname, file + '.graphql'), 'utf8');
+  return map;
+}, {});
+
+var blameQuery = graphQLQueries['git-blame'];
+var getPullRequestQuery = graphQLQueries['get-pull-request'];
+var getUserQuery = graphQLQueries['get-user'];
+var getReviewRequestsQuery = graphQLQueries['get-review-requests'];
+var requestReviewsMutation = graphQLQueries['request-reviews'];
 
 var github;
 var token;
@@ -248,12 +254,78 @@ function createReviewRequest(resource, reviewers) {
  * @return {Object} Updated GitHub resource
  */
 function deleteReviewRequest(resource, reviewers) {
-  return github.pullRequests.deleteReviewRequest({
-    owner: resource.owner,
-    repo: resource.repo,
-    number: resource.number,
-    reviewers: reviewers
-  });
+  /* The github package deleteReviewRequest method does not work here
+   * because it serializes the parameters (i.e. reviewers) as query string
+   * instead of as JSON payload. This is due to the github package's API
+   * spec being out of date with the GitHub API as of October 2019.
+   * Eventually, the latest octokit/rest package will be used instead.
+   * Until then, deleting review requests is re-implemented with GraphQL.
+   * GraphQL is used for all calls, ignoring node IDs in REST API responses.
+   */
+
+  var promises = [
+    GraphQLRequest({
+      token: token,
+      query: getPullRequestQuery,
+      variables: {
+        owner: resource.owner,
+        repo: resource.repo,
+        pull: resource.number
+      }
+    }),
+    GraphQLRequest({
+      token: token,
+      query: getReviewRequestsQuery,
+      variables: {
+        owner: resource.owner,
+        repo: resource.repo,
+        pull: resource.number
+      }
+    })
+  ];
+
+  var pullRequestId;
+
+  return Promise.all(promises)
+    .then(function (res) {
+      pullRequestId = res[0].data.repository.pullRequest.id;
+      var reviewRequests = res[1].data.repostiory.pullRequest.reviewRequests.nodes.map(function (res) {
+        if (res.requestedReviewer.organization) {
+          throw Error('Teams not yet supported for review requests');
+        }
+
+        return res.requestedReviewer.login;
+      });
+
+      var reviewersToKeep = reviewRequests.filter(function (existingReviewer) {
+        return reviewers.indexOf(existingReviewer) === -1;
+      });
+
+      var reviewersToKeepIds = reviewersToKeep.map(function (reviewer) {
+        return GraphQLRequest({
+          token: token,
+          query: getUserQuery,
+          variables: {
+            login: reviewer
+          }
+        })
+          .then(function (res) {
+            return res.data.user.id;
+          })
+      });
+
+      return Promise.all(reviewersToKeepIds);
+    })
+    .then(function (res) {
+      return GraphQLRequest({
+        token: token,
+        query: requestReviewsMutation,
+        variables: {
+          pullRequestId: pullRequestId,
+          userIds: res
+        }
+      });
+    });
 }
 
 /**
@@ -276,6 +348,10 @@ module.exports = function(githubToken) {
 
   return {
     blameQuery: blameQuery,
+    getPullRequestQuery: getPullRequestQuery,
+    getUserQuery: getUserQuery,
+    getReviewRequestsQuery: getReviewRequestsQuery,
+    requestReviewsMutation: requestReviewsMutation,
     getPullRequest: getPullRequest,
     getPullRequestFiles: getPullRequestFiles,
     getPullRequestCommits: getPullRequestCommits,
