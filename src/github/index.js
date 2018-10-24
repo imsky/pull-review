@@ -289,7 +289,7 @@ function deleteReviewRequest(resource, reviewers) {
   return Promise.all(promises)
     .then(function (res) {
       pullRequestId = res[0].data.repository.pullRequest.id;
-      var reviewRequests = res[1].data.repostiory.pullRequest.reviewRequests.nodes.map(function (res) {
+      var reviewRequests = res[1].data.repository.pullRequest.reviewRequests.nodes.map(function (res) {
         if (res.requestedReviewer.organization) {
           throw Error('Teams not yet supported for review requests');
         }
