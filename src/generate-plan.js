@@ -1,8 +1,6 @@
 'use strict';
 
 var Promise = require('native-promise-only');
-var fs = require('fs')
-var path = require('path')
 
 var Github = require('./github');
 var Action = require('./models/action');
@@ -27,7 +25,7 @@ module.exports = function generatePlan(options) {
   var actions = [];
   //todo: consider getting rid of the fallback Github client
   var github = options.github || Github(options.githubToken);
-  var config = fs.readFileSync(path.join(__dirname, '..', '.pull-review'), 'utf8')
+  var config = process.env.PULL_REVIEW_CONFIG || options.config;
   var pullReviewConfigPath =
     process.env.PULL_REVIEW_CONFIG_PATH ||
     options.pullReviewConfigPath ||
@@ -100,7 +98,7 @@ module.exports = function generatePlan(options) {
       pullRequestLabels = res[2];
       pullRequestReviewRequests = res[3];
       repoPullReviewConfig = res[4];
-      config = config;
+      config = config || repoPullReviewConfig;
 
       if (!config) {
         throw Error('Missing configuration');

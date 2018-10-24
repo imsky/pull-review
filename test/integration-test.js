@@ -77,7 +77,7 @@ describe('pull-review', function() {
       }
     });
 
-    it('works without a review request', function() {
+    it('works on a new pull request', function() {
       githubMock({
         config: reviewRequestConfig,
         reviewRequests: true
@@ -91,10 +91,11 @@ describe('pull-review', function() {
       });
     });
 
-    it('works with a review request', function() {
+    it('works with an existing review request on a pull request', function() {
       githubMock({
         config: reviewRequestConfig,
-        assignees: [{login: 'charlie'}]
+        assignees: [{login: 'charlie'}],
+        reviewRequests: true
       });
 
       return pullReview({

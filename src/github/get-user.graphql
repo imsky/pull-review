@@ -1,5 +1,0 @@
-query ($login: String!) {
-  user (login: $login) {
-    id
-  }
-}

@@ -12,14 +12,13 @@ var GraphQLRequest = require('./graphql');
 
 var log = debug('pull-review');
 
-var graphQLQueries = ['git-blame', 'get-pull-request', 'get-user', 'get-review-requests', 'request-reviews'].reduce(function (map, file) {
+var graphQLQueries = ['git-blame', 'get-pull-request', 'get-review-requests', 'request-reviews'].reduce(function (map, file) {
   map[file] = fs.readFileSync(path.join(__dirname, file + '.graphql'), 'utf8');
   return map;
 }, {});
 
 var blameQuery = graphQLQueries['git-blame'];
 var getPullRequestQuery = graphQLQueries['get-pull-request'];
-var getUserQuery = graphQLQueries['get-user'];
 var getReviewRequestsQuery = graphQLQueries['get-review-requests'];
 var requestReviewsMutation = graphQLQueries['request-reviews'];
 
@@ -294,27 +293,16 @@ function deleteReviewRequest(resource, reviewers) {
           throw Error('Teams not yet supported for review requests');
         }
 
-        return res.requestedReviewer.login;
+        return res.requestedReviewer;
       });
 
       var reviewersToKeep = reviewRequests.filter(function (existingReviewer) {
-        return reviewers.indexOf(existingReviewer) === -1;
+        return reviewers.indexOf(existingReviewer.login) === -1;
+      }).map(function (reviewer) {
+        return reviewer.id;
       });
 
-      var reviewersToKeepIds = reviewersToKeep.map(function (reviewer) {
-        return GraphQLRequest({
-          token: token,
-          query: getUserQuery,
-          variables: {
-            login: reviewer
-          }
-        })
-          .then(function (res) {
-            return res.data.user.id;
-          })
-      });
-
-      return Promise.all(reviewersToKeepIds);
+      return reviewersToKeep;
     })
     .then(function (res) {
       return GraphQLRequest({
@@ -349,7 +337,6 @@ module.exports = function(githubToken) {
   return {
     blameQuery: blameQuery,
     getPullRequestQuery: getPullRequestQuery,
-    getUserQuery: getUserQuery,
     getReviewRequestsQuery: getReviewRequestsQuery,
     requestReviewsMutation: requestReviewsMutation,
     getPullRequest: getPullRequest,
