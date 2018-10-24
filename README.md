@@ -8,7 +8,11 @@
 
 Pull Review looks through the changes in a pull request and assigns the most relevant reviewers, those who have made the largest and most recent contributions to the changed files. The number of reviewers assigned, along with other things, [can be configured](#configuration).
 
-You can use Pull Review through [GitHub comments](#github), from chat rooms in Slack/HipChat/etc. using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker image](#docker).
+You can use Pull Review through [GitHub comments](#github), from chat using [Hubot](#hubot), on the [command line](#cli), via [API](#api), or as a [Docker image](#docker).
+
+## TODO:
+
+add a place to explain the GitHub token permissions
 
 ## Installation
 
