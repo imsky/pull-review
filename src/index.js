@@ -71,9 +71,11 @@ module.exports = function PullReview(options) {
                 action.payload.assignees
               );
             });
-            loggedEvents.push(
-              'requested a review from ' + action.payload.assignees.join(', ')
-            );
+            if (action.payload.assignees.length) {
+              loggedEvents.push(
+                'requested a review from ' + action.payload.assignees.join(', ')
+              );
+            }
             break;
           case 'DELETE_REVIEW_REQUESTS':
             transaction.push(function() {
@@ -82,9 +84,12 @@ module.exports = function PullReview(options) {
                 action.payload.assignees
               );
             });
-            loggedEvents.push(
-              'removed review request from ' + action.payload.assignees.join(', ')
-            );
+
+            if (action.payload.assignees.length) {
+              loggedEvents.push(
+                'removed review request' + (action.payload.assignees.length > 1 ? 's' : '') + ' from ' + action.payload.assignees.join(', ')
+              );
+            }
             break;
           case 'NOTIFY':
             if (action.payload.channel === 'github') {

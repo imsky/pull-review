@@ -1,0 +1,7 @@
+mutation ($pullRequestId: ID!, $userIds: [ID!], $teamIds: [ID!]) {
+  requestReviews(input: {pullRequestId: $pullRequestId, userIds: $userIds, teamIds: $teamIds, union: false}) {
+    pullRequest {
+      id
+    }
+  }
+}

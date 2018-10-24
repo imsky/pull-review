@@ -26,6 +26,52 @@ module.exports = function(options) {
         '{"body":"@charlie, @bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)"}\n'
       )
       .reply(200);
+
+    api
+      .post('/graphql', {
+        query:
+          'query ($owner: String!, $repo: String!, $pull: Int!) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pull) {\n      id\n    }\n  }\n}\n',
+        variables: {owner: 'OWNER', repo: 'REPO', pull: 1}
+      })
+      .reply(200, {
+        data: {
+          repository: {
+            pullRequest: {
+              id: 'deadbeef'
+            }
+          }
+        }
+      });
+
+    api.post('/graphql', {
+      query: 'query ($owner: String!, $repo: String!, $pull: Int!) {\n  repository(owner: $owner, name: $repo) {\n    pullRequest(number: $pull) {\n      reviewRequests(first: 100) {\n        nodes {\n          requestedReviewer {\n            ... on User {\n              id\n              login\n            }\n            # todo: confirm Team works\n            ... on Team {\n              id\n              name\n              organization {\n                login\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}\n',
+      variables: {owner: 'OWNER', repo: 'REPO', pull: 1}
+    })
+    .reply(200, {
+      data: {
+        repository: {
+          pullRequest: {
+            reviewRequests: {
+              nodes:(options.assignees || []).map(function (assignee) {
+              return {
+                requestedReviewer: {
+                  id: 'foobar',
+                  login: assignee
+                }
+              }
+            })
+          }
+          }
+        }
+      }
+    });
+
+    api.post('/graphql', {
+      query: 'mutation ($pullRequestId: ID!, $userIds: [ID!], $teamIds: [ID!]) {\n  requestReviews(input: {pullRequestId: $pullRequestId, userIds: $userIds, teamIds: $teamIds, union: false}) {\n    pullRequest {\n      id\n    }\n  }\n}\n',
+      variables: {pullRequestId: 'deadbeef', userIds: ['foobar']}
+    }).reply(200, {
+      data: {}
+    });
   }
 
   function mockPullRequest(options) {
