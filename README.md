@@ -203,6 +203,12 @@ When using [min_authors_of_changed_files](#min_authors_of_changed_files), a smal
 
 Default: 0
 
+#### min_percent_authorship_for_extra_reviewer
+
+If the assigned reviewer has greater percentage authorship of the changed files than this minimum, an extra reviewer will be assigned. This is helpful for files with many authors and one author with majority authorship, making them the default reviewer for those files. Set to 0 to disable.
+
+Default: 0
+
 #### require_notification
 
 Require a user to be listed in the [reviewers](#reviewers) section in order to be assigned as a reviewer. 
