@@ -2,6 +2,9 @@
 # pull-review config version (required)
 version: 1
 
+# use review requests instead of assignees to assign reviewers to pull requests
+use_review_requests: false
+
 # maximum number of files to evaluate per pull request (set to 0 for no limit)
 max_files: 5
 
@@ -25,6 +28,9 @@ min_authors_of_changed_files: 0
 
 # minimum number of lines that should be changed to require an additional reviewer when using min_authors_of_changed_files (set to 0 to disable)
 min_lines_changed_for_extra_reviewer: 0
+
+# minimum percent of lines authored by a reviewer to require an additional reviewer (set to 0 to disable)
+min_percent_authorship_for_extra_reviewer: 0
 
 # require a user to be listed in the reviewers section in order to be assigned to a pull request
 require_notification: true
@@ -67,6 +73,3 @@ file_blacklist:
 # list of PR labels to either require (whitelist) or forbid (blacklist) in reviews
 label_whitelist: []
 label_blacklist: ['WIP']
-
-# use review requests instead of assignees to assign reviewers to pull requests
-use_review_requests: false

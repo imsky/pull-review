@@ -40,6 +40,7 @@ module.exports = function getReviewers(options) {
   var maxLinesPerReviewer = config.maxLinesPerReviewer;
   var minAuthorsOfChangedFiles = config.minAuthorsOfChangedFiles;
   var minLinesChangedForExtraReviewer = config.minLinesChangedForExtraReviewer;
+  var minPercentAuthorshipForExtraReviewer = config.minPercentAuthorshipForExtraReviewer;
   var maxReviewersAssignedDynamically =
     maxFilesPerReviewer > 0 || maxLinesPerReviewer > 0;
   var fileBlacklist = config.fileBlacklist;
@@ -358,8 +359,6 @@ module.exports = function getReviewers(options) {
         .slice(0, maxReviewersAssignable);
     })
     .then(function(reviewers) {
-      var notEnoughAuthorDiversity = uniqueAuthors < minAuthorsOfChangedFiles;
-
       reviewers.forEach(function(reviewer) {
         selectedReviewers[reviewer.login] = true;
       });
@@ -367,20 +366,32 @@ module.exports = function getReviewers(options) {
       var fallbackReviewers = getFallbackReviewers();
       var randomReviewers = getRandomReviewers();
       var extraReviewers = fallbackReviewers.concat(randomReviewers);
+      var notEnoughAuthorDiversity = minAuthorsOfChangedFiles > 0 && uniqueAuthors < minAuthorsOfChangedFiles;
+      var tooMuchAuthorship = minPercentAuthorshipForExtraReviewer > 0 && !isNaN(reviewers[0].ownership) && (reviewers[0].ownership * 100) >= minPercentAuthorshipForExtraReviewer;
+      var assignExtraReviewer = false;
 
-      if (notEnoughAuthorDiversity && maxReviewers > 1) {
+      if (maxReviewers > 1) {
+        if (notEnoughAuthorDiversity) {
+          if (changedLines >= minLinesChangedForExtraReviewer) {
+            assignExtraReviewer = true;
+          }
+        } else if (tooMuchAuthorship) {
+          assignExtraReviewer = true;
+        }
+      }
+
+      if (assignExtraReviewer) {
         var extraReviewer = extraReviewers.shift();
 
-        if (
-          reviewers.length < maxReviewers &&
-          changedLines >= minLinesChangedForExtraReviewer
-        ) {
-          reviewers.push(extraReviewer);
-        } else if (reviewers.length === maxReviewers) {
-          reviewers = reviewers.slice(0, -1).concat(extraReviewer);
-        }
+        if (extraReviewer) {
+          if (reviewers.length < maxReviewers) {
+            reviewers.push(extraReviewer);
+          } else if (reviewers.length === maxReviewers) {
+            reviewers = reviewers.slice(0, -1).concat(extraReviewer);
+          }
 
-        excludedReviewers[extraReviewer.login] = true;
+          excludedReviewers[extraReviewer.login] = true;
+        }
       }
 
       if (
