@@ -366,7 +366,7 @@ module.exports = function getReviewers(options) {
       var fallbackReviewers = getFallbackReviewers();
       var randomReviewers = getRandomReviewers();
       var extraReviewers = fallbackReviewers.concat(randomReviewers);
-      var notEnoughAuthorDiversity = uniqueAuthors < minAuthorsOfChangedFiles;
+      var notEnoughAuthorDiversity = minAuthorsOfChangedFiles > 0 && uniqueAuthors < minAuthorsOfChangedFiles;
       var tooMuchAuthorship = minPercentAuthorshipForExtraReviewer > 0 && !isNaN(reviewers[0].ownership) && (reviewers[0].ownership * 100) >= minPercentAuthorshipForExtraReviewer;
       var assignExtraReviewer = false;
 
@@ -383,13 +383,15 @@ module.exports = function getReviewers(options) {
       if (assignExtraReviewer) {
         var extraReviewer = extraReviewers.shift();
 
-        if (reviewers.length < maxReviewers) {
-          reviewers.push(extraReviewer);
-        } else if (reviewers.length === maxReviewers) {
-          reviewers = reviewers.slice(0, -1).concat(extraReviewer);
-        }
+        if (extraReviewer) {
+          if (reviewers.length < maxReviewers) {
+            reviewers.push(extraReviewer);
+          } else if (reviewers.length === maxReviewers) {
+            reviewers = reviewers.slice(0, -1).concat(extraReviewer);
+          }
 
-        excludedReviewers[extraReviewer.login] = true;
+          excludedReviewers[extraReviewer.login] = true;
+        }
       }
 
       if (

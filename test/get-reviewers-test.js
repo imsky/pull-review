@@ -739,6 +739,50 @@ describe('#getReviewers', function() {
     });
   });
 
+  it('assigns an extra reviewer if min pecent authorship is met', function () {
+    return getReviewers({
+      config: Config({
+        version: 1,
+        reviewers: {
+          alice: {},
+          bob: {},
+          charlie: {}
+        },
+        max_files_per_reviewer: 2,
+        min_authors_of_changed_files: 2,
+        min_percent_authorship_for_extra_reviewer: 60
+      }),
+      files: [
+        {
+          filename: 'TEST',
+          status: 'modified',
+          changes: 5,
+        }
+      ],
+      authorLogin: 'alice',
+      getBlameForFile: function () {
+        return [
+          {
+            login: 'bob',
+            count: 7,
+            age: 1
+          },
+          {
+            login: 'charlie',
+            count: 2,
+            age: 1
+          }
+        ]
+      }
+    }).then(function (reviewers) {
+      reviewers.should.have.lengthOf(2);
+      reviewers[0].login.should.equal('bob');
+      reviewers[0].source.should.equal('blame');
+      reviewers[1].login.should.equal('charlie');
+      reviewers[1].source.should.equal('random');
+    });
+  });
+
   describe('in public mode', function() {
     it('works', function() {
       process.env.PUBLIC_MODE = 'true';
