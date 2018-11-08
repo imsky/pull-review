@@ -367,7 +367,7 @@ module.exports = function getReviewers(options) {
       var randomReviewers = getRandomReviewers();
       var extraReviewers = fallbackReviewers.concat(randomReviewers);
       var notEnoughAuthorDiversity = minAuthorsOfChangedFiles > 0 && uniqueAuthors < minAuthorsOfChangedFiles;
-      var tooMuchAuthorship = minPercentAuthorshipForExtraReviewer > 0 && !isNaN(reviewers[0].ownership) && (reviewers[0].ownership * 100) >= minPercentAuthorshipForExtraReviewer;
+      var tooMuchAuthorship = minPercentAuthorshipForExtraReviewer > 0 && reviewers.length && !isNaN(reviewers[0].ownership) && (reviewers[0].ownership * 100) >= minPercentAuthorshipForExtraReviewer;
       var assignExtraReviewer = false;
 
       if (maxReviewers > 1) {
