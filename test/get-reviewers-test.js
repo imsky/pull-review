@@ -739,47 +739,118 @@ describe('#getReviewers', function() {
     });
   });
 
-  it('assigns an extra reviewer if min pecent authorship is met', function () {
-    return getReviewers({
-      config: Config({
-        version: 1,
-        reviewers: {
-          alice: {},
-          bob: {},
-          charlie: {}
-        },
-        max_files_per_reviewer: 2,
-        min_authors_of_changed_files: 2,
-        min_percent_authorship_for_extra_reviewer: 60
-      }),
-      files: [
-        {
-          filename: 'TEST',
-          status: 'modified',
-          changes: 5,
-        }
-      ],
-      authorLogin: 'alice',
-      getBlameForFile: function () {
-        return [
-          {
-            login: 'bob',
-            count: 7,
-            age: 1
+  describe('using min percent authorship', function () {
+    it('assigns an extra reviewer by blame if one is available', function () {
+      return getReviewers({
+        config: Config({
+          version: 1,
+          reviewers: {
+            alice: {},
+            bob: {},
+            charlie: {}
           },
+          max_files_per_reviewer: 2,
+          min_authors_of_changed_files: 2,
+          min_percent_authorship_for_extra_reviewer: 60
+        }),
+        files: [
           {
-            login: 'charlie',
-            count: 2,
-            age: 1
+            filename: 'TEST',
+            status: 'modified',
+            changes: 5,
           }
-        ]
-      }
-    }).then(function (reviewers) {
-      reviewers.should.have.lengthOf(2);
-      reviewers[0].login.should.equal('bob');
-      reviewers[0].source.should.equal('blame');
-      reviewers[1].login.should.equal('charlie');
-      reviewers[1].source.should.equal('random');
+        ],
+        authorLogin: 'alice',
+        getBlameForFile: function () {
+          return [
+            {
+              login: 'bob',
+              count: 7,
+              age: 1
+            },
+            {
+              login: 'charlie',
+              count: 2,
+              age: 1
+            }
+          ]
+        }
+      }).then(function (reviewers) {
+        reviewers.should.have.lengthOf(2);
+        reviewers[0].login.should.equal('bob');
+        reviewers[0].source.should.equal('blame');
+        reviewers[1].login.should.equal('charlie');
+        reviewers[1].source.should.equal('blame');
+      });
+    });
+
+    it('assigns an extra reviewer randomly correctly', function () {
+      return getReviewers({
+        config: Config({
+          version: 1,
+          reviewers: {
+            alice: {},
+            bob: {},
+            charlie: {}
+          },
+          max_files_per_reviewer: 2,
+          min_authors_of_changed_files: 2,
+          min_percent_authorship_for_extra_reviewer: 60
+        }),
+        files: [
+          {
+            filename: 'TEST',
+            status: 'modified',
+            changes: 5
+          }
+        ],
+        authorLogin: 'alice',
+        getBlameForFile: function () {
+          return [
+            {
+              login: 'bob',
+              count: 7,
+              age: 1
+            }
+          ]
+        }
+      }).then(function (reviewers) {
+        reviewers.should.have.lengthOf(2);
+        reviewers[0].login.should.equal('bob');
+        reviewers[0].source.should.equal('blame');
+        reviewers[1].login.should.equal('charlie');
+        reviewers[1].source.should.equal('random');
+      });
+    });
+
+    it('assigns an extra reviewer correctly if there are no reviewers by blame', function () {
+      return getReviewers({
+        config: Config({
+          version: 1,
+          reviewers: {
+            alice: {},
+            bob: {},
+            charlie: {}
+          },
+          max_files_per_reviewer: 2,
+          min_authors_of_changed_files: 2,
+          min_percent_authorship_for_extra_reviewer: 60
+        }),
+        files: [
+          {
+            filename: 'TEST',
+            status: 'modified',
+            changes: 5
+          }
+        ],
+        authorLogin: 'alice',
+        getBlameForFile: function () {
+          return []
+        }
+      }).then(function (reviewers) {
+        reviewers.should.have.lengthOf(1);
+        reviewers[0].source.should.equal('random');
+      });
     });
   });
 

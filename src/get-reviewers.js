@@ -80,7 +80,7 @@ module.exports = function getReviewers(options) {
 
   var changedLines = Math.abs(
     nonRemovedFiles.reduce(function(sum, file) {
-      return sum + (file.additions - file.deletions);
+      return sum + ((file.additions || 0) - (file.deletions || 0));
     }, 0)
   );
 
@@ -354,11 +354,11 @@ module.exports = function getReviewers(options) {
         return b.count * b.ownership - a.count * a.ownership;
       });
 
-      return assignedReviewers
-        .concat(reviewersByOwnership)
-        .slice(0, maxReviewersAssignable);
+      return assignedReviewers.concat(reviewersByOwnership);
     })
-    .then(function(reviewers) {
+    .then(function(allReviewers) {
+      var reviewers = allReviewers.slice(0, maxReviewersAssignable);
+
       reviewers.forEach(function(reviewer) {
         selectedReviewers[reviewer.login] = true;
       });
@@ -367,21 +367,28 @@ module.exports = function getReviewers(options) {
       var randomReviewers = getRandomReviewers();
       var extraReviewers = fallbackReviewers.concat(randomReviewers);
       var notEnoughAuthorDiversity = minAuthorsOfChangedFiles > 0 && uniqueAuthors < minAuthorsOfChangedFiles;
-      var tooMuchAuthorship = minPercentAuthorshipForExtraReviewer > 0 && !isNaN(reviewers[0].ownership) && (reviewers[0].ownership * 100) >= minPercentAuthorshipForExtraReviewer;
-      var assignExtraReviewer = false;
+      var tooMuchAuthorship = minPercentAuthorshipForExtraReviewer > 0 && reviewers.length && !isNaN(reviewers[0].ownership) && (reviewers[0].ownership * 100) >= minPercentAuthorshipForExtraReviewer;
+      var extraReviewerToAssign = null;
 
       if (maxReviewers > 1) {
         if (notEnoughAuthorDiversity) {
-          if (changedLines >= minLinesChangedForExtraReviewer) {
-            assignExtraReviewer = true;
+          var needExtraReviewer = minLinesChangedForExtraReviewer > 0 ? changedLines >= minLinesChangedForExtraReviewer : true;
+          if (needExtraReviewer) {
+            extraReviewerToAssign = 'fallback';
           }
         } else if (tooMuchAuthorship) {
-          assignExtraReviewer = true;
+          extraReviewerToAssign = 'next-best';
         }
       }
 
-      if (assignExtraReviewer) {
-        var extraReviewer = extraReviewers.shift();
+      if (extraReviewerToAssign) {
+        var extraReviewer;
+
+        if (extraReviewerToAssign === 'fallback') {
+          extraReviewer = extraReviewers.shift();
+        } else if (extraReviewerToAssign === 'next-best' && allReviewers.length > reviewers.length) {
+          extraReviewer = allReviewers.slice(maxReviewersAssignable).shift();
+        }
 
         if (extraReviewer) {
           if (reviewers.length < maxReviewers) {
@@ -389,7 +396,6 @@ module.exports = function getReviewers(options) {
           } else if (reviewers.length === maxReviewers) {
             reviewers = reviewers.slice(0, -1).concat(extraReviewer);
           }
-
           excludedReviewers[extraReviewer.login] = true;
         }
       }
