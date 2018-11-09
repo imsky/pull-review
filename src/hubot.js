@@ -83,7 +83,9 @@ module.exports = function(robot) {
 
     try {
       updateChatUserMap('skip reconnect');
-      setInterval(updateChatUserMap, 60 * 1000);
+      //NB: Slack rate limits rtm.connect as a Tier 1 method, 1 req/min
+      //todo: make this configurable
+      setInterval(updateChatUserMap, 15 * 60 * 1000);
 
       PullReview({
         pullRequestURL: pullRequestURL,
