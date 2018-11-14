@@ -166,10 +166,14 @@ module.exports = function generatePlan(options) {
         return reviewer.login;
       });
 
-      var channels = ['github'];
+      var channels = [];
 
-      if (isChat && chatChannel) {
-        channels.push(chatChannel);
+      if (isChat) {
+        if (chatChannel) {
+          channels.push(chatChannel)
+        }
+      } else {
+        channels.push('github')
       }
 
       actions.push(
