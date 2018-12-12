@@ -371,7 +371,7 @@ module.exports = function getReviewers(options) {
       var extraReviewerToAssign = null;
 
       if (maxReviewers > 1) {
-        if (notEnoughAuthorDiversity) {
+        if (notEnoughAuthorDiversity && !tooMuchAuthorship) {
           var needExtraReviewer = minLinesChangedForExtraReviewer > 0 ? changedLines >= minLinesChangedForExtraReviewer : true;
           if (needExtraReviewer) {
             extraReviewerToAssign = 'fallback';
