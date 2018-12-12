@@ -53,7 +53,7 @@
     "coffee-script": "~1.12",
     "eslint": "~2.13",
     "hubot": "~2.19",
-    "hubot-slack": "^4.5.3",
+    "hubot-slack": "4.5.3",
     "hubot-test-helper": "~1.7",
     "mocha": "~3.2",
     "nock": "~9.0",
