@@ -2,6 +2,9 @@ var url = require('./url');
 var PullReview = require('./index');
 var userMapping = require('./utilities/user-mapping');
 
+var CHAT_USER_MAP_UPDATE_INTERVAL = 15 * 60 * 1000;
+var lastUpdatedChatUserMap;
+
 /**
  * Set up Hubot listeners for Pull Review
  * @param  {Object} robot - Hubot reference
@@ -66,14 +69,17 @@ module.exports = function(robot) {
       }
 
       var rtmClient = robot.adapter.client.rtm;
+      var now = new Date();
 
       if (typeof rtmClient.reconnect === 'function') {
-        if (!skipReconnect) {
+        if (skipReconnect !== 'skip reconnect' && lastUpdatedChatUserMap && (now - lastUpdatedChatUserMap < CHAT_USER_MAP_UPDATE_INTERVAL)) {
           rtmClient.reconnect();
         }
       } else {
         robot.logger.error('Slack RTM client has no reconnect() function');
       }
+
+      lastUpdatedChatUserMap = new Date();
 
       Object.assign(
         chatUserMap,
@@ -85,7 +91,7 @@ module.exports = function(robot) {
       updateChatUserMap('skip reconnect');
       //NB: Slack rate limits rtm.connect as a Tier 1 method, 1 req/min
       //todo: make this configurable
-      setInterval(updateChatUserMap, 15 * 60 * 1000);
+      setInterval(updateChatUserMap, CHAT_USER_MAP_UPDATE_INTERVAL);
 
       PullReview({
         pullRequestURL: pullRequestURL,
