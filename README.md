@@ -1,6 +1,6 @@
 # Pull Review
 
-[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
+[![coverage report](https://gitlab.com/imsky/pull-review/badges/master/coverage.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![pipeline status](https://gitlab.com/imsky/pull-review/badges/master/pipeline.svg)](https://gitlab.com/imsky/pull-review/commits/master)(https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
 ![Pull Review](https://imsky.github.io/pull-review/pull-review-github-header.png)
 
@@ -211,7 +211,7 @@ Default: 0
 
 #### require_notification
 
-Require a user to be listed in the [reviewers](#reviewers) section in order to be assigned as a reviewer. 
+Require a user to be listed in the [reviewers](#reviewers) section in order to be assigned as a reviewer.
 
 Default: true
 
