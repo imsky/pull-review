@@ -371,13 +371,14 @@ module.exports = function getReviewers(options) {
       var extraReviewerToAssign = null;
 
       if (maxReviewers > 1) {
-        if (notEnoughAuthorDiversity) {
-          var needExtraReviewer = (minLinesChangedForExtraReviewer > 0 && !tooMuchAuthorship) ? changedLines >= minLinesChangedForExtraReviewer : true;
-          if (needExtraReviewer) {
+        var enoughLinesChangedForExtraReviewer = (minLinesChangedForExtraReviewer > 0 && !tooMuchAuthorship) ? changedLines >= minLinesChangedForExtraReviewer : true;
+
+        if (enoughLinesChangedForExtraReviewer) {
+          if (notEnoughAuthorDiversity) {
             extraReviewerToAssign = 'fallback';
+          } else if (tooMuchAuthorship) {
+            extraReviewerToAssign = 'next-best';
           }
-        } else if (tooMuchAuthorship) {
-          extraReviewerToAssign = 'next-best';
         }
       }
 
