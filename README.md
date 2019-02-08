@@ -197,15 +197,15 @@ If the pull request changes code with fewer authors than this minimum, replace a
 
 Default: 0
 
-#### min_lines_changed_for_extra_reviewer
-
-When using [min_authors_of_changed_files](#min_authors_of_changed_files), a small pull request can warrant an extra reviewer if there aren't enough authors of the changed code. However, small pull requests usually don't need more than one reviewer. This option can be used to ensure that an extra reviewer is assigned for pull requests that change at least a minimum of lines of code.
-
-Default: 0
-
 #### min_percent_authorship_for_extra_reviewer
 
 If the assigned reviewer has greater percentage authorship of the changed files than this minimum, an extra reviewer will be assigned. This is helpful for files with many authors and one author with majority authorship, making them the default reviewer for those files. Set to 0 to disable.
+
+Default: 0
+
+#### min_lines_changed_for_extra_reviewer
+
+When using [min_authors_of_changed_files](#min_authors_of_changed_files) or [min_percent_authorship_for_extra_reviewer](#min_percent_authorship_for_extra_reviewer), a small pull request can warrant an extra reviewer if there aren't enough distinct authors of the changed code. However, small pull requests usually don't need more than one reviewer. This option can be used to ensure that an extra reviewer is assigned for pull requests that change at least a minimum of lines of code.
 
 Default: 0
 

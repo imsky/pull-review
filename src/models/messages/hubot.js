@@ -61,7 +61,9 @@ module.exports = function(input) {
       //convert markdown links with titles to slack links
       .replace(/\[([^\\\[]+?)\]\((http.*?)\)/gm, '<$2|$1>')
       //convert asterisk-led lists to use bullet points
-      .replace(/^\* /gm, '• ');
+      .replace(/^\* /gm, '• ')
+      //strip language identifiers from code blocks
+      .replace(/^```[a-z0-9]+$/gm, '```');
 
     var attachment = {
       title: repoName + ': ' + title,

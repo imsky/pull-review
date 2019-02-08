@@ -23,14 +23,14 @@ max_lines_per_reviewer: 0
 # if at least a minimum number of reviewers is not found, assign a minimum number of reviewers randomly
 assign_min_reviewers_randomly: true
 
-# if the pull request changes code with fewer than a minimum number of authors, add more reviewers if possible (set to 0 to disable)
+# if the pull request changes code with fewer than a minimum number of authors, add extra reviewers if possible (set to 0 to disable)
 min_authors_of_changed_files: 0
 
-# minimum number of lines that should be changed to require an additional reviewer when using min_authors_of_changed_files (set to 0 to disable)
-min_lines_changed_for_extra_reviewer: 0
-
-# minimum percent of lines authored by a reviewer to require an additional reviewer (set to 0 to disable)
+# minimum percent of lines authored by a reviewer to require an extra reviewer (set to 0 to disable)
 min_percent_authorship_for_extra_reviewer: 0
+
+# minimum number of lines that must be changed to add an extra reviewer (set to 0 to disable)
+min_lines_changed_for_extra_reviewer: 0
 
 # require a user to be listed in the reviewers section in order to be assigned to a pull request
 require_notification: true
@@ -56,7 +56,7 @@ review_path_assignments:
   "*.js":
   - alice
 
-# if more reviewers are required, assign the following users based on minimatch (glob) patterns 
+# if more reviewers are required, assign the following users based on minimatch (glob) patterns
 review_path_fallbacks:
   app/web/**:
   - alice
