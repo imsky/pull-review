@@ -243,7 +243,7 @@ Specifically for Slack, using real names instead of usernames (as in the example
 
 If non-GitHub notification handles are not available/required, an empty object can be specified (as it is for `bob` in the example above). This will notify `@bob` on GitHub, and will work with the [`require_notification`](#require_notification) configuration option.
 
-Currently only Slack user mapping is supported - for other chat networks like HipChat or IRC, Pull Review will mention the GitHub usernames instead.
+Currently only Slack user mapping is supported - for other chat networks like IRC, Pull Review will mention the GitHub usernames instead.
 
 #### review_blacklist
 
