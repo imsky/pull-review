@@ -1,3 +1,5 @@
+//todo: add test to ensure always-assigned reviewers are not unassigned when reviewing again
+
 var getReviewers = require('../src/get-reviewers');
 var Config = require('../src/models/config');
 

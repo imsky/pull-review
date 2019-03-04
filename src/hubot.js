@@ -37,6 +37,8 @@ module.exports = function(robot) {
 
     var urls = url.extractURLs(chatText);
     var processedText = chatText
+      .replace(/r[evi]{4}w/gi, 'review')
+      .replace(/a[gai]{3}n/gi, 'again')
       .replace(/\s+/g, ' ')
       .replace(/(\breview | again\b)/gi, function(m) {
         return m.toLowerCase();
