@@ -47,6 +47,7 @@ module.exports = function PullReviewConfig(input) {
   );
   var minPercentAuthorshipForExtraReviewer = get(input.min_percent_authorship_for_extra_reviewer, 0);
   var reviewers = get(input.reviewers, {});
+  var groups = get(input.groups, {});
   var reviewBlacklist = get(input.review_blacklist, []);
   var reviewPathFallbacks = get(input.review_path_fallbacks, null);
   var requireNotification = get(input.require_notification, true);
@@ -86,6 +87,8 @@ module.exports = function PullReviewConfig(input) {
     throw Error('File blacklist must be an array');
   } else if (Object(reviewers) !== reviewers) {
     throw Error('Invalid reviewers specification, expected object');
+  } else if (Object(groups) !== groups) {
+    throw Error('Invalid groups specification, expected object');
   }
 
   if (PUBLIC_MODE) {
@@ -99,6 +102,7 @@ module.exports = function PullReviewConfig(input) {
       minLinesChangedForExtraReviewer: 0,
       minPercentAuthorshipForExtraReviewer: 0,
       reviewers: reviewers,
+      groups: groups,
       reviewBlacklist: reviewBlacklist,
       reviewPathAssignments: [],
       reviewPathFallbacks: [],
@@ -121,6 +125,7 @@ module.exports = function PullReviewConfig(input) {
     minLinesChangedForExtraReviewer: minLinesChangedForExtraReviewer,
     minPercentAuthorshipForExtraReviewer: minPercentAuthorshipForExtraReviewer,
     reviewers: reviewers,
+    groups: groups,
     reviewBlacklist: reviewBlacklist,
     reviewPathAssignments: reviewPathAssignments,
     reviewPathFallbacks: reviewPathFallbacks,

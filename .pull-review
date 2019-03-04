@@ -45,6 +45,17 @@ reviewers:
   dee:
     slack: "dwhite"
 
+# groups of users
+groups:
+  @org/frontend:
+    - alice
+    - bob
+  @org/backend:
+    - dee
+  @org/devops:
+    - charlie
+    - dee
+
 # list of users who will never be notified
 review_blacklist:
   - charlie
