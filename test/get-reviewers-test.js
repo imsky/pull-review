@@ -74,7 +74,7 @@ describe('#getReviewers', function() {
         getBlameForFile: function() {},
         assignees: [1]
       });
-    }.should.throw(Error, 'Pull request has minimum reviewers assigned'));
+    }.should.throw(Error, 'Pull request has minimum reviewers assigned. Try "review ... again".'));
   });
 
   it('fails with bad file data', function() {
