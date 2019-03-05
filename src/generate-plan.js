@@ -1,11 +1,33 @@
 'use strict';
 
 var Promise = require('native-promise-only');
+var LRU = require('lru-cache');
 
 var Github = require('./github');
 var Action = require('./models/action');
 var Config = require('./models/config');
 var getReviewers = require('./get-reviewers');
+
+var cache = LRU({ max: 100, maxAge: 1000 * 60 });
+var cacheEnabled = ['undefined', ''].indexOf(String(process.env.PULL_REVIEW_CACHE_DISABLED)) !== -1;
+
+function getPullReviewConfig(github, pullRequest, pullReviewConfigPath) {
+  var key = [pullRequest.owner, pullRequest.repo, pullReviewConfigPath].join('-');
+  return Promise.resolve(cache.get(key))
+    .then(function (cachedValue) {
+      if (cachedValue !== undefined && cacheEnabled) {
+        return cachedValue;
+      }
+      return github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8');
+    })
+    .then(function (fetchedValue) {
+      cache.set(key, fetchedValue, 1000 * 60 * 3);
+      return fetchedValue;
+    })
+    .catch(function () {
+      return null;
+    });
+}
 
 /**
  * @param  {Object} options
@@ -85,11 +107,7 @@ module.exports = function generatePlan(options) {
         github.getReviewRequests(pullRequest),
         config
           ? null
-          : github
-              .getRepoFile(pullRequest, pullReviewConfigPath, 'utf8')
-              .catch(function() {
-                return null;
-              })
+          : getPullReviewConfig(github, pullRequest, pullReviewConfigPath)
       ]);
     })
     .then(function(res) {

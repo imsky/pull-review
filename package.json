@@ -41,6 +41,7 @@
     "github-graphql-client": "~1.0",
     "js-yaml": "~3.8",
     "knuth-shuffle": "~1.0",
+    "lru-cache": "^4.1.0",
     "minimatch": "~3.0",
     "native-promise-only": "~0.8",
     "normalize-url": "~1.9",
