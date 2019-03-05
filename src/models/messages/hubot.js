@@ -10,7 +10,7 @@ module.exports = function(input) {
   var pullRequestRecord = input.pullRequestRecord;
   var pullRequest = input.pullRequest;
 
-  if (!users) {
+  if (!Array.isArray(users)) {
     throw Error('Missing users');
   } else if (!channel) {
     throw Error('Missing channel');
@@ -27,9 +27,10 @@ module.exports = function(input) {
       if (user.indexOf('<') !== 0 && user.indexOf('@') !== 0) {
         return '@' + user;
       }
-
       return user;
     });
+  } else {
+    throw Error('Unsupported message channel: ' + channel);
   }
 
   var message =

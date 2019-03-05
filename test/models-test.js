@@ -64,6 +64,17 @@ describe('models', function() {
         });
       }.should.throw(Error, 'Missing pull request record'));
 
+      (function() {
+        HubotMessage({
+          users: [],
+          channel: 'test',
+          pullRequestRecord: {
+            html_url: 'test'
+          },
+          channel: 'unknown'
+        });
+      }.should.throw(Error, 'Unsupported message channel: unknown'));
+
       HubotMessage({
         users: ['alice', 'bob'],
         channel: 'hubot:generic',
