@@ -1,6 +1,7 @@
 var url = require('./url');
 var PullReview = require('./index');
 var userMapping = require('./utilities/user-mapping');
+var spelling = require('./utilities/spelling');
 
 var CHAT_USER_MAP_UPDATE_INTERVAL = 15 * 60 * 1000;
 var lastUpdatedChatUserMap;
@@ -36,9 +37,7 @@ module.exports = function(robot) {
     var retryReview;
 
     var urls = url.extractURLs(chatText);
-    var processedText = chatText
-      .replace(/r[evi]{4}w/gi, 'review')
-      .replace(/a[gai]{3}n/gi, 'again')
+    var processedText = spelling.correctSpelling(chatText.trim(), ['review', 'again'])
       .replace(/\s+/g, ' ')
       .replace(/(\breview | again\b)/gi, function(m) {
         return m.toLowerCase();
