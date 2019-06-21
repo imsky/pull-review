@@ -125,14 +125,25 @@ module.exports = function PullReview(options) {
         }, Promise.resolve());
       });
     })
-    .then(function() {
+    .then(function () {
+      /**
+       * GitHub API calls for a PR with two files:
+       * getPullRequest: 1
+       * getPullRequestFiles: 1
+       * getPullRequestCommits: 1
+       * getPullRequestLabels: 1
+       * getReviewRequests: 1
+       * getRepoFile: 1 (.pull-review)
+       * getBlameForCommitFile: 2
+       * assignUsersToPullRequest: 1
+       * postPullRequestComment: 1
+       */
       log(
         (dryRun ? 'would have ' : '') +
           loggedEvents.join(', ') +
           ' on ' +
           options.pullRequestURL
       );
-
       return actions;
     });
 };

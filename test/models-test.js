@@ -64,6 +64,17 @@ describe('models', function() {
         });
       }.should.throw(Error, 'Missing pull request record'));
 
+      (function() {
+        HubotMessage({
+          users: [],
+          channel: 'test',
+          pullRequestRecord: {
+            html_url: 'test'
+          },
+          channel: 'unknown'
+        });
+      }.should.throw(Error, 'Unsupported message channel: unknown'));
+
       HubotMessage({
         users: ['alice', 'bob'],
         channel: 'hubot:generic',
@@ -84,7 +95,7 @@ describe('models', function() {
         pullRequestRecord: {
           title: 'hello world',
           html_url: 'https://github.com/OWNER/REPO/pull/1',
-          body: 'hello [world] [link](http://example.com)',
+          body: 'hello [world] [link](http://example.com)\n```js\nconsole.log(123)\n```',
           user: {
             login: 'bob',
             html_url: 'www.bob.com'
@@ -103,7 +114,7 @@ describe('models', function() {
             footer_icon:
               'https://imsky.github.io/pull-review/pull-review-github-icon.png',
             mrkdwn_in: ['text', 'pretext', 'fields'],
-            text: 'hello [world] <http://example.com|link>',
+            text: 'hello [world] <http://example.com|link>\n```\nconsole.log(123)\n```',
             title: 'OWNER/REPO: hello world',
             title_link: 'https://github.com/OWNER/REPO/pull/1'
           }

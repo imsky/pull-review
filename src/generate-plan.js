@@ -1,11 +1,58 @@
 'use strict';
 
 var Promise = require('native-promise-only');
+var LRU = require('lru-cache');
 
 var Github = require('./github');
 var Action = require('./models/action');
 var Config = require('./models/config');
 var getReviewers = require('./get-reviewers');
+
+var cache = LRU({ max: 100, maxAge: 1000 * 60 });
+var cacheEnabled = ['undefined', ''].indexOf(String(process.env.PULL_REVIEW_CACHE_DISABLED)) !== -1;
+
+function getPullReviewConfig(github, pullRequest, pullReviewConfigPath) {
+  var key = [pullRequest.owner, pullRequest.repo, pullReviewConfigPath].join('-');
+  return Promise.resolve(cache.get(key))
+    .then(function (cachedValue) {
+      if (cachedValue !== undefined && cacheEnabled) {
+        return cachedValue;
+      }
+      return github.getRepoFile(pullRequest, pullReviewConfigPath, 'utf8');
+    })
+    .then(function (fetchedValue) {
+      cache.set(key, fetchedValue, 1000 * 60 * 3);
+      return fetchedValue;
+    })
+    .catch(function () {
+      return null;
+    });
+}
+
+function getBlameForFile(github, pullRequest, pullRequestRecord) {
+  return function (file) {
+    var key = [pullRequest.owner, pullRequest.repo, pullRequestRecord.base.sha, file.filename].join('-');
+    return Promise.resolve(cache.get(key))
+      .then(function (cachedValue) {
+        if (cachedValue !== undefined && cacheEnabled) {
+          return cachedValue;
+        }
+        return github.getBlameForCommitFile({
+          owner: pullRequest.owner,
+          repo: pullRequest.repo,
+          //since only modified files are analyzed, the blame for those files is looked up on the original branch
+          //of course the files could change significantly on the branch, however this at least filters out otherwise
+          //unusable blame data that just points to the branch author
+          sha: pullRequestRecord.base.sha,
+          path: file.filename
+        });
+      })
+      .then(function (fetchedValue) {
+        cache.set(key, fetchedValue, 1000 * 60 * 30);
+        return fetchedValue;
+      });
+  }
+}
 
 /**
  * @param  {Object} options
@@ -87,11 +134,7 @@ module.exports = function generatePlan(options) {
         github.getReviewRequests(pullRequest),
         config
           ? null
-          : github
-              .getRepoFile(pullRequest, pullReviewConfigPath, 'utf8')
-              .catch(function() {
-                return null;
-              })
+          : getPullReviewConfig(github, pullRequest, pullReviewConfigPath)
       ]);
     })
     .then(function(res) {
@@ -146,17 +189,7 @@ module.exports = function generatePlan(options) {
         authorLogin: pullRequestRecord.user.login,
         assignees: pullRequestAssignees,
         retryReview: retryReview,
-        getBlameForFile: function(file) {
-          return github.getBlameForCommitFile({
-            owner: pullRequest.owner,
-            repo: pullRequest.repo,
-            //since only modified files are analyzed, the blame for those files is looked up on the original branch
-            //of course the files could change significantly on the branch, however this at least filters out otherwise
-            //unusable blame data that just points to the branch author
-            sha: pullRequestRecord.base.sha,
-            path: file.filename
-          });
-        }
+        getBlameForFile: getBlameForFile(github, pullRequest, pullRequestRecord)
       });
     })
     .then(function(reviewers) {

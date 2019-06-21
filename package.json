@@ -1,6 +1,6 @@
 {
   "name": "pull-review",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Assign pull request reviewers intelligently",
   "main": "index.js",
   "bin": {
@@ -41,6 +41,7 @@
     "github-graphql-client": "~1.0",
     "js-yaml": "~3.8",
     "knuth-shuffle": "~1.0",
+    "lru-cache": "^4.1.0",
     "minimatch": "~3.0",
     "native-promise-only": "~0.8",
     "normalize-url": "~1.9",
@@ -53,7 +54,7 @@
     "coffee-script": "~1.12",
     "eslint": "~2.13",
     "hubot": "~2.19",
-    "hubot-slack": "^4.5.3",
+    "hubot-slack": "4.5.3",
     "hubot-test-helper": "~1.7",
     "mocha": "~3.2",
     "nock": "~9.0",

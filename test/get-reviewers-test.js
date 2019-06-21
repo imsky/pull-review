@@ -1,3 +1,5 @@
+//todo: add test to ensure always-assigned reviewers are not unassigned when reviewing again
+
 var getReviewers = require('../src/get-reviewers');
 var Config = require('../src/models/config');
 
@@ -72,7 +74,7 @@ describe('#getReviewers', function() {
         getBlameForFile: function() {},
         assignees: [1]
       });
-    }.should.throw(Error, 'Pull request has minimum reviewers assigned'));
+    }.should.throw(Error, 'Pull request has minimum reviewers assigned. Try "review ... again".'));
   });
 
   it('fails with bad file data', function() {

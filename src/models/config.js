@@ -84,6 +84,8 @@ module.exports = function PullReviewConfig(input) {
     throw Error('Review blacklist must be an array');
   } else if (!Array.isArray(fileBlacklist)) {
     throw Error('File blacklist must be an array');
+  } else if (Object(reviewers) !== reviewers) {
+    throw Error('Invalid reviewers specification, expected object');
   }
 
   if (PUBLIC_MODE) {

@@ -120,7 +120,7 @@ module.exports = function getReviewers(options) {
   if (assignees.length >= maxReviewers) {
     throw Error('Pull request has maximum reviewers assigned');
   } else if (assignees.length >= minReviewers) {
-    throw Error('Pull request has minimum reviewers assigned');
+    throw Error('Pull request has minimum reviewers assigned. Try "review ... again".');
   }
 
   var unassignedReviewers = maxReviewers - assignees.length;
@@ -371,13 +371,14 @@ module.exports = function getReviewers(options) {
       var extraReviewerToAssign = null;
 
       if (maxReviewers > 1) {
-        if (notEnoughAuthorDiversity) {
-          var needExtraReviewer = minLinesChangedForExtraReviewer > 0 ? changedLines >= minLinesChangedForExtraReviewer : true;
-          if (needExtraReviewer) {
+        var enoughLinesChangedForExtraReviewer = minLinesChangedForExtraReviewer > 0 ? changedLines >= minLinesChangedForExtraReviewer : true;
+
+        if (enoughLinesChangedForExtraReviewer) {
+          if (notEnoughAuthorDiversity) {
             extraReviewerToAssign = 'fallback';
+          } else if (tooMuchAuthorship) {
+            extraReviewerToAssign = 'next-best';
           }
-        } else if (tooMuchAuthorship) {
-          extraReviewerToAssign = 'next-best';
         }
       }
 

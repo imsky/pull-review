@@ -1,6 +1,6 @@
 # Pull Review
 
-[![codecov](https://codecov.io/gh/imsky/pull-review/branch/master/graph/badge.svg)](https://codecov.io/gh/imsky/pull-review) [![Build Status](https://travis-ci.org/imsky/pull-review.svg?branch=master)](https://travis-ci.org/imsky/pull-review) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
+[![coverage report](https://gitlab.com/imsky/pull-review/badges/master/coverage.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![pipeline status](https://gitlab.com/imsky/pull-review/badges/master/pipeline.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
 ![Pull Review](https://imsky.github.io/pull-review/pull-review-github-header.png)
 
@@ -197,15 +197,15 @@ If the pull request changes code with fewer authors than this minimum, replace a
 
 Default: 0
 
-#### min_lines_changed_for_extra_reviewer
-
-When using [min_authors_of_changed_files](#min_authors_of_changed_files), a small pull request can warrant an extra reviewer if there aren't enough authors of the changed code. However, small pull requests usually don't need more than one reviewer. This option can be used to ensure that an extra reviewer is assigned for pull requests that change at least a minimum of lines of code.
-
-Default: 0
-
 #### min_percent_authorship_for_extra_reviewer
 
 If the assigned reviewer has greater percentage authorship of the changed files than this minimum, an extra reviewer will be assigned. This is helpful for files with many authors and one author with majority authorship, making them the default reviewer for those files. Set to 0 to disable.
+
+Default: 0
+
+#### min_lines_changed_for_extra_reviewer
+
+When using [min_authors_of_changed_files](#min_authors_of_changed_files) or [min_percent_authorship_for_extra_reviewer](#min_percent_authorship_for_extra_reviewer), a small pull request can warrant an extra reviewer if there aren't enough distinct authors of the changed code. However, small pull requests usually don't need more than one reviewer. This option can be used to ensure that an extra reviewer is assigned for pull requests that change at least a minimum of lines of code.
 
 Default: 0
 

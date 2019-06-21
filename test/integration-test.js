@@ -256,6 +256,21 @@ describe('pull-review', function() {
         });
     });
 
+    it('works when keywordsare misspelled', function(done) {
+      room.user
+        .say('alice', 'reivew https://github.com/OWNER/REPO/pull/2 please')
+        .then(function() {
+          setTimeout(function() {
+            room.messages.should.have.lengthOf(2);
+            room.messages[1][0].should.equal('hubot');
+            room.messages[1][1].should.equal(
+              '@bob: please review https://github.com/OWNER/REPO/pull/2'
+            );
+            done();
+          }, 100);
+        });
+    });
+
     it('does nothing without a pull request URL', function(done) {
       room.user
         .say('alice', 'https://github.com/imsky/pull-review https://google.com')

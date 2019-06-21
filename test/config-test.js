@@ -99,5 +99,12 @@ describe('config', function() {
         file_blacklist: null
       });
     }.should.throw(Error, 'File blacklist must be an array'));
+
+    (function () {
+      PullReviewConfig({
+        version: 1,
+        reviewers: "foo:{}"
+      });
+    }).should.throw('Invalid reviewers specification, expected object');
   });
 });
