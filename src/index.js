@@ -25,7 +25,7 @@ var defaultNotifyFn = function defaultNotifyFn(message) {
  */
 module.exports = function PullReview(options) {
   var actions;
-  var loggedEvents = [];
+  var plannedEvents = [];
   var dryRun = Boolean(options.dryRun);
   var notifyFn = options.notifyFn || defaultNotifyFn;
   var github = Github(options.githubToken);
@@ -49,8 +49,8 @@ module.exports = function PullReview(options) {
                 action.payload.assignees
               );
             });
-            loggedEvents.push(
-              'assigned ' + action.payload.assignees.join(', ')
+            plannedEvents.push(
+              'assign ' + action.payload.assignees.join(', ')
             );
             break;
           case 'UNASSIGN_USERS_FROM_PULL_REQUEST':
@@ -60,8 +60,8 @@ module.exports = function PullReview(options) {
                 action.payload.assignees
               );
             });
-            loggedEvents.push(
-              'unassigned ' + action.payload.assignees.join(', ')
+            plannedEvents.push(
+              'unassign ' + action.payload.assignees.join(', ')
             );
             break;
           case 'CREATE_REVIEW_REQUEST':
@@ -72,8 +72,8 @@ module.exports = function PullReview(options) {
               );
             });
             if (action.payload.assignees.length) {
-              loggedEvents.push(
-                'requested a review from ' + action.payload.assignees.join(', ')
+              plannedEvents.push(
+                'request a review from ' + action.payload.assignees.join(', ')
               );
             }
             break;
@@ -86,8 +86,8 @@ module.exports = function PullReview(options) {
             });
 
             if (action.payload.assignees.length) {
-              loggedEvents.push(
-                'removed review request' + (action.payload.assignees.length > 1 ? 's' : '') + ' from ' + action.payload.assignees.join(', ')
+              plannedEvents.push(
+                'remove review request' + (action.payload.assignees.length > 1 ? 's' : '') + ' from ' + action.payload.assignees.join(', ')
               );
             }
             break;
@@ -99,7 +99,7 @@ module.exports = function PullReview(options) {
                   GithubMessage(action.payload)
                 );
               });
-              loggedEvents.push('posted GitHub comment');
+              plannedEvents.push('post GitHub comment');
             } else {
               transaction.push(function() {
                 return new Promise(function(resolve) {
@@ -116,6 +116,9 @@ module.exports = function PullReview(options) {
             break;
         }
       });
+
+      log('will ' + plannedEvents.join(', ') + ' on ' +
+      options.pullRequestURL);
 
       return Promise.resolve().then(function() {
         return transaction.reduce(function(promise, fn) {
@@ -138,12 +141,10 @@ module.exports = function PullReview(options) {
        * assignUsersToPullRequest: 1
        * postPullRequestComment: 1
        */
-      log(
-        (dryRun ? 'would have ' : '') +
-          loggedEvents.join(', ') +
-          ' on ' +
-          options.pullRequestURL
-      );
+      if (!dryRun) {
+        log('did ' + plannedEvents.join(', ') + ' on ' +
+      options.pullRequestURL);
+      }
       return actions;
     });
 };
