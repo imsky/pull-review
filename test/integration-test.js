@@ -401,6 +401,7 @@ describe('pull-review', function() {
     });
 
     it('redirects on root route', function() {
+      this.timeout(10000);
       return request.get(baseURL).then(function(response) {
         response.redirects.should.include(
           'https://github.com/imsky/pull-review'
