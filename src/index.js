@@ -8,8 +8,10 @@ var generatePlan = require('./generate-plan');
 var Action = require('./models/action');
 var GithubMessage = require('./models/messages/github');
 var HubotMessage = require('./models/messages/hubot');
+var Lock = require('./lock');
 
 var log = debug('pull-review');
+var lock = Lock();
 
 var defaultNotifyFn = function defaultNotifyFn(message) {
   log(message);
@@ -30,6 +32,13 @@ module.exports = function PullReview(options) {
   var notifyFn = options.notifyFn || defaultNotifyFn;
   var github = Github(options.githubToken);
   options.github = github;
+
+  var pullRequestLock = lock(options.pullRequestURL);
+
+  if (pullRequestLock.isLocked && !process.env.PULL_REVIEW_DISABLE_PR_LOCK) {
+    log('skipping ' + options.pullRequestURL + ' due to existing request');
+    return Promise.resolve([]);
+  }
 
   log('started on ' + options.pullRequestURL);
 
