@@ -1,10 +1,6 @@
 var nock = require('nock');
 
-var github = require('../../src/github');
-
 var api = nock('https://api.github.com');
-
-var blameQuery = github.blameQuery;
 
 module.exports = function(options) {
   options = options || {};
@@ -214,6 +210,12 @@ module.exports = function(options) {
       '{"body":"@dee: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)"}\n'
     )
     .reply(200);
+    api
+    .post(
+      '/repos/OWNER/REPO/issues/999/comments',
+      '{"body":"@charlie, @bob: please review this pull request.\\n\\n> Powered by [pull-review](https://github.com/imsky/pull-review)"}\n'
+    )
+    .reply(200);
 
   mockPullRequest({
     number: 1,
@@ -242,6 +244,22 @@ module.exports = function(options) {
 
   mockPullRequestCommits({
     number: 2
+  });
+
+  mockPullRequest({
+    number: 999,
+    state: options.state,
+    assignee: options.assignee,
+    assignees: options.assignees
+  });
+
+  mockPullRequestCommits({
+    number: 999,
+    commits: options.commits
+  });
+
+  mockPullRequestFiles({
+    number: 999
   });
 
   api.get('/repos/OWNER/REPO/pulls/1/files?per_page=100').reply(200, [

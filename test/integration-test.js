@@ -14,6 +14,7 @@ var helper = new Helper('../index.js');
 describe('pull-review', function() {
   afterEach(function() {
     nock.cleanAll();
+    process.env.PULL_REVIEW_DISABLE_PR_LOCK = true;
   });
 
   it('works in dry run mode', function() {
@@ -108,6 +109,26 @@ describe('pull-review', function() {
         actions[1].payload.assignees.should.not.include('charlie');
       });
     });
+
+    it('does nothing if review has been requested for the same pull request twice in a short period of time', function () {
+      this.timeout(3000);
+      delete process.env.PULL_REVIEW_DISABLE_PR_LOCK;
+
+      githubMock({
+        config: reviewRequestConfig
+      });
+
+      return pullReview({
+        pullRequestURL: 'https://github.com/OWNER/REPO/pull/999'
+      }).then(function (actions) {
+        actions.should.have.lengthOf(2);
+        return pullReview({
+          pullRequestURL: 'https://github.com/OWNER/REPO/pull/999'
+        })
+      }).then(function (actions) {
+        actions.should.have.lengthOf(0);
+      });
+    })
   });
 
   it('fails with invalid arguments', function() {
