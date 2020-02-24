@@ -39,7 +39,7 @@
     "express-rate-limit": "~2.9",
     "github": "~10.0",
     "github-graphql-client": "~1.0",
-    "js-yaml": "~3.8",
+    "js-yaml": "~3.13",
     "knuth-shuffle": "~1.0",
     "lru-cache": "^4.1.0",
     "minimatch": "~3.0",
