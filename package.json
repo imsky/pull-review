@@ -59,7 +59,7 @@
     "mocha": "~3.2",
     "nock": "~9.0",
     "nyc": "~10.3",
-    "request": "~2.42",
+    "request": "~2.88",
     "superagent": "~3.6"
   },
   "nyc": {
