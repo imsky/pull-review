@@ -50,7 +50,7 @@
   "devDependencies": {
     "chai": "~3.5",
     "chai-as-promised": "~6.0",
-    "codecov": "~3.6",
+    "codecov": "~3.7",
     "coffee-script": "~1.12",
     "eslint": "~2.13",
     "hubot": "~2.19",
