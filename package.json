@@ -60,7 +60,7 @@
     "nock": "~9.0",
     "nyc": "~10.3",
     "request": "~2.88",
-    "superagent": "~3.6"
+    "superagent": "~3.7"
   },
   "nyc": {
     "check-coverage": true,
