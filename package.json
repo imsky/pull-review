@@ -44,7 +44,7 @@
     "lru-cache": "^4.1.0",
     "minimatch": "~3.0",
     "native-promise-only": "~0.8",
-    "normalize-url": "~1.9",
+    "normalize-url": "~4.5",
     "url-regex": "~3.2"
   },
   "devDependencies": {
