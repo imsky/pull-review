@@ -7,14 +7,14 @@
   - npm install
   - npm test
 
+test:node14:
+  extends: .test
+  cache:
+    key: node14
+  image: node:14-alpine
+
 test:node8:
   extends: .test
   cache:
     key: node8
   image: node:8-alpine
-
-test:node4:
-  extends: .test
-  cache:
-    key: node4
-  image: node:4.5
