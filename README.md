@@ -322,7 +322,7 @@ Limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of
 
 ## Support
 
-Pull Review supports Node.js 0.10+.
+Pull Review supports Node.js 8+.
 
 ## License
 
