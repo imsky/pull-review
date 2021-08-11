@@ -55,6 +55,7 @@ module.exports = function PullReviewConfig(input) {
   var labelWhitelist = get(input.label_whitelist, []);
   var labelBlacklist = get(input.label_blacklist, []);
   var useReviewRequests = get(input.use_review_requests, false);
+  var notificationChannels = get(input.notification_channels, ['github', 'chat']);
 
   if (minReviewers < 1) {
     throw Error('Invalid number of minimum reviewers');
@@ -107,7 +108,8 @@ module.exports = function PullReviewConfig(input) {
       fileBlacklist: fileBlacklist,
       labelWhitelist: labelWhitelist,
       labelBlacklist: labelBlacklist,
-      useReviewRequests: useReviewRequests
+      useReviewRequests: useReviewRequests,
+      notificationChannels: notificationChannels
     });
   }
 
@@ -129,6 +131,7 @@ module.exports = function PullReviewConfig(input) {
     fileBlacklist: fileBlacklist,
     labelWhitelist: labelWhitelist,
     labelBlacklist: labelBlacklist,
-    useReviewRequests: useReviewRequests
+    useReviewRequests: useReviewRequests,
+    notificationChannels: notificationChannels
   });
 };
