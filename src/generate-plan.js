@@ -64,7 +64,7 @@ function getBlameForFile(github, pullRequest, pullRequestRecord) {
  * @param  {Boolean} options.isChat - the request is made from a chat context
  * @param  {String} options.chatRoom - the name of the chat room where the request originated
  * @param  {String} options.chatChannel - internal identifier of the chat request originator, e.g. hubot:slack
- * @param  {String} options.userMappingFn - optional function that maps the configured notification username for a reviewer to another username, e.g. a user's full name to the internal Slack user ID
+ * @param  {Function} options.userMappingFn - optional function that maps the configured notification username for a reviewer to another username, e.g. a user's full name to the internal Slack user ID
  * @return {Array} list of actions to take
  */
 module.exports = function generatePlan(options) {
@@ -95,8 +95,6 @@ module.exports = function generatePlan(options) {
   var pullRequestLabels;
   var pullRequestReviewRequests;
   var useReviewRequests = false;
-  var notifySlack = (process.env.PULL_REVIEW_NOTIFY_SLACK || 'true').toLowerCase() === 'true';
-  var notifyGithub = (process.env.PULL_REVIEW_NOTIFY_GITHUB || 'true').toLowerCase() === 'true';
 
   if (!pullRequestURL) {
     throw Error('Missing pull request URL');
@@ -203,12 +201,12 @@ module.exports = function generatePlan(options) {
 
       var channels = [];
 
-      if (isChat && chatChannel && notifySlack) {
-        channels.push(chatChannel);
+      if (config.notificationChannels.includes('github')) {
+        channels.push('github');
       }
 
-      if (notifyGithub) {
-        channels.push('github');
+      if (isChat && chatChannel && config.notificationChannels.includes('chat')) {
+        channels.push(chatChannel);
       }
 
       actions.push(
@@ -228,7 +226,7 @@ module.exports = function generatePlan(options) {
         var channelUsers = reviewers.map(function(reviewer) {
           if (channel === 'hubot:slack') {
             var slackUser = reviewer.notify.slack;
-            return userMappingFn
+            return typeof(userMappingFn) === 'function'
               ? userMappingFn(slackUser, reviewer.login)
               : slackUser;
           }

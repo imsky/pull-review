@@ -106,5 +106,12 @@ describe('config', function() {
         reviewers: "foo:{}"
       });
     }).should.throw('Invalid reviewers specification, expected object');
+
+    (function () {
+      PullReviewConfig({
+        version: 1,
+        min_percent_authorship_for_extra_reviewer: -1
+      })
+    }).should.throw('Invalid minimum percentage of authorship for extra reviewer');
   });
 });

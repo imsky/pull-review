@@ -287,14 +287,22 @@ An array of pull request labels that are required for pull request review.
 
 An array of pull request labels that are forbidden from pull request review.
 
+#### notification_channels
+
+An array of channels to use for review notifications. The default channels are `chat` (the same chat channel that Hubot uses, e.g. Slack) and `github` (a comment on the pull request).
+
+To disable notifications, use an empty array:
+
+```yaml
+notification_channels: []
+```
+
 ### Environment variables
 
 * `PULL_REVIEW_GITHUB_TOKEN`: GitHub token used to fetch pull request information. The token must have `repo`, `user`, `read:org`, and `read:discussion` scopes. **Required** when using Pull Review as a Hubot plugin or when running in server mode.
 * `PULL_REVIEW_CONFIG_PATH`: location of the config file in the pull request repo (default is `.pull-review`).
 * `PULL_REVIEW_CONFIG`: Pull Review configuration override in JSON/YAML format.
 * `PULL_REVIEW_REQUIRED_ROOMS`: whitelist of Hubot chat rooms for Pull Review requests (e.g. `dev,ops`).
-* `PULL_REVIEW_NOTIFY_SLACK`: send message to slack (default `true`)
-* `PULL_REVIEW_NOTIFY_GITHUB`: send message to the Github pull-request (default `true`)
 
 ## Reviewing again
 

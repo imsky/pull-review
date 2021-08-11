@@ -11,6 +11,7 @@ var PullRequestFile = require('./models/pull-request-file');
  * @param  {Object} options.config - Pull Review configuration object
  * @param  {Array}  options.files - list of GitHub pull request files
  * @param  {Array}  options.commits - list of pull request commits
+ * @param  {Array}  options.labels - list of pull request labels
  * @param  {Array}  options.assignees - list of pull request assignees
  * @param  {String} options.authorLogin - username of the pull request author
  * @param  {Function} options.getBlameForFile - function that returns Git blame data for pull request file
