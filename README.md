@@ -29,6 +29,8 @@ reviewers:
   your_github_username: {}
 ```
 
+In order to use Pull Review as a Hubot plugin or in server mode, you'll need a [GitHub token](https://github.com/settings/tokens). The token must have `repo`, `public_repo`, `read:user`, and `read:org` scopes.
+
 For details on configuration options, check out the [configuration](#configuration) section.
 
 ### GitHub
@@ -299,7 +301,7 @@ notification_channels: []
 
 ### Environment variables
 
-* `PULL_REVIEW_GITHUB_TOKEN`: GitHub token used to fetch pull request information. The token must have `repo`, `user`, `read:org`, and `read:discussion` scopes. **Required** when using Pull Review as a Hubot plugin or when running in server mode.
+* `PULL_REVIEW_GITHUB_TOKEN`: GitHub token used to fetch pull request information.
 * `PULL_REVIEW_CONFIG_PATH`: location of the config file in the pull request repo (default is `.pull-review`).
 * `PULL_REVIEW_CONFIG`: Pull Review configuration override in JSON/YAML format.
 * `PULL_REVIEW_REQUIRED_ROOMS`: whitelist of Hubot chat rooms for Pull Review requests (e.g. `dev,ops`).
@@ -330,7 +332,7 @@ Limits can be set on [files per reviewer](#max_files_per_reviewer) and [lines of
 
 ## Support
 
-Pull Review supports Node.js 0.10+.
+Pull Review supports Node.js 8+.
 
 ## License
 

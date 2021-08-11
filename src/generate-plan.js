@@ -9,7 +9,7 @@ var Config = require('./models/config');
 var getReviewers = require('./get-reviewers');
 
 var cache = LRU({ max: 100, maxAge: 1000 * 60 });
-var cacheEnabled = ['undefined', ''].indexOf(String(process.env.PULL_REVIEW_CACHE_DISABLED)) !== -1;
+var cacheEnabled = ['undefined', ''].indexOf(String(process.env.PULL_REVIEW_DISABLE_CACHE)) !== -1;
 
 function getPullReviewConfig(github, pullRequest, pullReviewConfigPath) {
   var key = [pullRequest.owner, pullRequest.repo, pullReviewConfigPath].join('-');
