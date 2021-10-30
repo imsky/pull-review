@@ -1,4 +1,4 @@
-from node:8-alpine
+from node:lts-alpine
 
 env USER=pull-review
 
