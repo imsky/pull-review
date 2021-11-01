@@ -1,6 +1,6 @@
 # Pull Review
 
-[![coverage report](https://gitlab.com/imsky/pull-review/badges/master/coverage.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![pipeline status](https://gitlab.com/imsky/pull-review/badges/master/pipeline.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![Docker Build Statu](https://img.shields.io/docker/build/imsky/pull-review.svg)](https://hub.docker.com/r/imsky/pull-review/) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
+[![coverage report](https://gitlab.com/imsky/pull-review/badges/master/coverage.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![pipeline status](https://gitlab.com/imsky/pull-review/badges/master/pipeline.svg)](https://gitlab.com/imsky/pull-review/commits/master) [![npm](https://img.shields.io/npm/v/pull-review.svg)](https://www.npmjs.com/package/pull-review) [![license](https://img.shields.io/github/license/imsky/pull-review.svg)](https://github.com/imsky/pull-review/blob/master/LICENSE)
 
 ![Pull Review](https://imsky.github.io/pull-review/pull-review-github-header.png)
 
@@ -132,13 +132,13 @@ The Docker image can be used in [CLI](#cli) mode or in [server](#server) mode.
 
 ```bash
 # get the Pull Review image
-docker pull imsky/pull-review
+docker pull ghcr.io/imsky/pull-review
 
 # run Pull Review on a pull request
-docker run -it -e PULL_REVIEW_GITHUB_TOKEN imsky/pull-review https://github.com/imsky/pull-review/pull/1
+docker run -it -e PULL_REVIEW_GITHUB_TOKEN ghcr.io/imsky/pull-review https://github.com/imsky/pull-review/pull/1
 
 # run Pull Review with a specific GitHub token
-docker run -it imsky/pull-review https://github.com/imsky/pull-review/pull/1 --github-token PULL_REVIEW_GITHUB_TOKEN
+docker run -it ghcr.io/imsky/pull-review https://github.com/imsky/pull-review/pull/1 --github-token PULL_REVIEW_GITHUB_TOKEN
 ```
 
 ### Server
