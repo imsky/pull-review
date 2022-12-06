@@ -35,7 +35,7 @@
     "body-parser": "~1.18",
     "commander": "~2.11",
     "debug": "~3.1",
-    "express": "~4.15",
+    "express": "~4.17",
     "express-rate-limit": "~2.9",
     "github": "~10.0",
     "github-graphql-client": "~1.0",
